@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Elderly Care Institute</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#C61D63",
+                        "secondary": "#FDE7F2",
+                        "background-light": "#FFF9FB",
+                        "neutral-text": "#333333",
+                        "neutral-border": "#E0E0E0",
+                        "dark-text": "#E3E3E3",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light text-neutral-text">
+<div class="flex flex-col min-h-screen">
+<header class="sticky top-0 z-50 bg-white shadow-md">
+<div class="container mx-auto px-6 py-4 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="text-primary size-8">
+<svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"></path>
+</svg>
+</div>
+<h1 class="text-neutral-text text-xl font-bold">Golden Years Care</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+<a class="hover:text-primary transition-colors" href="#">Home</a>
+<a class="hover:text-primary transition-colors" href="#">About Us</a>
+<a class="hover:text-primary transition-colors" href="#">Services</a>
+<a class="hover:text-primary transition-colors" href="#">News</a>
+<a class="hover:text-primary transition-colors" href="#">Contact</a>
+</nav>
+<button class="hidden md:inline-block bg-primary text-white text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-primary/90 transition-colors">Book a Tour</button>
+<button class="md:hidden text-neutral-text">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</header>
+<main class="flex-1">
+<section class="relative h-[60vh] min-h-[400px] bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDWDiZDT1PMrnXooMPm4ZvuJjYK4Lvd1sf-RkpwjtCBUWfN1zGXRbXaXm_ZwenpTX1-PMKelGadv9yve5BF2czqZEZEVY07b8OT_ZfB7Y3TOFZnO_mWTAPAhwgHNW1tLgLzN2p6dfF1dEYiCi8MPl5rS0Ej3m8mb_9x-uqXmyJu1Wt47cLGGugT5r0uCmeoMKHWIE1rFsciHzo0sPqwK6iD99t7KrLGGeg3vjewVIJZPv_e7oasJfTnh0ZFZt3H5-E3eokQ9KeVDhxT");'>
+<div class="absolute inset-0 bg-black/40"></div>
+<div class="relative container mx-auto px-6 h-full flex flex-col justify-center items-start text-white">
+<h2 class="text-4xl md:text-6xl font-bold max-w-2xl leading-tight">Compassionate Care for a Life of Dignity</h2>
+<p class="mt-4 max-w-lg text-lg">Providing a safe, nurturing, and engaging community for your loved ones in their golden years.</p>
+<button class="mt-8 bg-primary text-white font-semibold px-8 py-3 rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2">
+                        Learn More <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+<button class="size-2.5 bg-white rounded-full"></button>
+<button class="size-2.5 bg-white/50 rounded-full hover:bg-white"></button>
+<button class="size-2.5 bg-white/50 rounded-full hover:bg-white"></button>
+</div>
+</section>
+<section class="py-20 bg-white">
+<div class="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
+<div class="md:w-1/2">
+<img alt="Elderly resident and caregiver sharing a happy moment" class="rounded-xl shadow-lg w-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDY3C0HS5MrFdaMfJv-FXgfxVWNrNlllMjAwGRvq-AfERnPT4pB0uhFaGX3mi2yDPkWU1QcZ2IJy559r_WBf0189Xo55C5MREZqK7CtyxMwS9VaXjmQ0vqeGTugYWbkyyKQsynW5m6pR4YkZT_QygxSGMGRSbmqlDsd93ks2_JoAqNboSan92lWTM3JNcLS1zepkZs61Rm9NFQEQEm2q9vhba7n0ybsLgGb-e9oMcPYvNxZk1QENmOXMRYxZXxxcFnZEg1Qug8B1UnY"/>
+</div>
+<div class="md:w-1/2">
+<h3 class="text-primary text-base font-semibold uppercase tracking-wider">Welcome to Golden Years Care</h3>
+<h2 class="text-3xl md:text-4xl font-bold mt-2 text-neutral-text">Your Trusted Partner in Elderly Care</h2>
+<p class="mt-4 text-neutral-text/80">At Golden Years Care, we believe in celebrating life at every age. Our dedicated team provides personalized, compassionate care in a warm and friendly environment. We are committed to enhancing the quality of life for our residents, offering a place they can truly call home.</p>
+<button class="mt-6 border-2 border-primary text-primary font-semibold px-8 py-3 rounded-full hover:bg-primary hover:text-white transition-all">About Our Mission</button>
+</div>
+</div>
+</section>
+<section class="py-20 bg-background-light">
+<div class="container mx-auto px-6 text-center">
+<h3 class="text-primary text-base font-semibold uppercase tracking-wider">Our Services</h3>
+<h2 class="text-3xl md:text-4xl font-bold mt-2 text-neutral-text">Comprehensive Care for Every Need</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+<div class="bg-white p-8 rounded-xl shadow-md text-left hover:shadow-xl transition-shadow">
+<div class="flex items-center justify-center size-16 rounded-full bg-secondary text-primary">
+<span class="material-symbols-outlined text-3xl">medical_services</span>
+</div>
+<h4 class="text-xl font-bold mt-6">24/7 Medical Support</h4>
+<p class="mt-2 text-neutral-text/80">Round-the-clock nursing staff, regular doctor visits, and emergency response systems to ensure health and safety.</p>
+</div>
+<div class="bg-white p-8 rounded-xl shadow-md text-left hover:shadow-xl transition-shadow">
+<div class="flex items-center justify-center size-16 rounded-full bg-secondary text-primary">
+<span class="material-symbols-outlined text-3xl">self_improvement</span>
+</div>
+<h4 class="text-xl font-bold mt-6">Daily Activities</h4>
+<p class="mt-2 text-neutral-text/80">Engaging social, recreational, and therapeutic activities designed to enrich the mind, body, and spirit.</p>
+</div>
+<div class="bg-white p-8 rounded-xl shadow-md text-left hover:shadow-xl transition-shadow">
+<div class="flex items-center justify-center size-16 rounded-full bg-secondary text-primary">
+<span class="material-symbols-outlined text-3xl">restaurant</span>
+</div>
+<h4 class="text-xl font-bold mt-6">Nutritious Dining</h4>
+<p class="mt-2 text-neutral-text/80">Chef-prepared, delicious, and balanced meals tailored to meet the dietary needs and preferences of each resident.</p>
+</div>
+</div>
+</div>
+</section>
+<section class="py-20 bg-white">
+<div class="container mx-auto px-6">
+<div class="text-center">
+<h3 class="text-primary text-base font-semibold uppercase tracking-wider">Stay Updated</h3>
+<h2 class="text-3xl md:text-4xl font-bold mt-2 text-neutral-text">Latest News &amp; Events</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+<div class="flex flex-col rounded-xl shadow-md overflow-hidden bg-background-light">
+<img alt="Group of seniors participating in an art class" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz8uTYa1v5DybTSDoRfjGn-AUtQ_sUUoBy1VvfBvjFSbMqNtAbU6OEZSZ_z-BL5BOwuiIRx-kG6sdcHGyRDZdbXfKVFDChfDFb4J16N-BqsVoqjEz9sGIJZw6deiuIrLd3A7MxPiAeGHqC9yyB2S4JctM3nokKqeUMjghGAJqSH4qslUsQMoZYFn-1CBYKauyKcTfkOZ9adopxu-9saPKDw7FPj2k-QJ2KYdc1m9cIuewz2HS_rL-lXDu5WU7TpeJ8wOCk0LeosLx6"/>
+<div class="p-6 flex-1 flex flex-col">
+<p class="text-sm text-primary font-semibold">EVENT</p>
+<h4 class="text-lg font-bold mt-2">Annual Summer Garden Party</h4>
+<p class="text-sm text-neutral-text/80 mt-2 flex-1">Join us for a day of sun, music, and laughter in our beautiful gardens. Family and friends are welcome!</p>
+<a class="mt-4 text-primary font-semibold flex items-center gap-1" href="#">Read More <span class="material-symbols-outlined text-base">arrow_forward</span></a>
+</div>
+</div>
+<div class="flex flex-col rounded-xl shadow-md overflow-hidden bg-background-light">
+<img alt="Caregiver talking to a resident" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpsDySP5M4IqXv_RwZjZ83OsRGLZYWFmTcJCnL4pxT0eN7NArFu0kbvh9tSGcBGZ7DwDNTYymUyE9Psa9BOeIcD0R79XgFKKbsHjDIVLWvHD05Iw0VILv3B1tGiFZNnkj6QzD4eFfW4pZNk1SITTR57K3dRqwozQ9HnNFkEfZATvRLtMKFexCKuMvE25rs419qDrXOtUNkMmhlwY4Pt7Sw-1rHA9qeUhsP_JrKayd4zz399uUypl-axmSyqbpy38ueT_YwOeoNTXEV"/>
+<div class="p-6 flex-1 flex flex-col">
+<p class="text-sm text-primary font-semibold">NEWS</p>
+<h4 class="text-lg font-bold mt-2">New Therapy Program Launch</h4>
+<p class="text-sm text-neutral-text/80 mt-2 flex-1">We are excited to introduce our new pet therapy program, proven to boost mood and reduce stress.</p>
+<a class="mt-4 text-primary font-semibold flex items-center gap-1" href="#">Read More <span class="material-symbols-outlined text-base">arrow_forward</span></a>
+</div>
+</div>
+<div class="flex flex-col rounded-xl shadow-md overflow-hidden bg-background-light">
+<img alt="Exterior view of the care institute building" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWDiZDT1PMrnXooMPm4ZvuJjYK4Lvd1sf-RkpwjtCBUWfN1zGXRbXaXm_ZwenpTX1-PMKelGadv9yve5BF2czqZEZEVY07b8OT_ZfB7Y3TOFZnO_mWTAPAhwgHNW1tLgLzN2p6dfF1dEYiCi8MPl5rS0Ej3m8mb_9x-uqXmyJu1Wt47cLGGugT5r0uCmeoMKHWIE1rFsciHzo0sPqwK6iD99t7KrLGGeg3vjewVIJZPv_e7oasJfTnh0ZFZt3H5-E3eokQ9KeVDhxT"/>
+<div class="p-6 flex-1 flex flex-col">
+<p class="text-sm text-primary font-semibold">ANNOUNCEMENT</p>
+<h4 class="text-lg font-bold mt-2">Celebrating 20 Years of Care</h4>
+<p class="text-sm text-neutral-text/80 mt-2 flex-1">Golden Years Care is proud to celebrate two decades of providing exceptional care to our community.</p>
+<a class="mt-4 text-primary font-semibold flex items-center gap-1" href="#">Read More <span class="material-symbols-outlined text-base">arrow_forward</span></a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-20 bg-secondary">
+<div class="container mx-auto px-6 text-center">
+<div class="max-w-3xl mx-auto">
+<span class="material-symbols-outlined text-5xl text-primary">smart_toy</span>
+<h2 class="text-3xl md:text-4xl font-bold mt-4 text-neutral-text">Have Questions? We're Here to Help!</h2>
+<p class="mt-4 text-neutral-text/80">Get instant answers to your questions about our services, amenities, and admission process with our friendly AI assistant, available 24/7.</p>
+<button class="mt-8 bg-primary text-white font-semibold px-8 py-3 rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 mx-auto">
+                            Chat with Our AI Assistant
+                            <span class="material-symbols-outlined">chat</span>
+</button>
+</div>
+</div>
+</section>
+<section class="py-20 bg-white">
+<div class="container mx-auto px-6">
+<div class="text-center">
+<h3 class="text-primary text-base font-semibold uppercase tracking-wider">Testimonials</h3>
+<h2 class="text-3xl md:text-4xl font-bold mt-2 text-neutral-text">What Our Families Say</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 max-w-5xl mx-auto">
+<div class="bg-background-light p-8 rounded-xl">
+<p class="text-neutral-text/80 italic">"The staff at Golden Years Care are angels. They treated my mother with such kindness and respect. We always felt she was in the best hands."</p>
+<div class="flex items-center gap-4 mt-6">
+<img alt="Photo of Sarah L." class="w-14 h-14 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz8uTYa1v5DybTSDoRfjGn-AUtQ_sUUoBy1VvfBvjFSbMqNtAbU6OEZSZ_z-BL5BOwuiIRx-kG6sdcHGyRDZdbXfKVFDChfDFb4J16N-BqsVoqjEz9sGIJZw6deiuIrLd3A7MxPiAeGHqC9yyB2S4JctM3nokKqeUMjghGAJqSH4qslUsQMoZYFn-1CBYKauyKcTfkOZ9adopxu-9saPKDw7FPj2k-QJ2KYdc1m9cIuewz2HS_rL-lXDu5WU7TpeJ8wOCk0LeosLx6"/>
+<div>
+<p class="font-bold text-neutral-text">Sarah L.</p>
+<p class="text-sm text-neutral-text/70">Daughter of a Resident</p>
+</div>
+</div>
+</div>
+<div class="bg-background-light p-8 rounded-xl">
+<p class="text-neutral-text/80 italic">"Finding the right place for my dad was stressful, but Golden Years made it easy. The facility is clean, bright, and full of life. He's happier than he's been in years."</p>
+<div class="flex items-center gap-4 mt-6">
+<img alt="Photo of Mark T." class="w-14 h-14 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDY3C0HS5MrFdaMfJv-FXgfxVWNrNlllMjAwGRvq-AfERnPT4pB0uhFaGX3mi2yDPkWU1QcZ2IJy559r_WBf0189Xo55C5MREZqK7CtyxMwS9VaXjmQ0vqeGTugYWbkyyKQsynW5m6pR4YkZT_QygxSGMGRSbmqlDsd93ks2_JoAqNboSan92lWTM3JNcLS1zepkZs61Rm9NFQEQEm2q9vhba7n0ybsLgGb-e9oMcPYvNxZk1QENmOXMRYxZXxxcFnZEg1Qug8B1UnY"/>
+<div>
+<p class="font-bold text-neutral-text">Mark T.</p>
+<p class="text-sm text-neutral-text/70">Son of a Resident</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<footer class="bg-neutral-text text-white">
+<div class="container mx-auto px-6 py-12">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+<div>
+<div class="flex items-center gap-3">
+<div class="text-primary size-8">
+<svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"></path>
+</svg>
+</div>
+<h3 class="text-xl font-bold">Golden Years Care</h3>
+</div>
+<p class="mt-4 text-sm text-white/70">Dedicated to providing compassionate and professional care for the elderly.</p>
+</div>
+<div>
+<h4 class="font-bold tracking-wide">Quick Links</h4>
+<ul class="mt-4 space-y-2 text-sm">
+<li><a class="text-white/70 hover:text-white" href="#">About Us</a></li>
+<li><a class="text-white/70 hover:text-white" href="#">Our Services</a></li>
+<li><a class="text-white/70 hover:text-white" href="#">Admissions</a></li>
+<li><a class="text-white/70 hover:text-white" href="#">Careers</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold tracking-wide">Contact Us</h4>
+<ul class="mt-4 space-y-2 text-sm text-white/70">
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-base mt-0.5">location_on</span>123 Wellness Ave, Serenity City, 45678</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-base">call</span>(123) 456-7890</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-base">mail</span>contact@goldenyears.care</li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold tracking-wide">Newsletter</h4>
+<p class="mt-4 text-sm text-white/70">Stay informed about our community and events.</p>
+<div class="mt-4 flex">
+<input class="w-full rounded-l-md border-0 bg-white/20 px-4 py-2 text-sm text-white placeholder-white/50 focus:ring-2 focus:ring-primary" placeholder="Your email" type="email"/>
+<button class="bg-primary px-4 py-2 rounded-r-md text-white font-semibold hover:bg-primary/90">Go</button>
+</div>
+</div>
+</div>
+<div class="mt-12 border-t border-white/20 pt-6 text-center text-sm text-white/50">
+<p>© 2024 Golden Years Care Institute. All Rights Reserved.</p>
+</div>
+</div>
+</footer>
+</div>
+
+</body></html>

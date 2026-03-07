@@ -1,0 +1,142 @@
+[
+  {
+    "ten_chi_so": "Huyết áp",
+    "gioi_han_canh_bao": {
+      "nguy_hiem": {
+        "tam_thu_min": 180,
+        "tam_thu_max": 70,
+        "tam_truong_min": 120,
+        "tam_truong_max": 50,
+        "message": "Huyết áp nguy hiểm! Tăng huyết áp khủng hoảng (≥180/120 mmHg) hoặc huyết áp rất thấp (<70/50 mmHg). Nguy cơ tổn thương cơ quan đích hoặc sốc. Cần can thiệp ngay lập tức."
+      },
+      "bat_on": {
+        "tam_thu_min": 140,
+        "tam_thu_max": 89,
+        "tam_truong_min": 90,
+        "tam_truong_max": 59,
+        "message": "Huyết áp bất ổn: Tăng huyết áp độ 1-2 (140-179/90-119 mmHg) hoặc huyết áp thấp (70-89/50-59 mmHg). Cần theo dõi sát, điều chỉnh thuốc điều trị, đánh giá biến chứng."
+      },
+      "cao": {
+        "tam_thu_min": 120,
+        "tam_thu_max": 139,
+        "tam_truong_min": 80,
+        "tam_truong_max": 89,
+        "message": "Tiền tăng huyết áp (120-139/80-89 mmHg). Theo dõi, thay đổi lối sống, có thể cần điều trị sớm."
+      },
+      "thap": {
+        "tam_thu_max": 89,
+        "tam_truong_max": 59,
+        "message": "Huyết áp thấp nhẹ (<90/60 mmHg, nhưng không phải bất ổn hoặc nguy hiểm). Đánh giá triệu chứng: chóng mặt, ngất, mệt mỏi. Có thể cần bù dịch, điều chỉnh thuốc, hoặc điều trị nguyên nhân."
+      }
+    }
+  },
+  {
+    "ten_chi_so": "Nhịp tim",
+    "gioi_han_canh_bao": {
+      "nguy_hiem": {
+        "min": 150,
+        "max": 40,
+        "message": "Nhịp tim rất nhanh (>150 bpm) hoặc rất chậm (<40 bpm)! Nguy cơ rối loạn nhịp tim nghiêm trọng, suy tim, sốc. Cần đánh giá ngay: ECG, điện giải, có thể cần can thiệp cấp cứu."
+      },
+      "bat_on": {
+        "min": 120,
+        "max": 50,
+        "message": "Nhịp tim bất ổn: nhanh vừa (120-149 bpm) hoặc chậm vừa (40-50 bpm). Đánh giá nguyên nhân: sốt, đau, lo âu, mất nước, thiếu máu, rối loạn nhịp tim, thuốc. Theo dõi sát, điều trị nguyên nhân."
+      },
+      "cao": {
+        "min": 101,
+        "max": 119,
+        "message": "Nhịp tim nhanh (101-119 bpm). Đánh giá: tình trạng lâm sàng, nguyên nhân (sốt, đau, lo âu, mất nước, thiếu máu). Theo dõi và điều trị phù hợp."
+      },
+      "thap": {
+        "min": 51,
+        "max": 59,
+        "message": "Nhịp tim chậm (51-59 bpm). Đánh giá: thuốc (chẹn beta, digoxin), bệnh tim, rối loạn điện giải, suy nút xoang. Có thể cần điều chỉnh thuốc hoặc đặt máy tạo nhịp."
+      }
+    }
+  },
+  {
+    "ten_chi_so": "Đường huyết",
+    "gioi_han_canh_bao": {
+      "nguy_hiem": {
+        "min": 16.7,
+        "max": 2.8,
+        "message": "Đường huyết rất cao (>16.7 mmol/L) hoặc rất thấp (<2.8 mmol/L)! Nguy cơ hôn mê tăng đường huyết (DKA, HHS) hoặc hôn mê hạ đường huyết. Cần can thiệp ngay: kiểm tra ketone, điện giải, có thể cần insulin hoặc glucose tĩnh mạch."
+      },
+      "bat_on": {
+        "min": 11.1,
+        "max": 3.9,
+        "message": "Đường huyết bất ổn: cao vừa (11.1-16.6 mmol/L) hoặc thấp vừa (2.8-3.9 mmol/L). Nguy cơ biến chứng cấp tính. Điều chỉnh thuốc, chế độ ăn, kiểm tra ketone nếu có triệu chứng."
+      },
+      "cao": {
+        "min": 7.1,
+        "max": 11.0,
+        "message": "Tăng đường huyết (7.1-11.0 mmol/L). Đánh giá lại chế độ ăn, thuốc điều trị đái tháo đường, hoạt động thể chất. Điều chỉnh điều trị nếu cần."
+      },
+      "thap": {
+        "max": 3.9,
+        "message": "Hạ đường huyết (<4.0 mmol/L). Kiểm tra triệu chứng: run, vã mồ hôi, lú lẫn, hôn mê. Xử trí ngay: uống/bơm glucose, kiểm tra lại sau 15 phút. Điều chỉnh thuốc nếu tái phát."
+      },
+      "binh_thuong": {
+        "min": 4.0,
+        "max": 7.0,
+        "message": "Đường huyết trong giới hạn bình thường (4.0-7.0 mmol/L)."
+      }
+    }
+  },
+  {
+    "ten_chi_so": "SpO2",
+    "gioi_han_canh_bao": {
+      "nguy_hiem": {
+        "min": 0,
+        "max": 89,
+        "message": "SpO2 rất thấp (<90%)! Thiếu oxy máu nghiêm trọng. Cần can thiệp ngay: thở oxy lưu lượng cao, đánh giá đường thở, tư thế, có thể cần hỗ trợ hô hấp (CPAP, BIPAP, hoặc đặt nội khí quản)."
+      },
+      "bat_on": {
+        "min": 90,
+        "max": 94,
+        "message": "SpO2 giảm vừa (90-94%). Thiếu oxy máu. Cần theo dõi sát, thở oxy bổ sung, đánh giá nguyên nhân (viêm phổi, suy tim, bệnh phổi tắc nghẽn), điều chỉnh tư thế."
+      },
+      "thap": {
+        "min": 95,
+        "max": 100,
+        "message": "SpO2 trong giới hạn bình thường (95-100%)."
+      },
+      "binh_thuong": {
+        "min": 95,
+        "max": 100,
+        "message": "SpO2 trong giới hạn bình thường (95-100%)."
+      }
+    }
+  },
+  {
+    "ten_chi_so": "Nhiệt độ",
+    "gioi_han_canh_bao": {
+      "nguy_hiem": {
+        "min": 39.6,
+        "max": 35.0,
+        "message": "Sốt cao (>39.6°C) hoặc hạ thân nhiệt nghiêm trọng (<35°C)! Nguy cơ co giật, tổn thương não, nhiễm trùng huyết. Cần hạ sốt ngay (paracetamol, lau mát), đánh giá nguyên nhân, có thể cần kháng sinh hoặc điều trị hỗ trợ."
+      },
+      "bat_on": {
+        "min": 38.6,
+        "max": 36.4,
+        "message": "Nhiệt độ bất ổn: sốt vừa (38.6-39.5°C) hoặc hạ thân nhiệt nhẹ (35.0-36.4°C). Cần hạ sốt/giữ ấm, đánh giá nguyên nhân (nhiễm trùng, viêm, thuốc), theo dõi triệu chứng kèm theo, có thể cần xét nghiệm và điều trị kháng sinh."
+      },
+      "cao": {
+        "min": 37.6,
+        "max": 38.5,
+        "message": "Sốt nhẹ (37.6-38.5°C). Theo dõi, đánh giá nguyên nhân, có thể cần hạ sốt nếu bệnh nhân khó chịu."
+      },
+      "thap": {
+        "max": 36.4,
+        "message": "Hạ thân nhiệt nhẹ (<36.5°C). Giữ ấm, theo dõi, đánh giá nguyên nhân (nhiễm trùng nặng ở người già, suy giáp, thuốc)."
+      },
+      "binh_thuong": {
+        "min": 36.5,
+        "max": 37.5,
+        "message": "Nhiệt độ trong giới hạn bình thường (36.5-37.5°C)."
+      }
+    }
+  }
+]
+

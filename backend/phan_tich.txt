@@ -1,0 +1,184 @@
+BÁO CÁO PHÂN TÍCH CHỨC NĂNG
+
+HỆ THỐNG ADMIN QUẢN TRỊ NỘI BỘ
+VIỆN DƯỠNG LÃO
+
+
+
+Phiên bản 1.0
+Tháng 11/2025
+ 
+MỤC LỤC
+I. TỔNG QUAN HỆ THỐNG
+II. MODULE QUẢN LÝ BỆNH NHÂN
+III. MODULE QUẢN LÝ LỊCH THĂM KHÁM
+IV. MODULE QUẢN LÝ NHÂN VIÊN ĐIỀU DƯỠNG
+V. MODULE QUẢN LÝ DỊCH VỤ & BẢNG GIÁ
+VI. MODULE QUẢN LÝ SỰ KIỆN & HOẠT ĐỘNG
+VII. MODULE QUẢN LÝ TIN TỨC & NỘI DUNG
+VIII. MODULE TUYỂN DỤNG
+IX. HỆ THỐNG AI & TRỢ LÝ THÔNG MINH
+X. DASHBOARD & BÁO CÁO
+XI. PHÂN QUYỀN & BẢO MẬT
+XII. YÊU CẦU KỸ THUẬT & KIẾN TRÚC
+XIII. KẾ HOẠCH TRIỂN KHAI
+ 
+I. TỔNG QUAN HỆ THỐNG
+1.1. Mục đích
+Hệ thống Admin được thiết kế để quản lý toàn bộ nghiệp vụ vận hành của Viện Dưỡng Lão, bao gồm quản lý hồ sơ bệnh nhân, người thân, lịch thăm khám, nhân viên điều dưỡng, phân ca làm việc, dịch vụ, sự kiện, tuyển dụng, và các báo cáo thống kê tự động.
+
+1.2. Đối tượng sử dụng
+Vai trò	Quyền truy cập
+Super Admin	Toàn quyền quản lý hệ thống
+Quản lý Y tế	Quản lý bệnh nhân, lịch khám, thuốc, sức khỏe
+Quản lý Nhân sự	Quản lý điều dưỡng, phân ca, KPI, tuyển dụng
+Điều dưỡng trưởng	Xem bệnh nhân, cập nhật chăm sóc, giao việc
+Nhân viên Điều dưỡng	Chỉ xem bệnh nhân được giao, cập nhật chỉ số
+Marketing/Content	Quản lý tin tức, bài viết, sự kiện
+ 
+II. MODULE QUẢN LÝ BỆNH NHÂN
+A. Quản lý Hồ sơ Bệnh nhân
+Quản lý toàn bộ thông tin cá nhân, y tế, bệnh lý của bệnh nhân với hệ thống lưu trữ điện tử (EMR).
+
+Nhóm thông tin	Chi tiết
+Thông tin cá nhân	Họ tên, ngày sinh, giới tính, CCCD, địa chỉ
+Thông tin y tế	Nhóm máu, tiền sử bệnh, dị ứng thuốc
+Tình trạng hiện tại	Bệnh lý đang mắc (Alzheimer, Parkinson...)
+Khả năng sinh hoạt	Tự chăm sóc / Cần hỗ trợ / Phụ thuộc hoàn toàn
+Ngày nhập viện	Ngày bắt đầu chăm sóc
+Loại dịch vụ	Nội trú / Ban ngày / Tại nhà / Phục hồi
+
+B. Quản lý Thuốc & Dinh dưỡng
+Quản lý đơn thuốc, lịch uống thuốc, thực đơn cá nhân hóa, và theo dõi dinh dưỡng.
+•	Tạo đơn thuốc với thông tin chi tiết: tên thuốc, liều lượng, thời gian dùng
+•	Nhắc nhở tự động khi đến giờ uống thuốc
+•	Xây dựng thực đơn theo bệnh lý và khẩu vị
+•	Theo dõi lượng ăn, calo, dưỡng chất hằng ngày
+
+C. Theo dõi Sức khỏe & Chỉ số sinh tồn
+Chỉ số	Tần suất	Ngưỡng cảnh báo
+Huyết áp	Hằng ngày	< 90/60 hoặc > 140/90
+Đường huyết	Hằng ngày	< 70 hoặc > 180 mg/dL
+Nhịp tim	Hằng ngày	< 60 hoặc > 100 bpm
+SpO2	Hằng ngày	< 95%
+Nhiệt độ	Hằng ngày	< 36°C hoặc > 37.5°C
+
+D. AI Dự đoán Rủi ro Sức khỏe
+Sử dụng Machine Learning để dự đoán rủi ro: ngã, tai biến, suy tim, nhiễm trùng...
+•	Thu thập dữ liệu: Chỉ số sinh tồn, thuốc, dinh dưỡng, tuổi, bệnh lý
+•	Phân tích AI: Decision Tree, Random Forest, Neural Network
+•	Tính điểm rủi ro 0-100 cho từng loại
+•	Cảnh báo tự động khi rủi ro cao
+ 
+III. MODULE QUẢN LÝ LỊCH THĂM KHÁM
+A. Lịch khám Định kỳ
+Quản lý lịch khám bệnh, xét nghiệm định kỳ với tự động nhắc lịch.
+Trường	Mô tả
+Loại khám	Tổng quát / Chuyên khoa / Xét nghiệm / Phục hồi
+Bệnh nhân	Liên kết với hồ sơ
+Bác sĩ	Người thực hiện
+Ngày giờ	Thời gian dự kiến
+Kết quả	Ghi nhận sau khám
+
+B. Lịch hẹn Gặp Người thân
+Quản lý yêu cầu từ website, xác nhận lịch hẹn tham quan và tư vấn.
+•	Nhận yêu cầu từ website công khai
+•	Kiểm tra lịch trống và xác nhận
+•	Gửi email/SMS xác nhận
+•	Check-in khi khách đến
+•	Ghi nhận nội dung tư vấn
+ 
+IV. MODULE QUẢN LÝ NHÂN VIÊN ĐIỀU DƯỠNG
+A. Hồ sơ Nhân viên
+Quản lý thông tin, hợp đồng, chứng chỉ, năng lực của nhân viên.
+Thông tin	Chi tiết
+Cá nhân	Họ tên, ngày sinh, CCCD, địa chỉ, SĐT, email
+Chức vụ	Điều dưỡng / Điều dưỡng trưởng / Bác sĩ
+Chứng chỉ	Bằng cấp, chứng chỉ hành nghề
+Năng lực	Chăm sóc Alzheimer, Phục hồi chức năng...
+Hợp đồng	Loại, ngày bắt đầu, lương cơ bản
+
+B. Phân ca Làm việc
+Tự động phân công ca làm việc dựa trên năng lực và kinh nghiệm.
+Ca	Giờ	Số người
+Ca sáng	6:00 - 14:00	3-5 người
+Ca chiều	14:00 - 22:00	3-5 người
+Ca đêm	22:00 - 6:00	2-3 người
+•	Calendar view dễ theo dõi
+•	Chấm công tự động
+•	Cảnh báo thiếu người
+
+C. Giao việc Chăm sóc
+Phân công điều dưỡng chăm sóc từng bệnh nhân, theo dõi tiến độ.
+•	Phân công bệnh nhân cho điều dưỡng
+•	Tạo checklist công việc hằng ngày
+•	Check-in khi hoàn thành
+•	Ghi nhật ký chăm sóc
+
+D. Đánh giá KPI
+Chỉ số KPI	Mục tiêu
+Tỷ lệ hoàn thành công việc	≥ 95%
+Độ chính xác ghi chép	≤ 2 lỗi/tháng
+Số lần trễ ca	≤ 1 lần/tháng
+Phản hồi tích cực	≥ 90%
+Đánh giá quản lý	≥ 8/10
+ 
+V. MODULE QUẢN LÝ DỊCH VỤ & BẢNG GIÁ
+Quản lý danh sách dịch vụ, bảng giá linh hoạt, cập nhật lên website.
+•	Thêm/Sửa/Xóa dịch vụ
+•	Cập nhật giá theo mùa, khuyến mãi
+•	Tạo combo/gói dịch vụ
+•	Đồng bộ tự động lên website
+
+VI. MODULE QUẢN LÝ SỰ KIỆN & HOẠT ĐỘNG
+Quản lý sự kiện: Sinh nhật, ngày lễ, câu lạc bộ, tham quan...
+•	Tạo sự kiện với ngày giờ, địa điểm, ngân sách
+•	Mời người tham gia
+•	Phân công tổ chức
+•	Upload ảnh/video
+•	Đăng tin lên website
+
+VII. MODULE QUẢN LÝ TIN TỨC & NỘI DUNG
+Quản lý bài viết hiển thị trên website công khai.
+•	Editor WYSIWYG
+•	Phân loại theo category, tags
+•	SEO tự động
+•	Lên lịch đăng
+•	Thống kê lượt xem
+ 
+VIII. MODULE TUYỂN DỤNG
+Quản lý toàn bộ quy trình tuyển dụng nhân viên.
+•	Tạo tin tuyển dụng, đăng lên website
+•	Tiếp nhận hồ sơ online
+•	AI sàng lọc CV tự động
+•	Quản lý lịch phỏng vấn
+•	Ghi nhận đánh giá
+
+IX. HỆ THỐNG AI & TRỢ LÝ THÔNG MINH
+A. AI Giám sát & Báo cáo
+Tự động thu thập dữ liệu, phân tích, tạo báo cáo định kỳ.
+•	Tổng hợp dữ liệu từ tất cả module
+•	Tạo báo cáo ngày/tuần/tháng
+•	Phát hiện bất thường: Thiếu người, hồ sơ chưa cập nhật...
+
+B. Chatbot AI Nội bộ
+Hỗ trợ nhân viên tra cứu thông tin nhanh chóng.
+•	Tra cứu ca làm, bệnh nhân phụ trách
+•	Hướng dẫn quy trình nội bộ
+•	Nhắc lịch họp, phân công mới
+•	Báo cáo sự cố
+
+C. AI Trợ lý Điều hành
+Giao diện hội thoại tự nhiên cho quản lý.
+Ví dụ: "AI, ai đang trực khu A ngày mai?"
+ 
+X. DASHBOARD & BÁO CÁO
+Bảng điều khiển tổng hợp hiển thị thông tin quan trọng.
+Widget	Thông tin
+Tổng số bệnh nhân	Đang chăm sóc / Xuất viện
+Nhân viên trực	Số người đang làm
+Lịch hẹn hôm nay	Số lịch khám, gặp người thân
+Cảnh báo	Chỉ số bất thường, ca thiếu người
+Biểu đồ sức khỏe	Theo tình trạng bệnh nhân
+
+

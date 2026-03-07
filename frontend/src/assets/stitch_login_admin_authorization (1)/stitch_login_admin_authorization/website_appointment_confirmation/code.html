@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Appointment Requests - Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#c31d62",
+                        "background-light": "#f8f6f7",
+                        "background-dark": "#211118",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="flex h-full grow">
+<!-- SideNavBar -->
+<div class="flex h-auto min-h-screen flex-col justify-between border-r border-gray-200/50 bg-white dark:border-gray-800 dark:bg-background-dark p-4 w-64">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Admin avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA32_SUz6ylQFCtlUPn_Hgz5WGYwwGywzlzaG9tOpCflUnpo83_fhmtmjAsTung_ZcYUrcFlSKYLx4AFRAIKXzJRu_wmUFUnr-SOf-dHRWY2WQTw0osMNJnN-bRv0TqwtmMql-9FxcIRMbsDMBlHvEylQol3WOhAa3iAnukTV5dEnX0HRfSMz779VzhW6TXYENYhJtsFPb6H4vzot0Gqyu_rqpANzzTDzirL2rgFX2cPMJJhHqnaoc8rQ0kGbNKMG2ut0B2TkQbVUVO");'></div>
+<div class="flex flex-col">
+<h1 class="text-[#171114] dark:text-white text-base font-medium leading-normal">Eleanor Vance</h1>
+<p class="text-[#876472] dark:text-gray-400 text-sm font-normal leading-normal">Administrator</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#876472] dark:text-gray-300 hover:bg-primary/10 hover:text-primary dark:hover:text-primary" href="#">
+<span class="material-symbols-outlined text-2xl">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary" href="#">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<p class="text-sm font-medium leading-normal">Appointments</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#876472] dark:text-gray-300 hover:bg-primary/10 hover:text-primary dark:hover:text-primary" href="#">
+<span class="material-symbols-outlined text-2xl">group</span>
+<p class="text-sm font-medium leading-normal">Patients</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#876472] dark:text-gray-300 hover:bg-primary/10 hover:text-primary dark:hover:text-primary" href="#">
+<span class="material-symbols-outlined text-2xl">person</span>
+<p class="text-sm font-medium leading-normal">Consultants</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#876472] dark:text-gray-300 hover:bg-primary/10 hover:text-primary dark:hover:text-primary" href="#">
+<span class="material-symbols-outlined text-2xl">bar_chart</span>
+<p class="text-sm font-medium leading-normal">Reports</p>
+</a>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90">
+<span class="truncate">New Patient</span>
+</button>
+<div class="flex flex-col gap-1 border-t border-gray-200/50 dark:border-gray-800 pt-2">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#876472] dark:text-gray-300 hover:bg-primary/10 hover:text-primary dark:hover:text-primary" href="#">
+<span class="material-symbols-outlined text-2xl">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#876472] dark:text-gray-300 hover:bg-primary/10 hover:text-primary dark:hover:text-primary" href="#">
+<span class="material-symbols-outlined text-2xl">logout</span>
+<p class="text-sm font-medium leading-normal">Log out</p>
+</a>
+</div>
+</div>
+</div>
+<!-- Main Content -->
+<main class="flex-1 p-8">
+<div class="w-full">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between gap-3 p-4">
+<div class="flex min-w-72 flex-col gap-3">
+<p class="text-[#171114] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Appointment Requests</p>
+<p class="text-[#876472] dark:text-gray-400 text-base font-normal leading-normal">Review, confirm, and manage all incoming appointment requests.</p>
+</div>
+</div>
+<!-- Tabs -->
+<div class="pb-3 mt-4">
+<div class="flex border-b border-[#e5dce0] dark:border-gray-700 px-4 gap-8">
+<a class="relative flex flex-col items-center justify-center border-b-[3px] border-b-primary text-primary pb-[13px] pt-4" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Pending</p>
+<span class="absolute top-2 right-[-20px] bg-primary/20 text-primary text-xs font-bold px-2 py-0.5 rounded-full">12</span>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#876472] dark:text-gray-400 pb-[13px] pt-4 hover:text-primary" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Confirmed</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#876472] dark:text-gray-400 pb-[13px] pt-4 hover:text-primary" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Archived</p>
+</a>
+</div>
+</div>
+<div class="bg-white dark:bg-background-dark/50 rounded-lg border border-[#e5dce0] dark:border-gray-800">
+<!-- ToolBar -->
+<div class="flex flex-wrap justify-between items-center gap-2 px-4 py-3 border-b border-[#e5dce0] dark:border-gray-800">
+<div class="flex items-center gap-2">
+<div class="relative w-full max-w-xs">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#876472] dark:text-gray-400">search</span>
+<input class="w-full h-10 pl-10 pr-4 text-sm bg-background-light dark:bg-background-dark border border-[#e5dce0] dark:border-gray-700 rounded-lg focus:ring-primary focus:border-primary text-[#171114] dark:text-white" placeholder="Search by name or service..." type="text"/>
+</div>
+<button class="p-2 text-[#876472] dark:text-gray-400 hover:text-primary dark:hover:text-primary rounded-lg hover:bg-primary/10">
+<span class="material-symbols-outlined text-2xl">filter_list</span>
+</button>
+<button class="p-2 text-[#876472] dark:text-gray-400 hover:text-primary dark:hover:text-primary rounded-lg hover:bg-primary/10">
+<span class="material-symbols-outlined text-2xl">calendar_today</span>
+</button>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#E53E3E]/20 text-[#E53E3E] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-4 hover:bg-[#E53E3E]/30">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">delete</span>
+<span class="truncate">Decline Selected</span>
+</button>
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#38A169]/20 text-[#38A169] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-4 hover:bg-[#38A169]/30">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="truncate">Confirm Selected</span>
+</button>
+</div>
+</div>
+<!-- Table -->
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-white dark:bg-background-dark/50">
+<tr class="border-b border-b-[#e5dce0] dark:border-gray-800">
+<th class="p-4 w-12"><input class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-transparent dark:bg-transparent" type="checkbox"/></th>
+<th class="px-4 py-3 text-left text-[#171114] dark:text-white text-sm font-medium leading-normal">Patient Name</th>
+<th class="px-4 py-3 text-left text-[#171114] dark:text-white text-sm font-medium leading-normal">Contact Info</th>
+<th class="px-4 py-3 text-left text-[#171114] dark:text-white text-sm font-medium leading-normal">Service Requested</th>
+<th class="px-4 py-3 text-left text-[#171114] dark:text-white text-sm font-medium leading-normal">Requested Date</th>
+<th class="px-4 py-3 text-left text-[#171114] dark:text-white text-sm font-medium leading-normal">Status</th>
+<th class="px-4 py-3 text-left text-[#171114] dark:text-white text-sm font-medium leading-normal">Actions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-t border-t-[#e5dce0] dark:border-gray-800 hover:bg-background-light dark:hover:bg-background-dark">
+<td class="p-4"><input class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-transparent dark:bg-transparent" type="checkbox"/></td>
+<td class="px-4 py-2 text-[#171114] dark:text-gray-300 text-sm font-normal leading-normal">Eleanor Vance</td>
+<td class="px-4 py-2 text-[#876472] dark:text-gray-400 text-sm font-normal leading-normal">evance@email.com</td>
+<td class="px-4 py-2 text-[#876472] dark:text-gray-400 text-sm font-normal leading-normal">Memory Care Consultation</td>
+<td class="px-4 py-2 text-sm font-normal leading-normal">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-background-light dark:bg-background-dark border border-[#e5dce0] dark:border-gray-700 text-[#171114] dark:text-gray-300 text-sm font-medium">
+<span class="truncate">Nov 1, 2023 at 10:00 AM</span>
+</button>
+</td>
+<td class="px-4 py-2 text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="inline-flex items-center rounded-full bg-orange-100 dark:bg-orange-900/50 px-2.5 py-0.5 text-xs font-medium text-orange-800 dark:text-orange-300">Pending</span>
+</td>
+<td class="px-4 py-2 text-sm font-normal leading-normal">
+<button class="font-medium text-primary hover:underline">View Details</button>
+</td>
+</tr>
+<tr class="border-t border-t-[#e5dce0] dark:border-gray-800 hover:bg-background-light dark:hover:bg-background-dark">
+<td class="p-4"><input class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-transparent dark:bg-transparent" type="checkbox"/></td>
+<td class="px-4 py-2 text-[#171114] dark:text-gray-300 text-sm font-normal leading-normal">Arthur Pendelton</td>
+<td class="px-4 py-2 text-[#876472] dark:text-gray-400 text-sm font-normal leading-normal">arthur.p@email.com</td>
+<td class="px-4 py-2 text-[#876472] dark:text-gray-400 text-sm font-normal leading-normal">Physical Therapy</td>
+<td class="px-4 py-2 text-sm font-normal leading-normal">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-background-light dark:bg-background-dark border border-[#e5dce0] dark:border-gray-700 text-[#171114] dark:text-gray-300 text-sm font-medium">
+<span class="truncate">Nov 1, 2023 at 2:00 PM</span>
+</button>
+</td>
+<td class="px-4 py-2 text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="inline-flex items-center rounded-full bg-orange-100 dark:bg-orange-900/50 px-2.5 py-0.5 text-xs font-medium text-orange-800 dark:text-orange-300">Pending</span>
+</td>
+<td class="px-4 py-2 text-sm font-normal leading-normal">
+<button class="font-medium text-primary hover:underline">View Details</button>
+</td>
+</tr>
+<tr class="border-t border-t-[#e5dce0] dark:border-gray-800 hover:bg-background-light dark:hover:bg-background-dark">
+<td class="p-4"><input checked="" class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-transparent dark:bg-transparent" type="checkbox"/></td>
+<td class="px-4 py-2 text-[#171114] dark:text-gray-300 text-sm font-normal leading-normal">Beatrice Miller</td>
+<td class="px-4 py-2 text-[#876472] dark:text-gray-400 text-sm font-normal leading-normal">b.miller@email.com</td>
+<td class="px-4 py-2 text-[#876472] dark:text-gray-400 text-sm font-normal leading-normal">Assisted Living Tour</td>
+<td class="px-4 py-2 text-sm font-normal leading-normal">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-background-light dark:bg-background-dark border border-[#e5dce0] dark:border-gray-700 text-[#171114] dark:text-gray-300 text-sm font-medium">
+<span class="truncate">Nov 2, 2023 at 11:00 AM</span>
+</button>
+</td>
+<td class="px-4 py-2 text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="inline-flex items-center rounded-full bg-orange-100 dark:bg-orange-900/50 px-2.5 py-0.5 text-xs font-medium text-orange-800 dark:text-orange-300">Pending</span>
+</td>
+<td class="px-4 py-2 text-sm font-normal leading-normal">
+<button class="font-medium text-primary hover:underline">View Details</button>
+</td>
+</tr>
+<tr class="border-t border-t-[#e5dce0] dark:border-gray-800 hover:bg-background-light dark:hover:bg-background-dark">
+<td class="p-4"><input class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-transparent dark:bg-transparent" type="checkbox"/></td>
+<td class="px-4 py-2 text-[#171114] dark:text-gray-300 text-sm font-normal leading-normal">Charles Robinson</td>
+<td class="px-4 py-2 text-[#876472] dark:text-gray-400 text-sm font-normal leading-normal">charles@email.com</td>
+<td class="px-4 py-2 text-[#876472] dark:text-gray-400 text-sm font-normal leading-normal">Skilled Nursing Info</td>
+<td class="px-4 py-2 text-sm font-normal leading-normal">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-background-light dark:bg-background-dark border border-[#e5dce0] dark:border-gray-700 text-[#171114] dark:text-gray-300 text-sm font-medium">
+<span class="truncate">Nov 2, 2023 at 3:00 PM</span>
+</button>
+</td>
+<td class="px-4 py-2 text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="inline-flex items-center rounded-full bg-orange-100 dark:bg-orange-900/50 px-2.5 py-0.5 text-xs font-medium text-orange-800 dark:text-orange-300">Pending</span>
+</td>
+<td class="px-4 py-2 text-sm font-normal leading-normal">
+<button class="font-medium text-primary hover:underline">View Details</button>
+</td>
+</tr>
+<tr class="border-t border-t-[#e5dce0] dark:border-gray-800 hover:bg-background-light dark:hover:bg-background-dark">
+<td class="p-4"><input checked="" class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-transparent dark:bg-transparent" type="checkbox"/></td>
+<td class="px-4 py-2 text-[#171114] dark:text-gray-300 text-sm font-normal leading-normal">Diana Prince</td>
+<td class="px-4 py-2 text-[#876472] dark:text-gray-400 text-sm font-normal leading-normal">diana.p@email.com</td>
+<td class="px-4 py-2 text-[#876472] dark:text-gray-400 text-sm font-normal leading-normal">Memory Care Consultation</td>
+<td class="px-4 py-2 text-sm font-normal leading-normal">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 bg-background-light dark:bg-background-dark border border-[#e5dce0] dark:border-gray-700 text-[#171114] dark:text-gray-300 text-sm font-medium">
+<span class="truncate">Nov 3, 2023 at 9:00 AM</span>
+</button>
+</td>
+<td class="px-4 py-2 text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="inline-flex items-center rounded-full bg-orange-100 dark:bg-orange-900/50 px-2.5 py-0.5 text-xs font-medium text-orange-800 dark:text-orange-300">Pending</span>
+</td>
+<td class="px-4 py-2 text-sm font-normal leading-normal">
+<button class="font-medium text-primary hover:underline">View Details</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Elderly Care Institute Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4A90E2",
+                        "background-light": "#F4F7FA",
+                        "background-dark": "#1a1c1e",
+                        "alert-red": "#D0021B",
+                        "success-green": "#7ED321",
+                        "warning-yellow": "#F5A623",
+                        "neutral-text": "#333333",
+                        "neutral-border": "#E0E0E0",
+                        "dark-text": "#E3E3E3",
+                        "dark-border": "#333333",
+                        "dark-card": "#212326"
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-neutral-text dark:text-dark-text">
+<div class="flex h-screen">
+<!-- SideNavBar -->
+<aside class="flex flex-col w-64 bg-white dark:bg-dark-card border-r border-neutral-border dark:border-dark-border">
+<div class="flex items-center gap-3 p-4 border-b border-neutral-border dark:border-dark-border h-16">
+<div class="text-primary size-8">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-neutral-text dark:text-dark-text text-lg font-bold leading-tight">Care-Institute</h2>
+</div>
+<div class="flex flex-col justify-between flex-1 p-4">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-semibold leading-normal">Dashboard</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-neutral-text/80 dark:text-dark-text/80 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg">
+<span class="material-symbols-outlined">groups</span>
+<p class="text-sm font-medium leading-normal">Patients</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-neutral-text/80 dark:text-dark-text/80 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg">
+<span class="material-symbols-outlined">badge</span>
+<p class="text-sm font-medium leading-normal">Staff</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-neutral-text/80 dark:text-dark-text/80 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg">
+<span class="material-symbols-outlined">calendar_month</span>
+<p class="text-sm font-medium leading-normal">Appointments</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-neutral-text/80 dark:text-dark-text/80 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg">
+<span class="material-symbols-outlined">bar_chart</span>
+<p class="text-sm font-medium leading-normal">Reports</p>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-3 py-2 text-neutral-text/80 dark:text-dark-text/80 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-neutral-text/80 dark:text-dark-text/80 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium leading-normal">Log Out</p>
+</div>
+</div>
+</div>
+</aside>
+<div class="flex-1 flex flex-col overflow-hidden">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-neutral-border dark:border-dark-border px-8 py-3 bg-white dark:bg-dark-card h-16">
+<div class="flex-1">
+<label class="flex flex-col max-w-sm">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-10">
+<div class="text-neutral-text/60 dark:text-dark-text/60 flex bg-background-light dark:bg-background-dark items-center justify-center pl-3 rounded-l-lg border-y border-l border-neutral-border dark:border-dark-border">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-neutral-text dark:text-dark-text focus:outline-0 focus:ring-2 focus:ring-primary/50 border-y border-r border-neutral-border dark:border-dark-border bg-background-light dark:bg-background-dark h-full placeholder:text-neutral-text/60 dark:placeholder:text-dark-text/60 pl-2 text-sm font-normal" placeholder="Search Patients, Staff..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center rounded-full size-10 hover:bg-black/5 dark:hover:bg-white/5 text-neutral-text/80 dark:text-dark-text/80">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="flex gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Profile picture of Dr. Emily Carter" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDWDiZDT1PMrnXooMPm4ZvuJjYK4Lvd1sf-RkpwjtCBUWfN1zGXRbXaXm_ZwenpTX1-PMKelGadv9yve5BF2czqZEZEVY07b8OT_ZfB7Y3TOFZnO_mWTAPAhwgHNW1tLgLzN2p6dfF1dEYiCi8MPl5rS0Ej3m8mb_9x-uqXmyJu1Wt47cLGGugT5r0uCmeoMKHWIE1rFsciHzo0sPqwK6iD99t7KrLGGeg3vjewVIJZPv_e7oasJfTnh0ZFZt3H5-E3eokQ9KeVDhxT");'></div>
+<div class="flex flex-col text-sm">
+<h1 class="font-semibold text-neutral-text dark:text-dark-text">Dr. Emily Carter</h1>
+<p class="text-neutral-text/60 dark:text-dark-text/60">Administrator</p>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto p-8">
+<div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+<p class="text-neutral-text dark:text-dark-text text-3xl font-bold leading-tight tracking-tight">Dashboard</p>
+</div>
+<!-- Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+<div class="flex flex-col gap-2 rounded-lg p-6 border border-neutral-border dark:border-dark-border bg-white dark:bg-dark-card">
+<p class="text-neutral-text dark:text-dark-text text-base font-medium leading-normal">Currently Cared For</p>
+<p class="text-neutral-text dark:text-dark-text text-4xl font-bold tracking-tight">86</p>
+</div>
+<div class="flex flex-col gap-2 rounded-lg p-6 border border-neutral-border dark:border-dark-border bg-white dark:bg-dark-card">
+<p class="text-neutral-text dark:text-dark-text text-base font-medium leading-normal">New Admissions (Today)</p>
+<p class="text-neutral-text dark:text-dark-text text-4xl font-bold tracking-tight">3</p>
+</div>
+<div class="flex flex-col gap-2 rounded-lg p-6 border border-neutral-border dark:border-dark-border bg-white dark:bg-dark-card">
+<p class="text-neutral-text dark:text-dark-text text-base font-medium leading-normal">Upcoming Discharges</p>
+<p class="text-neutral-text dark:text-dark-text text-4xl font-bold tracking-tight">5</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 flex flex-col gap-6">
+<!-- Staff on Duty -->
+<div class="bg-white dark:bg-dark-card rounded-lg border border-neutral-border dark:border-dark-border">
+<h2 class="text-neutral-text dark:text-dark-text text-lg font-bold p-4 border-b border-neutral-border dark:border-dark-border">Staff on Duty</h2>
+<div class="p-4">
+<div class="border-b border-neutral-border dark:border-dark-border text-sm font-medium text-center text-neutral-text/70 dark:text-dark-text/70">
+<ul class="flex flex-wrap -mb-px">
+<li class="mr-2"><a class="inline-block p-4 border-b-2 border-primary text-primary rounded-t-lg" href="#">Morning</a></li>
+<li class="mr-2"><a class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-neutral-text dark:hover:text-dark-text hover:border-neutral-border dark:hover:border-dark-border" href="#">Afternoon</a></li>
+<li><a class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-neutral-text dark:hover:text-dark-text hover:border-neutral-border dark:hover:border-dark-border" href="#">Night</a></li>
+</ul>
+</div>
+<div class="py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full" data-alt="Avatar of Olivia Chen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpsDySP5M4IqXv_RwZjZ83OsRGLZYWFmTcJCnL4pxT0eN7NArFu0kbvh9tSGcBGZ7DwDNTYymUyE9Psa9BOeIcD0R79XgFKKbsHjDIVLWvHD05Iw0VILv3B1tGiFZNnkj6QzD4eFfW4pZNk1SITTR57K3dRqwozQ9HnNFkEfZATvRLtMKFexCKuMvE25rs419qDrXOtUNkMmhlwY4Pt7Sw-1rHA9qeUhsP_JrKayd4zz399uUypl-axmSyqbpy38ueT_YwOeoNTXEV"/>
+<div><p class="font-medium">Olivia Chen</p><p class="text-xs text-neutral-text/60 dark:text-dark-text/60">Head Nurse</p></div>
+</div>
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full" data-alt="Avatar of Ben Carter" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDY3C0HS5MrFdaMfJv-FXgfxVWNrNlllMjAwGRvq-AfERnPT4pB0uhFaGX3mi2yDPkWU1QcZ2IJy559r_WBf0189Xo55C5MREZqK7CtyxMwS9VaXjmQ0vqeGTugYWbkyyKQsynW5m6pR4YkZT_QygxSGMGRSbmqlDsd93ks2_JoAqNboSan92lWTM3JNcLS1zepkZs61Rm9NFQEQEm2q9vhba7n0ybsLgGb-e9oMcPYvNxZk1QENmOXMRYxZXxxcFnZEg1Qug8B1UnY"/>
+<div><p class="font-medium">Ben Carter</p><p class="text-xs text-neutral-text/60 dark:text-dark-text/60">Caregiver</p></div>
+</div>
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full" data-alt="Avatar of David Lee" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz8uTYa1v5DybTSDoRfjGn-AUtQ_sUUoBy1VvfBvjFSbMqNtAbU6OEZSZ_z-BL5BOwuiIRx-kG6sdcHGyRDZdbXfKVFDChfDFb4J16N-BqsVoqjEz9sGIJZw6deiuIrLd3A7MxPiAeGHqC9yyB2S4JctM3nokKqeUMjghGAJqSH4qslUsQMoZYFn-1CBYKauyKcTfkOZ9adopxu-9saPKDw7FPj2k-QJ2KYdc1m9cIuewz2HS_rL-lXDu5WU7TpeJ8wOCk0LeosLx6"/>
+<div><p class="font-medium">David Lee</p><p class="text-xs text-neutral-text/60 dark:text-dark-text/60">Physiotherapist</p></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Health Alerts -->
+<div class="bg-white dark:bg-dark-card rounded-lg border border-neutral-border dark:border-dark-border">
+<h2 class="text-neutral-text dark:text-dark-text text-lg font-bold p-4 border-b border-neutral-border dark:border-dark-border">Health Alerts</h2>
+<div class="p-4 space-y-4">
+<div class="flex items-center gap-4 p-3 rounded-lg bg-alert-red/10">
+<div class="flex items-center justify-center size-8 rounded-full bg-alert-red text-white"><span class="material-symbols-outlined text-base">priority_high</span></div>
+<div class="flex-1"><p class="font-medium">Robert Williams</p><p class="text-sm text-neutral-text/80 dark:text-dark-text/80">High Blood Pressure: 160/100 mmHg</p></div>
+<p class="text-xs text-neutral-text/60 dark:text-dark-text/60">2m ago</p>
+<button class="text-primary text-sm font-semibold">View Details</button>
+</div>
+<div class="flex items-center gap-4 p-3 rounded-lg bg-warning-yellow/10">
+<div class="flex items-center justify-center size-8 rounded-full bg-warning-yellow text-white"><span class="material-symbols-outlined text-base">monitor_heart</span></div>
+<div class="flex-1"><p class="font-medium">Eleanor Vance</p><p class="text-sm text-neutral-text/80 dark:text-dark-text/80">Irregular Heartbeat Detected</p></div>
+<p class="text-xs text-neutral-text/60 dark:text-dark-text/60">15m ago</p>
+<button class="text-primary text-sm font-semibold">View Details</button>
+</div>
+<div class="flex items-center gap-4 p-3 rounded-lg bg-alert-red/10">
+<div class="flex items-center justify-center size-8 rounded-full bg-alert-red text-white"><span class="material-symbols-outlined text-base">priority_high</span></div>
+<div class="flex-1"><p class="font-medium">George Miller</p><p class="text-sm text-neutral-text/80 dark:text-dark-text/80">Low Oxygen Saturation: 88%</p></div>
+<p class="text-xs text-neutral-text/60 dark:text-dark-text/60">32m ago</p>
+<button class="text-primary text-sm font-semibold">View Details</button>
+</div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 flex flex-col gap-6">
+<!-- Today's Appointments -->
+<div class="bg-white dark:bg-dark-card rounded-lg border border-neutral-border dark:border-dark-border">
+<h2 class="text-neutral-text dark:text-dark-text text-lg font-bold p-4 border-b border-neutral-border dark:border-dark-border">Today's Appointments</h2>
+<div class="p-4 space-y-3">
+<div class="flex items-center gap-3">
+<div class="w-1 h-10 rounded-full bg-primary"></div>
+<div><p class="font-medium">Dr. Smith with Clara Oswald</p><p class="text-xs text-neutral-text/60 dark:text-dark-text/60">10:00 AM - Medical Checkup</p></div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-1 h-10 rounded-full bg-success-green"></div>
+<div><p class="font-medium">Family Visit for John Doe</p><p class="text-xs text-neutral-text/60 dark:text-dark-text/60">11:30 AM - Consultation</p></div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-1 h-10 rounded-full bg-warning-yellow"></div>
+<div><p class="font-medium">Physiotherapy for Susan Wright</p><p class="text-xs text-neutral-text/60 dark:text-dark-text/60">02:00 PM - Rehabilitation</p></div>
+</div>
+</div>
+</div>
+<!-- Upcoming Events -->
+<div class="bg-white dark:bg-dark-card rounded-lg border border-neutral-border dark:border-dark-border">
+<h2 class="text-neutral-text dark:text-dark-text text-lg font-bold p-4 border-b border-neutral-border dark:border-dark-border">Upcoming Events &amp; Activities</h2>
+<div class="p-4 space-y-3">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-8 rounded-lg bg-primary/10 text-primary"><span class="material-symbols-outlined text-base">celebration</span></div>
+<div><p class="font-medium">Bingo Night</p><p class="text-xs text-neutral-text/60 dark:text-dark-text/60">Today, 7:00 PM - Common Hall</p></div>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-8 rounded-lg bg-primary/10 text-primary"><span class="material-symbols-outlined text-base">self_improvement</span></div>
+<div><p class="font-medium">Group Yoga Session</p><p class="text-xs text-neutral-text/60 dark:text-dark-text/60">Tomorrow, 9:00 AM - Garden</p></div>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-8 rounded-lg bg-primary/10 text-primary"><span class="material-symbols-outlined text-base">music_note</span></div>
+<div><p class="font-medium">Live Music Performance</p><p class="text-xs text-neutral-text/60 dark:text-dark-text/60">Friday, 3:00 PM - Auditorium</p></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>
