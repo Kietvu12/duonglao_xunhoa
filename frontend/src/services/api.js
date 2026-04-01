@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://duonglaoxuanhoa.net/api_quanlyduonglao/api';
+ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://duonglaoxuanhoa.net/api_quanlyduonglao/api';
 // const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4545/api';
 
 // Helper function to get auth token
@@ -1018,6 +1018,10 @@ export const kpiAPI = {
     return apiCall(`/kpi/my-kpi?${queryString}`);
   },
   tinhKPI: (data) => apiCall('/kpi/tinh-kpi', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  tinhKPITatCa: (data) => apiCall('/kpi/tinh-kpi-tat-ca', {
     method: 'POST',
     body: JSON.stringify(data),
   }),

@@ -252,7 +252,7 @@ export const getBenhNhanById = async (req, res, next) => {
 
     // Get related data
     const [nguoiThan] = await pool.execute(
-      'SELECT * FROM nguoi_than_benh_nhan WHERE id_benh_nhan = ?',
+      'SELECT * FROM nguoi_than_benh_nhan WHERE id_benh_nhan = ? AND is_delete = 0',
       [id]
     );
 

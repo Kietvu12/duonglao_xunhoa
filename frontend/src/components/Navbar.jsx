@@ -9,7 +9,7 @@ const Navbar = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [dichVus, setDichVus] = useState([]);
-  const [selectedService, setSelectedService] = useState(null);
+  const [selectedServices, setSelectedServices] = useState([]);
   const [formData, setFormData] = useState({
     ho_ten: '',
     so_dien_thoai: '',
@@ -96,7 +96,7 @@ const Navbar = () => {
   const openBookingModal = () => {
     setIsMobileMenuOpen(false);
     setIsBookingModalOpen(true);
-    setSelectedService(null);
+    setSelectedServices([]);
     setFormData({
       ho_ten: '',
       so_dien_thoai: '',
@@ -112,7 +112,7 @@ const Navbar = () => {
 
   const closeBookingModal = () => {
     setIsBookingModalOpen(false);
-    setSelectedService(null);
+    setSelectedServices([]);
     setFormData({
       ho_ten: '',
       so_dien_thoai: '',
@@ -126,12 +126,22 @@ const Navbar = () => {
     setSuccess(false);
   };
 
-  const handleServiceSelect = (service) => {
-    setSelectedService(service);
-    setFormData(prev => ({
-      ...prev,
-      loai_dich_vu_quan_tam: service.ten_dich_vu
-    }));
+  const handleServiceToggle = (service) => {
+    setSelectedServices((prevSelected) => {
+      const exists = prevSelected.find((item) => item.id === service.id);
+      let updated;
+      if (exists) {
+        updated = prevSelected.filter((item) => item.id !== service.id);
+      } else {
+        updated = [...prevSelected, service];
+      }
+      const serviceNames = updated.map((item) => item.ten_dich_vu).join(', ');
+      setFormData((prev) => ({
+        ...prev,
+        loai_dich_vu_quan_tam: serviceNames
+      }));
+      return updated;
+    });
   };
 
   const handleFormChange = (e) => {
@@ -155,19 +165,21 @@ const Navbar = () => {
     setLoading(true);
 
     try {
-      // Validate required fields
-      if (!formData.ho_ten || !formData.so_dien_thoai || !formData.email || !formData.ngay_mong_muon || !formData.gio_mong_muon) {
+      // Validate required fields (email không bắt buộc)
+      if (!formData.ho_ten || !formData.so_dien_thoai || !formData.ngay_mong_muon || !formData.gio_mong_muon) {
         setError('Vui lòng điền đầy đủ thông tin bắt buộc');
         setLoading(false);
         return;
       }
 
-      // Validate email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        setError('Email không hợp lệ');
-        setLoading(false);
-        return;
+      // Validate email chỉ khi có nhập
+      if (formData.email && formData.email.trim() !== '') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email.trim())) {
+          setError('Email không hợp lệ');
+          setLoading(false);
+          return;
+        }
       }
 
       // Validate phone (Vietnamese format)
@@ -686,31 +698,37 @@ const Navbar = () => {
                           <p style={{ color: '#8A8A8A' }}>Đang tải danh sách dịch vụ...</p>
                         </div>
                       ) : (
-                        dichVus.map((service) => (
-                          <button
-                            key={service.id}
-                            type="button"
-                            onClick={() => handleServiceSelect(service)}
-                            className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
-                              selectedService?.id === service.id
-                                ? 'border-primary-rose bg-white shadow-md'
-                                : 'border-gray-200 bg-white hover:border-primary-rose/50 hover:shadow-sm'
-                            }`}
-                          >
-                            <div className="font-bold text-lg mb-1" style={{ 
-                              color: selectedService?.id === service.id ? '#A90046' : '#2D2D2D',
-                              fontFamily: "'Cormorant Garamond', 'Times New Roman', serif",
-                              fontWeight: '700'
-                            }}>
-                              {service.ten_dich_vu}
-                            </div>
-                            {service.mo_ta && (
-                              <p className="text-sm text-justify" style={{ color: '#8A8A8A', textAlign: 'justify' }}>
-                                {service.mo_ta.length > 100 ? `${service.mo_ta.substring(0, 100)}...` : service.mo_ta}
-                              </p>
-                            )}
-                          </button>
-                        ))
+                        dichVus.map((service) => {
+                          const isSelected = selectedServices.some((item) => item.id === service.id);
+                          return (
+                            <button
+                              key={service.id}
+                              type="button"
+                              onClick={() => handleServiceToggle(service)}
+                              className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
+                                isSelected
+                                  ? 'border-primary-rose bg-white shadow-md'
+                                  : 'border-gray-200 bg-white hover:border-primary-rose/50 hover:shadow-sm'
+                              }`}
+                            >
+                              <div
+                                className="font-bold text-lg mb-1"
+                                style={{
+                                  color: isSelected ? '#A90046' : '#2D2D2D',
+                                  fontFamily: "'Cormorant Garamond', 'Times New Roman', serif",
+                                  fontWeight: '700'
+                                }}
+                              >
+                                {service.ten_dich_vu}
+                              </div>
+                              {service.mo_ta && (
+                                <p className="text-sm text-justify" style={{ color: '#8A8A8A', textAlign: 'justify' }}>
+                                  {service.mo_ta.length > 100 ? `${service.mo_ta.substring(0, 100)}...` : service.mo_ta}
+                                </p>
+                              )}
+                            </button>
+                          );
+                        })
                       )}
                     </div>
                   </div>
@@ -722,14 +740,27 @@ const Navbar = () => {
                     </h4>
                     <form onSubmit={handleBookingSubmit} className="space-y-4">
                       {/* Selected Service Display */}
-                      {selectedService && (
+                      {selectedServices.length > 0 && (
                         <div className="p-4 rounded-xl border-2 border-primary-rose/30 bg-primary-rose/5">
                           <p className="text-sm font-semibold mb-1" style={{ color: '#8A8A8A' }}>
                             Dịch vụ đã chọn:
                           </p>
-                          <p className="font-bold" style={{ color: '#A90046', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
-                            {selectedService.ten_dich_vu}
-                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedServices.map((service) => (
+                              <span
+                                key={service.id}
+                                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold"
+                                style={{
+                                  backgroundColor: 'rgba(169, 0, 70, 0.08)',
+                                  color: '#A90046',
+                                  fontFamily: "'Cormorant Garamond', 'Times New Roman', serif",
+                                  fontWeight: '700'
+                                }}
+                              >
+                                {service.ten_dich_vu}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       )}
 
@@ -765,17 +796,16 @@ const Navbar = () => {
                         />
                       </div>
 
-                      {/* Email */}
+                      {/* Email (tùy chọn) */}
                       <div>
                         <label className="block text-sm font-semibold mb-2" style={{ color: '#2D2D2D' }}>
-                          Email <span className="text-red-500">*</span>
+                          Email (tùy chọn)
                         </label>
                         <input
                           type="email"
                           name="email"
                           value={formData.email}
                           onChange={handleFormChange}
-                          required
                           className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-rose focus:border-transparent"
                           placeholder="example@email.com"
                         />

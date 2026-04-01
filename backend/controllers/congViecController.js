@@ -59,6 +59,41 @@ export const getAllCongViec = async (req, res, next) => {
 
     const [congViecs] = await pool.execute(query, params);
 
+    let countQuery = `
+      SELECT COUNT(*) as total
+      FROM cong_viec cv
+      LEFT JOIN (
+        SELECT pc1.*
+        FROM phan_cong_cong_viec pc1
+        INNER JOIN (
+          SELECT id_cong_viec, MAX(id) as max_id
+          FROM phan_cong_cong_viec
+          GROUP BY id_cong_viec
+        ) pc2 ON pc1.id_cong_viec = pc2.id_cong_viec AND pc1.id = pc2.max_id
+      ) pc ON cv.id = pc.id_cong_viec
+      WHERE 1=1
+    `;
+    const countParams = [];
+    if (id_dieu_duong) {
+      countQuery += ' AND pc.id_dieu_duong = ?';
+      countParams.push(id_dieu_duong);
+    }
+    if (id_benh_nhan) {
+      countQuery += ' AND pc.id_benh_nhan = ?';
+      countParams.push(id_benh_nhan);
+    }
+    if (trang_thai) {
+      countQuery += ' AND pc.trang_thai = ?';
+      countParams.push(trang_thai);
+    }
+    if (muc_uu_tien) {
+      countQuery += ' AND cv.muc_uu_tien = ?';
+      countParams.push(muc_uu_tien);
+    }
+    const [countResult] = await pool.execute(countQuery, countParams);
+    const total = Number(countResult[0]?.total) || 0;
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limitValue);
+
     // Format datetime fields to MySQL format (YYYY-MM-DD HH:mm:ss)
     const formattedCongViecs = congViecs.map(cv => {
       const formatted = { ...cv };
@@ -100,7 +135,13 @@ export const getAllCongViec = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: formattedCongViecs
+      data: formattedCongViecs,
+      pagination: {
+        page: safePage,
+        limit: limitValue,
+        total,
+        totalPages
+      }
     });
   } catch (error) {
     next(error);
@@ -124,27 +165,34 @@ export const createCongViec = async (req, res, next) => {
       [ten_cong_viec, mo_ta, muc_uu_tien || 'trung_binh', thoi_gian_du_kien, req.user.id, ngayTaoVN]
     );
 
-    // Assign if provided (id_dieu_duong là ho_so_nhan_vien.id)
-    if (id_dieu_duong && id_benh_nhan) {
-      // Lấy id_tai_khoan để gửi thông báo
+    // Phân công một phần: DB cho phép NULL — chỉ cần ít nhất một trong hai (điều dưỡng / bệnh nhân)
+    const dd =
+      id_dieu_duong !== undefined && id_dieu_duong !== null && String(id_dieu_duong).trim() !== ''
+        ? id_dieu_duong
+        : null;
+    const bn =
+      id_benh_nhan !== undefined && id_benh_nhan !== null && String(id_benh_nhan).trim() !== ''
+        ? id_benh_nhan
+        : null;
+
+    if (dd || bn) {
       let idTaiKhoan = null;
-      const [hoSoNhanVien] = await pool.execute(
-        'SELECT id_tai_khoan FROM ho_so_nhan_vien WHERE id = ?',
-        [id_dieu_duong]
-      );
-      if (hoSoNhanVien.length > 0) {
-        idTaiKhoan = hoSoNhanVien[0].id_tai_khoan;
+      if (dd) {
+        const [hoSoNhanVien] = await pool.execute(
+          'SELECT id_tai_khoan FROM ho_so_nhan_vien WHERE id = ?',
+          [dd]
+        );
+        if (hoSoNhanVien.length > 0) {
+          idTaiKhoan = hoSoNhanVien[0].id_tai_khoan;
+        }
       }
-      
-      // Lấy thời gian VN hiện tại để lưu vào ngay_tao
-      const ngayTaoVN = getNowForDB();
-      
+
+      const ngayTaoPhanCong = getNowForDB();
       await pool.execute(
         'INSERT INTO phan_cong_cong_viec (id_cong_viec, id_dieu_duong, id_benh_nhan, ngay_tao) VALUES (?, ?, ?, ?)',
-        [result.insertId, id_dieu_duong, id_benh_nhan, ngayTaoVN]
+        [result.insertId, dd, bn, ngayTaoPhanCong]
       );
 
-      // Gửi thông báo cho điều dưỡng (không block response nếu có lỗi)
       if (idTaiKhoan) {
         createNotification({
           id_nguoi_nhan: idTaiKhoan,
@@ -152,7 +200,7 @@ export const createCongViec = async (req, res, next) => {
           tieu_de: 'Công việc mới',
           noi_dung: `Bạn có công việc mới: "${ten_cong_viec}"`,
           link: `/admin/cong-viec`
-        }).catch(err => console.error('Error sending notification:', err));
+        }).catch((err) => console.error('Error sending notification:', err));
       }
     }
 
@@ -170,33 +218,59 @@ export const phanCongCongViec = async (req, res, next) => {
   try {
     const { id_cong_viec, id_dieu_duong, id_benh_nhan } = req.body;
 
-    if (!id_cong_viec || !id_dieu_duong || !id_benh_nhan) {
+    // Preserve "undefined" to mean "do not change this field".
+    // Only convert explicit empty/null input to null for clearing.
+    const dd =
+      id_dieu_duong === undefined
+        ? undefined
+        : (id_dieu_duong === null || String(id_dieu_duong).trim() === '' ? null : id_dieu_duong);
+    const bn =
+      id_benh_nhan === undefined
+        ? undefined
+        : (id_benh_nhan === null || String(id_benh_nhan).trim() === '' ? null : id_benh_nhan);
+
+    if (!id_cong_viec) {
       return res.status(400).json({
         success: false,
-        message: 'Vui lòng điền đầy đủ thông tin'
+        message: 'Thiếu id công việc'
       });
     }
 
-    // Check if already assigned
-    const [existing] = await pool.execute(
-      'SELECT id FROM phan_cong_cong_viec WHERE id_cong_viec = ? AND id_dieu_duong = ? AND id_benh_nhan = ?',
-      [id_cong_viec, id_dieu_duong, id_benh_nhan]
+    const [existingRows] = await pool.execute(
+      'SELECT id, id_dieu_duong, id_benh_nhan FROM phan_cong_cong_viec WHERE id_cong_viec = ? ORDER BY id DESC LIMIT 1',
+      [id_cong_viec]
     );
 
-    if (existing.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Công việc đã được phân công'
-      });
+    const ngayVN = getNowForDB();
+
+    if (existingRows.length > 0) {
+      const mergedDd = dd !== undefined ? dd : (existingRows[0].id_dieu_duong ?? null);
+      const mergedBn = bn !== undefined ? bn : (existingRows[0].id_benh_nhan ?? null);
+
+      if (!mergedDd && !mergedBn) {
+        return res.status(400).json({
+          success: false,
+          message: 'Vui lòng chọn ít nhất điều dưỡng hoặc bệnh nhân'
+        });
+      }
+
+      await pool.execute(
+        'UPDATE phan_cong_cong_viec SET id_dieu_duong = ?, id_benh_nhan = ?, ngay_cap_nhat = ? WHERE id = ?',
+        [mergedDd, mergedBn, ngayVN, existingRows[0].id]
+      );
+    } else {
+      if (!dd && !bn) {
+        return res.status(400).json({
+          success: false,
+          message: 'Vui lòng chọn ít nhất điều dưỡng hoặc bệnh nhân'
+        });
+      }
+
+      await pool.execute(
+        'INSERT INTO phan_cong_cong_viec (id_cong_viec, id_dieu_duong, id_benh_nhan, ngay_tao) VALUES (?, ?, ?, ?)',
+        [id_cong_viec, dd, bn, ngayVN]
+      );
     }
-
-    // Lấy thời gian VN hiện tại để lưu vào ngay_tao
-    const ngayTaoVN = getNowForDB();
-    
-    await pool.execute(
-      'INSERT INTO phan_cong_cong_viec (id_cong_viec, id_dieu_duong, id_benh_nhan, ngay_tao) VALUES (?, ?, ?, ?)',
-      [id_cong_viec, id_dieu_duong, id_benh_nhan, ngayTaoVN]
-    );
 
     res.status(201).json({
       success: true,
@@ -333,44 +407,29 @@ export const updateCongViec = async (req, res, next) => {
         [id]
       );
 
-      const finalIdDieuDuong = normalizedIdDieuDuong !== undefined ? normalizedIdDieuDuong : (existingAssignments[0]?.id_dieu_duong || null);
-      const finalIdBenhNhan = normalizedIdBenhNhan !== undefined ? normalizedIdBenhNhan : (existingAssignments[0]?.id_benh_nhan || null);
+      const finalIdDieuDuong = normalizedIdDieuDuong !== undefined ? normalizedIdDieuDuong : (existingAssignments[0]?.id_dieu_duong ?? null);
+      const finalIdBenhNhan = normalizedIdBenhNhan !== undefined ? normalizedIdBenhNhan : (existingAssignments[0]?.id_benh_nhan ?? null);
 
-      if (finalIdDieuDuong && finalIdBenhNhan) {
-        // Both IDs have values, update or create assignment
+      const dd = finalIdDieuDuong || null;
+      const bn = finalIdBenhNhan || null;
+
+      if (!dd && !bn) {
         if (existingAssignments.length > 0) {
-          // Update existing assignment
-          const ngayCapNhatVN = getNowForDB();
-          await pool.execute(
-            'UPDATE phan_cong_cong_viec SET id_dieu_duong = ?, id_benh_nhan = ?, ngay_cap_nhat = ? WHERE id_cong_viec = ?',
-            [finalIdDieuDuong, finalIdBenhNhan, ngayCapNhatVN, id]
-          );
-        } else {
-          // Create new assignment
-          const ngayTaoVN = getNowForDB();
-          await pool.execute(
-            'INSERT INTO phan_cong_cong_viec (id_cong_viec, id_dieu_duong, id_benh_nhan, ngay_tao) VALUES (?, ?, ?, ?)',
-            [id, finalIdDieuDuong, finalIdBenhNhan, ngayTaoVN]
-          );
+          await pool.execute('DELETE FROM phan_cong_cong_viec WHERE id_cong_viec = ?', [id]);
         }
       } else if (existingAssignments.length > 0) {
-        // At least one ID is missing, but assignment exists - update with null values or delete
-        if (!finalIdDieuDuong && !finalIdBenhNhan) {
-          // Both are null/empty, delete assignment
-          await pool.execute(
-            'DELETE FROM phan_cong_cong_viec WHERE id_cong_viec = ?',
-            [id]
-          );
-        } else {
-          // One is null, update with the provided value
-          const ngayCapNhatVN = getNowForDB();
-          await pool.execute(
-            'UPDATE phan_cong_cong_viec SET id_dieu_duong = ?, id_benh_nhan = ?, ngay_cap_nhat = ? WHERE id_cong_viec = ?',
-            [finalIdDieuDuong, finalIdBenhNhan, ngayCapNhatVN, id]
-          );
-        }
+        const ngayCapNhatVN = getNowForDB();
+        await pool.execute(
+          'UPDATE phan_cong_cong_viec SET id_dieu_duong = ?, id_benh_nhan = ?, ngay_cap_nhat = ? WHERE id_cong_viec = ?',
+          [dd, bn, ngayCapNhatVN, id]
+        );
+      } else {
+        const ngayTaoVN = getNowForDB();
+        await pool.execute(
+          'INSERT INTO phan_cong_cong_viec (id_cong_viec, id_dieu_duong, id_benh_nhan, ngay_tao) VALUES (?, ?, ?, ?)',
+          [id, dd, bn, ngayTaoVN]
+        );
       }
-      // If no assignment exists and at least one ID is missing, do nothing (can't create partial assignment)
     }
 
     res.json({

@@ -3,23 +3,35 @@ import { kpiAPI, nhanVienAPI } from '../../services/api';
 
 // Component Modal Cấu hình điểm
 function DiemConfigModal({ diemMucUuTien, onClose, onUpdate, onReload, getMucUuTienLabel }) {
+  /** Chuỗi: cho phép xóa hết ô; tránh Number('') → 0. step="any" tránh browser snap 10 → 10.5 với step 0.5 */
   const [diemValues, setDiemValues] = useState({
-    thap: 0,
-    trung_binh: 0,
-    cao: 0
+    thap: '0',
+    trung_binh: '0',
+    cao: '0'
   });
 
   useEffect(() => {
     const values = {};
-    ['thap', 'trung_binh', 'cao'].forEach(mucUuTien => {
-      const config = diemMucUuTien.find(d => d.muc_uu_tien === mucUuTien);
-      values[mucUuTien] = config?.diem_so || 0;
+    ['thap', 'trung_binh', 'cao'].forEach((mucUuTien) => {
+      const config = diemMucUuTien.find((d) => d.muc_uu_tien === mucUuTien);
+      const n = config?.diem_so;
+      values[mucUuTien] = n !== undefined && n !== null ? String(n) : '0';
     });
     setDiemValues(values);
   }, [diemMucUuTien]);
 
   const handleSave = async (mucUuTien) => {
-    await onUpdate(mucUuTien, diemValues[mucUuTien]);
+    const raw = String(diemValues[mucUuTien] ?? '').trim();
+    const num = raw === '' ? 0 : parseFloat(raw.replace(',', '.'));
+    if (Number.isNaN(num)) {
+      alert('Vui lòng nhập số điểm hợp lệ');
+      return;
+    }
+    if (num < 0) {
+      alert('Điểm không được âm');
+      return;
+    }
+    await onUpdate(mucUuTien, num);
     onReload();
   };
 
@@ -46,9 +58,12 @@ function DiemConfigModal({ diemMucUuTien, onClose, onUpdate, onReload, getMucUuT
                 <input
                   type="number"
                   min="0"
-                  step="0.5"
+                  step="any"
+                  inputMode="decimal"
                   value={diemValues[mucUuTien]}
-                  onChange={(e) => setDiemValues(prev => ({ ...prev, [mucUuTien]: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setDiemValues((prev) => ({ ...prev, [mucUuTien]: e.target.value }))
+                  }
                   className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm"
                 />
                 <button
@@ -76,6 +91,7 @@ export default function KPIPage() {
   const [selectedNhanVien, setSelectedNhanVien] = useState(null);
   const [selectedThang, setSelectedThang] = useState(new Date().getMonth() + 1);
   const [selectedNam, setSelectedNam] = useState(new Date().getFullYear());
+  const [isCalculating, setIsCalculating] = useState(false);
   
   // Pagination state
   const [page, setPage] = useState(1);
@@ -142,6 +158,7 @@ export default function KPIPage() {
     }
 
     try {
+      setIsCalculating(true);
       await kpiAPI.tinhKPI({
         id_tai_khoan: selectedNhanVien,
         thang: selectedThang,
@@ -153,6 +170,32 @@ export default function KPIPage() {
       loadKPIs();
     } catch (error) {
       alert('Lỗi: ' + error.message);
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  const handleTinhKPITatCa = async () => {
+    if (!selectedThang || !selectedNam) {
+      alert('Vui lòng chọn đầy đủ tháng và năm');
+      return;
+    }
+
+    try {
+      setIsCalculating(true);
+      const response = await kpiAPI.tinhKPITatCa({
+        thang: selectedThang,
+        nam: selectedNam,
+      });
+      const daTinh = response?.data?.so_kpi_da_tinh ?? 0;
+      alert(`Đã tính KPI cho ${daTinh} nhân viên`);
+      setShowTinhKPIModal(false);
+      setSelectedNhanVien(null);
+      loadKPIs();
+    } catch (error) {
+      alert('Lỗi: ' + error.message);
+    } finally {
+      setIsCalculating(false);
     }
   };
 
@@ -543,10 +586,19 @@ export default function KPIPage() {
                 </button>
                 <button
                   onClick={handleTinhKPI}
+                  disabled={isCalculating}
                   className="flex items-center gap-2 px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#4A90E2]/90 transition-colors text-sm font-semibold"
                 >
                   <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>calculate</span>
-                  <span>Tính KPI</span>
+                  <span>{isCalculating ? 'Đang tính...' : 'Tính KPI'}</span>
+                </button>
+                <button
+                  onClick={handleTinhKPITatCa}
+                  disabled={isCalculating}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>groups</span>
+                  <span>{isCalculating ? 'Đang tính...' : 'Tính KPI cho tất cả'}</span>
                 </button>
               </div>
             </div>

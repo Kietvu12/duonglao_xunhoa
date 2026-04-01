@@ -1,8 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
+import PublicLayout from './components/PublicLayout'
 import HomePage from './pages/HomePage'
 import AboutUs from './pages/AboutUs'
 import Service from './pages/Service'
@@ -52,55 +51,13 @@ function App() {
       <Router basename="/">
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={
-            <>
-              <Navbar />
-              <HomePage />
-              <Footer />
-            </>
-          } />
-          <Route path="/ve-chung-toi" element={
-            <>
-              <Navbar />
-              <AboutUs />
-              <Footer />
-            </>
-          } />
-          <Route path="/dich-vu" element={
-            <>
-              <Navbar />
-              <Service />
-              <Footer />
-            </>
-          } />
-          <Route path="/tien-ich" element={
-            <>
-              <Navbar />
-              <Amenity />
-              <Footer />
-            </>
-          } />
-          <Route path="/blog" element={
-            <>
-              <Navbar />
-              <Blog />
-              <Footer />
-            </>
-          } />
-          <Route path="/lien-he" element={
-            <>
-              <Navbar />
-              <Contact />
-              <Footer />
-            </>
-          } />
-          <Route path="/su-kien/:id" element={
-            <>
-              <Navbar />
-              <EventDetail />
-              <Footer />
-            </>
-          } />
+          <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
+          <Route path="/ve-chung-toi" element={<PublicLayout><AboutUs /></PublicLayout>} />
+          <Route path="/dich-vu" element={<PublicLayout><Service /></PublicLayout>} />
+          <Route path="/tien-ich" element={<PublicLayout><Amenity /></PublicLayout>} />
+          <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
+          <Route path="/lien-he" element={<PublicLayout><Contact /></PublicLayout>} />
+          <Route path="/su-kien/:id" element={<PublicLayout><EventDetail /></PublicLayout>} />
           
           {/* Admin routes */}
           <Route path="/admin/login" element={<Login />} />

@@ -759,6 +759,7 @@ CREATE TABLE `lich_tham_benh` (
   `ngay` date DEFAULT NULL,
   `khung_gio` enum('8_10','14_16','18_20') DEFAULT NULL,
   `loai` enum('gap_mat','goi_dien') DEFAULT 'gap_mat',
+  `so_dien_thoai` varchar(20) DEFAULT NULL,
   `so_nguoi_di_cung` int(11) DEFAULT NULL,
   `ghi_chu` text DEFAULT NULL,
   `trang_thai` enum('cho_duyet','da_duyet','tu_choi') DEFAULT NULL,
@@ -1113,7 +1114,8 @@ CREATE TABLE `nguoi_than_benh_nhan` (
   `la_nguoi_lien_he_chinh` tinyint(1) DEFAULT 0,
   `ngay_tao` datetime DEFAULT current_timestamp(),
   `ngay_cap_nhat` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `avatar` text DEFAULT NULL
+  `avatar` text DEFAULT NULL,
+  `is_delete` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

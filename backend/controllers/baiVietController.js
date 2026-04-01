@@ -21,6 +21,37 @@ function extractImagesFromHTML(htmlContent) {
   return imageUrls;
 }
 
+function slugifyText(value = '') {
+  const normalized = String(value)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+
+  return normalized || 'bai-viet';
+}
+
+async function generateUniqueSlug(baseSlug) {
+  let candidateSlug = baseSlug;
+  let index = 1;
+
+  while (true) {
+    const [existing] = await pool.execute(
+      'SELECT id FROM bai_viet WHERE slug = ? LIMIT 1',
+      [candidateSlug]
+    );
+
+    if (existing.length === 0) {
+      return candidateSlug;
+    }
+
+    candidateSlug = `${baseSlug}-${index}`;
+    index += 1;
+  }
+}
+
 export const getAllBaiViet = async (req, res, next) => {
   try {
     const { page = 1, limit = 9, search, category, trang_thai, start_date, end_date } = req.query;
@@ -161,26 +192,9 @@ export const createBaiViet = async (req, res, next) => {
       });
     }
 
-    // Generate slug if not provided
-    const finalSlug = slug || tieu_de.toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd').replace(/Đ/g, 'D')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-
-    // Check if slug exists
-    const [existing] = await pool.execute(
-      'SELECT id FROM bai_viet WHERE slug = ?',
-      [finalSlug]
-    );
-
-    if (existing.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Slug đã tồn tại'
-      });
-    }
+    // Always generate a unique slug to avoid create conflicts.
+    const requestedSlug = slugifyText(slug || tieu_de);
+    const finalSlug = await generateUniqueSlug(requestedSlug);
 
     // Ensure all undefined values are converted to null for SQL
     // Convert empty strings to null for optional fields

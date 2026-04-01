@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   tinhVaTaoKPI,
+  tinhVaTaoKPITatCa,
   getAllKPI,
   getMyKPI,
   updateDiemMucUuTien,
@@ -20,6 +21,7 @@ router.put('/diem-muc-uu-tien', authorize('super_admin', 'quan_ly_y_te', 'quan_l
 
 // Tính và tạo KPI (chỉ admin)
 router.post('/tinh-kpi', authorize('super_admin', 'quan_ly_y_te', 'quan_ly_nhan_su'), tinhVaTaoKPI);
+router.post('/tinh-kpi-tat-ca', authorize('super_admin', 'quan_ly_y_te', 'quan_ly_nhan_su'), tinhVaTaoKPITatCa);
 
 // Lấy danh sách KPI (admin có thể xem tất cả, nhân viên chỉ xem của mình)
 router.get('/', authorize('super_admin', 'quan_ly_y_te', 'quan_ly_nhan_su', 'dieu_duong_truong', 'dieu_duong'), getAllKPI);

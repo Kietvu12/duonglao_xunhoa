@@ -106,9 +106,11 @@ export const getNhanVienById = async (req, res, next) => {
               hsnv.id_tai_khoan, hsnv.chuc_vu, hsnv.bang_cap, hsnv.luong_co_ban, hsnv.gioi_thieu, 
               hsnv.chuyen_mon, hsnv.so_nam_kinh_nghiem, hsnv.danh_gia, 
               hsnv.so_benh_nhan_da_dieu_tri, hsnv.noi_cong_tac, hsnv.lich_lam_viec,
-              hsnv.cccd, hsnv.so_bhyt, hsnv.dia_chi, hsnv.avatar
+              hsnv.cccd, hsnv.so_bhyt, hsnv.dia_chi, hsnv.avatar,
+              mhsnv.anh_cccd, mhsnv.anh_bangdh, mhsnv.anh_bhyt, mhsnv.anh_cv
        FROM ho_so_nhan_vien hsnv
        INNER JOIN tai_khoan tk ON hsnv.id_tai_khoan = tk.id
+       LEFT JOIN media_ho_so_nhan_vien mhsnv ON hsnv.id = mhsnv.id_nhan_vien
        WHERE hsnv.id = ? AND tk.da_xoa = 0`,
       [id]
     );
@@ -198,7 +200,7 @@ export const createNhanVien = async (req, res, next) => {
 
     const ngayTaoHoSoVN = getNowForDB();
     const ngayBatDauVN = getTodayVN();
-    await pool.execute(
+    const [hoSoResult] = await pool.execute(
       `INSERT INTO ho_so_nhan_vien (id_tai_khoan, chuc_vu, bang_cap, luong_co_ban, gioi_thieu, 
        chuyen_mon, so_nam_kinh_nghiem, danh_gia, so_benh_nhan_da_dieu_tri, noi_cong_tac, lich_lam_viec, 
        cccd, so_bhyt, dia_chi, ngay_bat_dau, ngay_tao)
@@ -215,7 +217,7 @@ export const createNhanVien = async (req, res, next) => {
       loai: 'he_thong',
       tieu_de: 'Nhân sự mới',
       noi_dung: `Nhân viên mới "${ho_ten}" đã được thêm vào hệ thống với vai trò ${vai_tro}`,
-      link: `/admin/nhan-vien/${result.insertId}`
+      link: `/admin/nhan-vien/${hoSoResult.insertId}`
     }).catch(err => {
       console.error('Error sending notification (non-blocking):', err);
     });
@@ -223,7 +225,7 @@ export const createNhanVien = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: 'Thêm nhân viên thành công',
-      data: { id: result.insertId }
+      data: { id: hoSoResult.insertId, id_tai_khoan: result.insertId }
     });
   } catch (error) {
     next(error);
@@ -293,15 +295,15 @@ export const updateNhanVien = async (req, res, next) => {
     const profileFields = [];
     const profileValues = [];
 
-    if (chuc_vu !== undefined) {
+    if (chuc_vu !== undefined && chuc_vu !== '') {
       profileFields.push('chuc_vu = ?');
       profileValues.push(chuc_vu);
     }
-    if (bang_cap !== undefined) {
+    if (bang_cap !== undefined && bang_cap !== '') {
       profileFields.push('bang_cap = ?');
       profileValues.push(bang_cap);
     }
-    if (luong_co_ban !== undefined) {
+    if (luong_co_ban !== undefined && luong_co_ban !== '') {
       profileFields.push('luong_co_ban = ?');
       profileValues.push(luong_co_ban);
     }
@@ -313,7 +315,7 @@ export const updateNhanVien = async (req, res, next) => {
       profileFields.push('chuyen_mon = ?');
       profileValues.push(chuyen_mon === '' ? null : chuyen_mon);
     }
-    if (so_nam_kinh_nghiem !== undefined) {
+    if (so_nam_kinh_nghiem !== undefined && so_nam_kinh_nghiem !== '') {
       profileFields.push('so_nam_kinh_nghiem = ?');
       profileValues.push(so_nam_kinh_nghiem);
     }
@@ -321,7 +323,7 @@ export const updateNhanVien = async (req, res, next) => {
       profileFields.push('danh_gia = ?');
       profileValues.push(danh_gia === '' ? null : danh_gia);
     }
-    if (so_benh_nhan_da_dieu_tri !== undefined) {
+    if (so_benh_nhan_da_dieu_tri !== undefined && so_benh_nhan_da_dieu_tri !== '') {
       profileFields.push('so_benh_nhan_da_dieu_tri = ?');
       profileValues.push(so_benh_nhan_da_dieu_tri);
     }
@@ -333,13 +335,13 @@ export const updateNhanVien = async (req, res, next) => {
       profileFields.push('lich_lam_viec = ?');
       profileValues.push(lich_lam_viec === '' ? null : lich_lam_viec);
     }
-    if (cccd !== undefined) {
+    if (cccd !== undefined && cccd !== '') {
       profileFields.push('cccd = ?');
-      profileValues.push(cccd === '' ? null : cccd);
+      profileValues.push(cccd);
     }
-    if (so_bhyt !== undefined) {
+    if (so_bhyt !== undefined && so_bhyt !== '') {
       profileFields.push('so_bhyt = ?');
-      profileValues.push(so_bhyt === '' ? null : so_bhyt);
+      profileValues.push(so_bhyt);
     }
     if (dia_chi !== undefined) {
       profileFields.push('dia_chi = ?');

@@ -44,13 +44,19 @@ export default function CongViecPage() {
     loadNhanViens();
   }, [page, limit]);
 
-  const loadCongViecs = async () => {
+  /** `opts` để sau khi tạo mới gọi page=1 (tránh state `page` cũ trong closure) */
+  const loadCongViecs = async (opts = {}) => {
+    const usePage = opts.page !== undefined ? opts.page : page;
+    const useLimit = opts.limit !== undefined ? opts.limit : limit;
     try {
       setLoading(true);
-      const response = await congViecAPI.getAll({ page, limit });
+      const response = await congViecAPI.getAll({ page: usePage, limit: useLimit });
       setCongViecs(response.data || []);
-      setTotal(response.total || response.pagination?.total || 0);
-      setTotalPages(response.totalPages || response.pagination?.totalPages || Math.ceil((response.total || 0) / limit));
+      const p = response.pagination;
+      const t = p?.total ?? response.total ?? 0;
+      const tp = p?.totalPages ?? response.totalPages ?? (t > 0 ? Math.ceil(t / useLimit) : 0);
+      setTotal(t);
+      setTotalPages(tp);
     } catch (error) {
       console.error('Error loading cong viecs:', error);
       alert('Lỗi khi tải danh sách công việc: ' + error.message);
@@ -89,16 +95,19 @@ export default function CongViecPage() {
       if (editing) {
         await congViecAPI.update(editing.id, submitData);
         alert('Cập nhật công việc thành công');
+        setShowModal(false);
+        setEditing(null);
+        resetForm();
+        await loadCongViecs();
       } else {
         await congViecAPI.create(submitData);
         alert('Tạo công việc thành công');
+        setShowModal(false);
+        setEditing(null);
+        resetForm();
+        setPage(1);
+        await loadCongViecs({ page: 1 });
       }
-      setShowModal(false);
-      setEditing(null);
-      resetForm();
-      loadCongViecs();
-      // Reset về trang 1 sau khi tạo mới
-      setPage(1);
     } catch (error) {
       alert('Lỗi: ' + error.message);
     }
@@ -225,6 +234,17 @@ export default function CongViecPage() {
     )
     .slice(0, 5);
 
+  const effectiveTotalPages =
+    total > 0 ? Math.max(1, totalPages || Math.ceil(total / limit)) : 1;
+  const safePage = Math.min(Math.max(1, page), effectiveTotalPages);
+  const fromItem = total > 0 ? ((safePage - 1) * limit) + 1 : 0;
+  const toItem = total > 0 ? Math.min(safePage * limit, total) : 0;
+  const maxPageButtons = Math.min(5, effectiveTotalPages);
+  const startPage = effectiveTotalPages <= 5
+    ? 1
+    : Math.max(1, Math.min(safePage - 2, effectiveTotalPages - 4));
+  const pageNumbers = Array.from({ length: maxPageButtons }, (_, i) => startPage + i);
+
   return (
     <div className="space-y-6 font-raleway p-6 lg:p-8">
       {/* Header */}
@@ -333,7 +353,7 @@ export default function CongViecPage() {
                     </td>
                     <td className="px-6 py-5 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        {!cv.ten_dieu_duong && (
+                        {(!cv.ten_dieu_duong || !cv.ten_benh_nhan) && (
                           <button
                             onClick={() => handleOpenPhanCongModal(cv)}
                             className="flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-xs font-semibold"
@@ -397,42 +417,31 @@ export default function CongViecPage() {
             {/* Page info */}
             <div className="text-sm text-gray-600">
               Hiển thị <span className="font-semibold text-gray-900">
-                {((page - 1) * limit) + 1}
+                {fromItem}
               </span> - <span className="font-semibold text-gray-900">
-                {Math.min(page * limit, total)}
+                {toItem}
               </span> trong tổng số <span className="font-semibold text-gray-900">{total}</span> công việc
             </div>
 
             {/* Pagination buttons */}
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setPage(prev => Math.max(1, prev - 1))}
-                disabled={page === 1}
+                type="button"
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                disabled={safePage <= 1}
                 className="px-3 py-1.5 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-semibold"
               >
                 <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>chevron_left</span>
               </button>
-              
-              {/* Page numbers */}
               <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (page <= 3) {
-                    pageNum = i + 1;
-                  } else if (page >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = page - 2 + i;
-                  }
-                  
+                {pageNumbers.map((pageNum) => {
                   return (
                     <button
+                      type="button"
                       key={pageNum}
                       onClick={() => setPage(pageNum)}
                       className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
-                        page === pageNum
+                        safePage === pageNum
                           ? 'bg-[#4A90E2] text-white'
                           : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                       }`}
@@ -442,10 +451,10 @@ export default function CongViecPage() {
                   );
                 })}
               </div>
-
               <button
-                onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={page === totalPages}
+                type="button"
+                onClick={() => setPage((prev) => Math.min(effectiveTotalPages, prev + 1))}
+                disabled={safePage >= effectiveTotalPages}
                 className="px-3 py-1.5 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-semibold"
               >
                 <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>chevron_right</span>
@@ -673,7 +682,7 @@ export default function CongViecPage() {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Điều dưỡng *
+                  Điều dưỡng (tùy chọn)
                 </label>
                 <div className="relative">
                   <input
@@ -721,7 +730,7 @@ export default function CongViecPage() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Bệnh nhân *
+                  Bệnh nhân (tùy chọn)
                 </label>
                 <div className="relative">
                   <input
@@ -780,8 +789,9 @@ export default function CongViecPage() {
                   Hủy
                 </button>
                 <button
+                  type="button"
                   onClick={handlePhanCong}
-                  disabled={!phanCongForm.id_dieu_duong || !phanCongForm.id_benh_nhan}
+                  disabled={!phanCongForm.id_dieu_duong && !phanCongForm.id_benh_nhan}
                   className="flex items-center gap-2 px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#4A90E2]/90 transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>assignment</span>

@@ -170,77 +170,39 @@ const BlogDetail = ({ post, onBack }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="mb-4">
-          <span className="text-base md:text-lg font-raleway-semibold text-[#1e4028] hover:text-primary cursor-pointer" onClick={onBack}>
+          <span className="text-base md:text-lg text-[#1e4028] hover:text-primary cursor-pointer" onClick={onBack}>
             Blog
           </span>
           <span className="mx-2 text-gray-400">/</span>
-          <span className="text-base md:text-lg font-raleway-semibold text-[#1e4028] hover:text-primary cursor-pointer" onClick={onBack}>
+          <span className="text-base md:text-lg text-[#1e4028] hover:text-primary cursor-pointer" onClick={onBack}>
             {getCategoryDisplayName(postData.category || 'Khác')}
           </span>
           <span className="mx-2 text-gray-400">/</span>
-          <span className="text-base md:text-lg font-raleway-semibold text-[#1e4028]">{postData.tieu_de || postData.title}</span>
+          <span className="text-base md:text-lg text-[#1e4028]">{postData.tieu_de || postData.title}</span>
         </nav>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-          {/* Left Column - Title, Date, Short Description */}
-          <div className="lg:col-span-5 space-y-6">
+        {/* Main Content */}
+        <div className="space-y-6">
             {/* Title - Very Large */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-raleway-bold text-[#242525] leading-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-[#242525] leading-tight"style={{ 
+                  color: '#2D2D2D', 
+                  fontFamily: "'Playfair Display', serif",
+                  lineHeight: '1.3',
+                  paddingTop: '0.5rem',
+                  paddingBottom: '0.5rem'
+                }}>
               {postData.tieu_de || postData.title}
             </h1>
 
             {/* Date */}
-            <p className="text-lg md:text-xl font-raleway-light text-black">
+            <p className="text-lg md:text-xl text-black">
               {formatDate(postData.ngay_dang || postData.ngay_tao || postData.date)}
             </p>
 
             {/* Short Description */}
-            <p className="text-base md:text-lg lg:text-xl font-raleway-regular leading-relaxed text-justify" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
+            <p className="text-base md:text-lg lg:text-xl leading-relaxed text-justify" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
               {getShortDescription()}
             </p>
-          </div>
-
-          {/* Right Column - Images */}
-          <div className="lg:col-span-7">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              {/* Main Large Image - Vertical (2/3 width) */}
-              <div className="md:col-span-3 w-full h-[400px] md:h-[500px] lg:h-[685px] rounded-lg overflow-hidden">
-                <img
-                  src={getMainImage()}
-                  alt={postData.tieu_de || postData.title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.src = outside1;
-                  }}
-                />
-              </div>
-
-              {/* Two Small Images Stacked (1/3 width) */}
-              <div className="md:col-span-2 flex flex-col gap-4 h-[400px] md:h-[500px] lg:h-[685px]">
-                <div className="flex-1 w-full rounded-lg overflow-hidden">
-                  <img
-                    src={getThumbnail1()}
-                    alt={`${postData.tieu_de || postData.title} thumbnail 1`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.src = outside2;
-                    }}
-                  />
-                </div>
-                <div className="flex-1 w-full rounded-lg overflow-hidden">
-                  <img
-                    src={getThumbnail2()}
-                    alt={`${postData.tieu_de || postData.title} thumbnail 2`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.src = outside2;
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Content Section */}
@@ -249,7 +211,7 @@ const BlogDetail = ({ post, onBack }) => {
             {/* Content from API */}
             <div className="max-w-7xl">
               <div 
-                className="text-base md:text-lg lg:text-xl text-black font-raleway-regular leading-relaxed prose prose-lg max-w-none blog-content text-justify"
+                className="text-base md:text-lg lg:text-xl text-black leading-relaxed prose prose-lg max-w-none blog-content text-justify"
                 style={{ 
                   lineHeight: '1.8',
                   wordSpacing: '0.1em',

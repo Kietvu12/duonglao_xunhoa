@@ -254,6 +254,65 @@ export const tinhVaTaoKPI = async (req, res, next) => {
 };
 
 /**
+ * API: Tính và lưu KPI cho tất cả nhân viên trong một tháng/năm
+ */
+export const tinhVaTaoKPITatCa = async (req, res, next) => {
+  try {
+    const now = new Date();
+    const thang = Number(req.body?.thang || now.getMonth() + 1);
+    const nam = Number(req.body?.nam || now.getFullYear());
+
+    if (!Number.isInteger(thang) || thang < 1 || thang > 12 || !Number.isInteger(nam) || nam < 2000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tháng hoặc năm không hợp lệ'
+      });
+    }
+
+    const [nhanViens] = await pool.execute(
+      `SELECT DISTINCT tk.id AS id_tai_khoan
+       FROM tai_khoan tk
+       INNER JOIN ho_so_nhan_vien hsnv ON hsnv.id_tai_khoan = tk.id
+       WHERE tk.da_xoa = 0
+         AND tk.vai_tro IN ('dieu_duong', 'dieu_duong_truong', 'quan_ly_y_te', 'quan_ly_nhan_su')`
+    );
+
+    if (nhanViens.length === 0) {
+      return res.json({
+        success: true,
+        message: 'Không có nhân viên để tính KPI',
+        data: {
+          thang,
+          nam,
+          so_nhan_vien_da_xu_ly: 0,
+          so_kpi_da_tinh: 0
+        }
+      });
+    }
+
+    let soKpiDaTinh = 0;
+    for (const nv of nhanViens) {
+      const kpiData = await tinhKPI(nv.id_tai_khoan, thang, nam);
+      await luuKPI(kpiData);
+      soKpiDaTinh++;
+    }
+
+    res.json({
+      success: true,
+      message: 'Tính KPI cho tất cả nhân viên thành công',
+      data: {
+        thang,
+        nam,
+        so_nhan_vien_da_xu_ly: nhanViens.length,
+        so_kpi_da_tinh: soKpiDaTinh
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * API: Lấy danh sách KPI
  */
 export const getAllKPI = async (req, res, next) => {
@@ -415,9 +474,31 @@ export const updateDiemMucUuTien = async (req, res, next) => {
       );
     }
 
+    // Sau khi đổi cấu hình điểm, tính lại toàn bộ KPI đã có
+    const [kpiThangNamList] = await pool.execute(
+      'SELECT DISTINCT thang, nam FROM kpi_nhan_vien'
+    );
+
+    let soBanGhiDaTinhLai = 0;
+    for (const item of kpiThangNamList) {
+      const [taiKhoans] = await pool.execute(
+        'SELECT DISTINCT id_tai_khoan FROM kpi_nhan_vien WHERE thang = ? AND nam = ?',
+        [item.thang, item.nam]
+      );
+
+      for (const tk of taiKhoans) {
+        const kpiData = await tinhKPI(tk.id_tai_khoan, item.thang, item.nam);
+        await luuKPI(kpiData);
+        soBanGhiDaTinhLai++;
+      }
+    }
+
     res.json({
       success: true,
-      message: 'Cập nhật điểm số thành công'
+      message: 'Cập nhật điểm số thành công và đã tính lại KPI',
+      data: {
+        so_ban_ghi_da_tinh_lai: soBanGhiDaTinhLai
+      }
     });
   } catch (error) {
     next(error);

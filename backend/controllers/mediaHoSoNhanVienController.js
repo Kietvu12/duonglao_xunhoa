@@ -84,21 +84,21 @@ export const createMediaHoSoNhanVien = async (req, res, next) => {
       const updateFields = [];
       const updateValues = [];
 
-      if (anh_cccd !== undefined) {
+      if (anh_cccd !== undefined && anh_cccd !== '') {
         updateFields.push('anh_cccd = ?');
-        updateValues.push(anh_cccd || null);
+        updateValues.push(anh_cccd);
       }
-      if (anh_bangdh !== undefined) {
+      if (anh_bangdh !== undefined && anh_bangdh !== '') {
         updateFields.push('anh_bangdh = ?');
-        updateValues.push(anh_bangdh || null);
+        updateValues.push(anh_bangdh);
       }
-      if (anh_bhyt !== undefined) {
+      if (anh_bhyt !== undefined && anh_bhyt !== '') {
         updateFields.push('anh_bhyt = ?');
-        updateValues.push(anh_bhyt || null);
+        updateValues.push(anh_bhyt);
       }
-      if (anh_cv !== undefined) {
+      if (anh_cv !== undefined && anh_cv !== '') {
         updateFields.push('anh_cv = ?');
-        updateValues.push(anh_cv || null);
+        updateValues.push(anh_cv);
       }
 
       if (updateFields.length > 0) {
@@ -154,24 +154,24 @@ export const updateMediaHoSoNhanVien = async (req, res, next) => {
       updateValues.push(id_nhan_vien);
     }
 
-    if (anh_cccd !== undefined) {
+    if (anh_cccd !== undefined && anh_cccd !== '') {
       updateFields.push('anh_cccd = ?');
-      updateValues.push(anh_cccd === '' ? null : anh_cccd);
+      updateValues.push(anh_cccd);
     }
 
-    if (anh_bangdh !== undefined) {
+    if (anh_bangdh !== undefined && anh_bangdh !== '') {
       updateFields.push('anh_bangdh = ?');
-      updateValues.push(anh_bangdh === '' ? null : anh_bangdh);
+      updateValues.push(anh_bangdh);
     }
 
-    if (anh_bhyt !== undefined) {
+    if (anh_bhyt !== undefined && anh_bhyt !== '') {
       updateFields.push('anh_bhyt = ?');
-      updateValues.push(anh_bhyt === '' ? null : anh_bhyt);
+      updateValues.push(anh_bhyt);
     }
 
-    if (anh_cv !== undefined) {
+    if (anh_cv !== undefined && anh_cv !== '') {
       updateFields.push('anh_cv = ?');
-      updateValues.push(anh_cv === '' ? null : anh_cv);
+      updateValues.push(anh_cv);
     }
 
     if (updateFields.length === 0) {

@@ -28,7 +28,6 @@ router.use(authenticate);
 
 // Nhân viên
 router.get('/', authorize('super_admin', 'quan_ly_nhan_su', 'dieu_duong_truong'), getAllNhanVien);
-router.get('/:id', authorize('super_admin', 'quan_ly_nhan_su', 'dieu_duong_truong'), getNhanVienById);
 router.post('/', authorize('super_admin', 'quan_ly_nhan_su'), createNhanVien);
 router.put('/:id', authorize('super_admin', 'quan_ly_nhan_su'), updateNhanVien);
 
@@ -49,6 +48,9 @@ router.post('/media-ho-so/upload', authorize('super_admin', 'quan_ly_nhan_su'), 
 router.post('/media-ho-so', authorize('super_admin', 'quan_ly_nhan_su'), createMediaHoSoNhanVien);
 router.put('/media-ho-so/:id', authorize('super_admin', 'quan_ly_nhan_su'), updateMediaHoSoNhanVien);
 router.delete('/media-ho-so/:id', authorize('super_admin', 'quan_ly_nhan_su'), deleteMediaHoSoNhanVien);
+
+// Route động đặt sau cùng để tránh bắt nhầm các route tĩnh ở trên
+router.get('/:id', authorize('super_admin', 'quan_ly_nhan_su', 'dieu_duong_truong'), getNhanVienById);
 
 export default router;
 

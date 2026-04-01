@@ -16,12 +16,17 @@ export default function LichThamBenhPage() {
   const [filterNgayBatDau, setFilterNgayBatDau] = useState('');
   const [filterNgayKetThuc, setFilterNgayKetThuc] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [formData, setFormData] = useState({
     id_benh_nhan: '',
     id_nguoi_than: '',
     ngay: '',
     khung_gio: '8_10',
     loai: 'gap_mat',
+    so_dien_thoai: '',
     so_nguoi_di_cung: '',
     ghi_chu: '',
     trang_thai: 'cho_duyet',
@@ -81,7 +86,11 @@ export default function LichThamBenhPage() {
 
   useEffect(() => {
     loadLichThamBenhs();
-  }, [search, filterTrangThai, filterBenhNhan, filterKhungGio, filterNgayBatDau, filterNgayKetThuc]);
+  }, [search, filterTrangThai, filterBenhNhan, filterKhungGio, filterNgayBatDau, filterNgayKetThuc, currentPage, itemsPerPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterTrangThai, filterBenhNhan, filterKhungGio, filterNgayBatDau, filterNgayKetThuc, itemsPerPage]);
 
   // Load danh sách người thân khi chọn bệnh nhân
   useEffect(() => {
@@ -98,8 +107,8 @@ export default function LichThamBenhPage() {
     try {
       setLoading(true);
       const params = {
-        page: 1,
-        limit: 1000,
+        page: currentPage,
+        limit: itemsPerPage,
         ...(search ? { search } : {}),
         ...(filterTrangThai ? { trang_thai: filterTrangThai } : {}),
         ...(filterBenhNhan ? { id_benh_nhan: filterBenhNhan } : {}),
@@ -109,6 +118,8 @@ export default function LichThamBenhPage() {
       };
       const response = await lichThamBenhAPI.getAll(params);
       setLichThamBenhs(response.data || []);
+      setTotalItems(response.pagination?.total || 0);
+      setTotalPages(response.pagination?.totalPages || 0);
     } catch (error) {
       console.error('Error loading lich tham benhs:', error);
       alert('Lỗi khi tải danh sách lịch thăm khám: ' + error.message);
@@ -127,6 +138,11 @@ export default function LichThamBenhPage() {
   };
 
   const hasActiveFilters = search || filterTrangThai || filterBenhNhan || filterKhungGio || filterNgayBatDau || filterNgayKetThuc;
+
+  const safeTotalPages = Math.max(1, totalPages);
+  const currentPageSafe = Math.min(currentPage, safeTotalPages);
+  const startIndex = totalItems === 0 ? 0 : (currentPageSafe - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
   const loadBenhNhans = async () => {
     try {
@@ -160,6 +176,10 @@ export default function LichThamBenhPage() {
     }
     if (!formData.id_nguoi_than || !selectedNguoiThan) {
       alert('Vui lòng chọn người thân');
+      return;
+    }
+    if (formData.loai === 'goi_dien' && !formData.so_dien_thoai?.trim()) {
+      alert('Vui lòng nhập số điện thoại khi chọn gọi điện');
       return;
     }
     
@@ -253,6 +273,7 @@ export default function LichThamBenhPage() {
       ngay: ngayFormatted,
       khung_gio: ltb.khung_gio || '8_10',
       loai: ltb.loai || 'gap_mat',
+      so_dien_thoai: ltb.so_dien_thoai || '',
       so_nguoi_di_cung: ltb.so_nguoi_di_cung ? String(ltb.so_nguoi_di_cung) : '',
       ghi_chu: ltb.ghi_chu || '',
       trang_thai: ltb.trang_thai || 'cho_duyet',
@@ -278,6 +299,7 @@ export default function LichThamBenhPage() {
       ngay: '',
       khung_gio: '8_10',
       loai: 'gap_mat',
+      so_dien_thoai: '',
       so_nguoi_di_cung: '',
       ghi_chu: '',
       trang_thai: 'cho_duyet',
@@ -485,6 +507,7 @@ export default function LichThamBenhPage() {
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Bệnh nhân</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Người thân</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Số điện thoại</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Ngày thăm</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Khung giờ</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Loại</th>
@@ -505,6 +528,9 @@ export default function LichThamBenhPage() {
                       </div>
                     </td>
                     <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-900">{ltb.ten_nguoi_than || '-'}</td>
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-900">
+                      {ltb.so_dien_thoai || '-'}
+                    </td>
                     <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-900">
                       {ltb.ngay ? new Date(ltb.ngay).toLocaleDateString('vi-VN') : '-'}
                     </td>
@@ -573,6 +599,50 @@ export default function LichThamBenhPage() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {!loading && totalItems > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-gray-600">
+              Hiển thị {totalItems === 0 ? 0 : startIndex + 1}-{endIndex} / {totalItems} lịch thăm
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-600">Mỗi trang:</label>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                className="px-2 py-1.5 border border-gray-200 rounded-lg bg-white text-sm"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPageSafe <= 1}
+                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                Trước
+              </button>
+              <span className="text-sm text-gray-700 min-w-[80px] text-center">
+                Trang {currentPageSafe}/{safeTotalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(safeTotalPages, p + 1))}
+                disabled={currentPageSafe >= safeTotalPages}
+                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                Sau
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal */}
       {showModal && (
@@ -837,13 +907,35 @@ export default function LichThamBenhPage() {
                   <select
                     required
                     value={formData.loai}
-                    onChange={(e) => setFormData({ ...formData, loai: e.target.value })}
+                    onChange={(e) => {
+                      const nextLoai = e.target.value;
+                      setFormData({
+                        ...formData,
+                        loai: nextLoai,
+                        so_dien_thoai: nextLoai === 'goi_dien' ? formData.so_dien_thoai : ''
+                      });
+                    }}
                     className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-white focus:outline-0 focus:ring-2 focus:ring-[#4A90E2]/50 text-gray-800"
                   >
                     <option value="gap_mat">Gặp mặt</option>
                     <option value="goi_dien">Gọi điện</option>
                   </select>
                 </div>
+                {formData.loai === 'goi_dien' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Số điện thoại *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.so_dien_thoai}
+                      onChange={(e) => setFormData({ ...formData, so_dien_thoai: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-white focus:outline-0 focus:ring-2 focus:ring-[#4A90E2]/50 text-gray-800"
+                      placeholder="Nhập số điện thoại để gọi"
+                    />
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Số người đi cùng

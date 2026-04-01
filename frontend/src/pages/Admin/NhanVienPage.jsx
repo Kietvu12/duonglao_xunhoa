@@ -253,32 +253,40 @@ export default function NhanVienPage() {
     }
   };
 
-  const loadMediaHoSo = async (idHoSoNhanVien) => {
+  const loadMediaHoSo = async (idHoSoNhanVien, idTaiKhoan = null) => {
     try {
-      // id truyền vào là id của ho_so_nhan_vien
-      const detailResponse = await nhanVienAPI.getById(idHoSoNhanVien);
-      if (detailResponse.data) {
-        // id trong detailResponse.data là id của ho_so_nhan_vien
-        const idNhanVien = detailResponse.data.id; // Đây là id của ho_so_nhan_vien
-        if (idNhanVien) {
-          const response = await nhanVienAPI.getMediaHoSo({ id_nhan_vien: idNhanVien });
-          if (response.data && response.data.length > 0) {
-            setMediaHoSo({
-              anh_cccd: response.data[0].anh_cccd || '',
-              anh_bangdh: response.data[0].anh_bangdh || '',
-              anh_bhyt: response.data[0].anh_bhyt || '',
-              anh_cv: response.data[0].anh_cv || ''
-            });
-          } else {
-            // Reset nếu không có media
-            setMediaHoSo({
-              anh_cccd: '',
-              anh_bangdh: '',
-              anh_bhyt: '',
-              anh_cv: ''
-            });
-          }
-        }
+      const pickLatestMedia = (rows = []) =>
+        rows.find(
+          (row) => row?.anh_cccd || row?.anh_bangdh || row?.anh_bhyt || row?.anh_cv
+        ) || null;
+
+      let mediaRecord = null;
+
+      if (idHoSoNhanVien) {
+        const responseByHoSoId = await nhanVienAPI.getMediaHoSo({ id_nhan_vien: idHoSoNhanVien });
+        mediaRecord = pickLatestMedia(responseByHoSoId.data || []);
+      }
+
+      // Fallback cho dữ liệu cũ từng lưu theo id_tai_khoan
+      if (!mediaRecord && idTaiKhoan) {
+        const responseByTaiKhoanId = await nhanVienAPI.getMediaHoSo({ id_nhan_vien: idTaiKhoan });
+        mediaRecord = pickLatestMedia(responseByTaiKhoanId.data || []);
+      }
+
+      if (mediaRecord) {
+        setMediaHoSo({
+          anh_cccd: mediaRecord.anh_cccd || '',
+          anh_bangdh: mediaRecord.anh_bangdh || '',
+          anh_bhyt: mediaRecord.anh_bhyt || '',
+          anh_cv: mediaRecord.anh_cv || ''
+        });
+      } else {
+        setMediaHoSo({
+          anh_cccd: '',
+          anh_bangdh: '',
+          anh_bhyt: '',
+          anh_cv: ''
+        });
       }
     } catch (error) {
       console.error('Error loading media ho so:', error);
@@ -447,7 +455,7 @@ export default function NhanVienPage() {
     });
     setShowModal(true);
     // Load media hồ sơ
-    await loadMediaHoSo(nv.id);
+    await loadMediaHoSo(nv.id, nv.id_tai_khoan);
   };
 
   const resetForm = () => {

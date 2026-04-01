@@ -756,8 +756,7 @@ export default function BenhNhanDetailPage() {
       // Sử dụng limit lớn để lấy tất cả dữ liệu
       const taiKhoanResponse = await taiKhoanAPI.getAll({ 
         vai_tro: 'nguoi_nha', 
-        limit: 10000,
-        trang_thai: 'active'
+        limit: 10000
       });
       const allTaiKhoans = taiKhoanResponse.data || [];
       
@@ -1530,7 +1529,7 @@ export default function BenhNhanDetailPage() {
       } else {
         const response = await nguoiThanAPI.create(data);
         let message = 'Thêm người thân thành công';
-        if (response.data?.tai_khoan_id) {
+        if (response.data?.tai_khoan_duoc_tao_moi) {
           message += '\n\nTài khoản đã được tạo tự động với:';
           message += '\n- Email/SĐT: ' + (nguoiThanForm.email || nguoiThanForm.so_dien_thoai);
           message += '\n- Mật khẩu mặc định: 123456';

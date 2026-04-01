@@ -25,7 +25,7 @@ export const getPublicHealthAlerts = async (req, res, next) => {
         ha.muc_do,
         ha.noi_dung_canh_bao,
         ha.thoi_gian_do as thoi_gian,
-        ha.updated_at
+        ha.ngay_cap_nhat AS updated_at
       FROM huyet_ap ha
       JOIN benh_nhan bn ON ha.id_benh_nhan = bn.id
       WHERE bn.da_xoa = 0
@@ -34,10 +34,10 @@ export const getPublicHealthAlerts = async (req, res, next) => {
           SELECT id FROM huyet_ap ha2
           WHERE ha2.id_benh_nhan = ha.id_benh_nhan
             AND ha2.muc_do IN ('canh_bao', 'nguy_hiem')
-          ORDER BY ha2.updated_at DESC
+          ORDER BY ha2.ngay_cap_nhat DESC
           LIMIT 1
         )
-      ORDER BY ha.updated_at DESC
+      ORDER BY ha.ngay_cap_nhat DESC
       LIMIT ?`,
       [limit]
     );
@@ -54,7 +54,7 @@ export const getPublicHealthAlerts = async (req, res, next) => {
         nt.muc_do,
         nt.noi_dung_canh_bao,
         nt.thoi_gian_do as thoi_gian,
-        nt.updated_at
+        nt.ngay_cap_nhat AS updated_at
       FROM nhip_tim nt
       JOIN benh_nhan bn ON nt.id_benh_nhan = bn.id
       WHERE bn.da_xoa = 0
@@ -63,10 +63,10 @@ export const getPublicHealthAlerts = async (req, res, next) => {
           SELECT id FROM nhip_tim nt2
           WHERE nt2.id_benh_nhan = nt.id_benh_nhan
             AND nt2.muc_do IN ('canh_bao', 'nguy_hiem')
-          ORDER BY nt2.updated_at DESC
+          ORDER BY nt2.ngay_cap_nhat DESC
           LIMIT 1
         )
-      ORDER BY nt.updated_at DESC
+      ORDER BY nt.ngay_cap_nhat DESC
       LIMIT ?`,
       [limit]
     );
@@ -83,7 +83,7 @@ export const getPublicHealthAlerts = async (req, res, next) => {
         dh.muc_do,
         dh.noi_dung_canh_bao,
         dh.thoi_gian_do as thoi_gian,
-        dh.updated_at
+        dh.ngay_cap_nhat AS updated_at
       FROM duong_huyet dh
       JOIN benh_nhan bn ON dh.id_benh_nhan = bn.id
       WHERE bn.da_xoa = 0
@@ -92,10 +92,10 @@ export const getPublicHealthAlerts = async (req, res, next) => {
           SELECT id FROM duong_huyet dh2
           WHERE dh2.id_benh_nhan = dh.id_benh_nhan
             AND dh2.muc_do IN ('canh_bao', 'nguy_hiem')
-          ORDER BY dh2.updated_at DESC
+          ORDER BY dh2.ngay_cap_nhat DESC
           LIMIT 1
         )
-      ORDER BY dh.updated_at DESC
+      ORDER BY dh.ngay_cap_nhat DESC
       LIMIT ?`,
       [limit]
     );
@@ -112,7 +112,7 @@ export const getPublicHealthAlerts = async (req, res, next) => {
         sp.muc_do,
         sp.noi_dung_canh_bao,
         sp.thoi_gian_do as thoi_gian,
-        sp.updated_at
+        sp.ngay_cap_nhat AS updated_at
       FROM spo2 sp
       JOIN benh_nhan bn ON sp.id_benh_nhan = bn.id
       WHERE bn.da_xoa = 0
@@ -121,10 +121,10 @@ export const getPublicHealthAlerts = async (req, res, next) => {
           SELECT id FROM spo2 sp2
           WHERE sp2.id_benh_nhan = sp.id_benh_nhan
             AND sp2.muc_do IN ('canh_bao', 'nguy_hiem')
-          ORDER BY sp2.updated_at DESC
+          ORDER BY sp2.ngay_cap_nhat DESC
           LIMIT 1
         )
-      ORDER BY sp.updated_at DESC
+      ORDER BY sp.ngay_cap_nhat DESC
       LIMIT ?`,
       [limit]
     );
@@ -141,7 +141,7 @@ export const getPublicHealthAlerts = async (req, res, next) => {
         nd.muc_do,
         nd.noi_dung_canh_bao,
         nd.thoi_gian_do as thoi_gian,
-        nd.updated_at
+        nd.ngay_cap_nhat AS updated_at
       FROM nhiet_do nd
       JOIN benh_nhan bn ON nd.id_benh_nhan = bn.id
       WHERE bn.da_xoa = 0
@@ -150,10 +150,10 @@ export const getPublicHealthAlerts = async (req, res, next) => {
           SELECT id FROM nhiet_do nd2
           WHERE nd2.id_benh_nhan = nd.id_benh_nhan
             AND nd2.muc_do IN ('canh_bao', 'nguy_hiem')
-          ORDER BY nd2.updated_at DESC
+          ORDER BY nd2.ngay_cap_nhat DESC
           LIMIT 1
         )
-      ORDER BY nd.updated_at DESC
+      ORDER BY nd.ngay_cap_nhat DESC
       LIMIT ?`,
       [limit]
     );

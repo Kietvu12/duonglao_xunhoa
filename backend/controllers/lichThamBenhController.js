@@ -67,6 +67,8 @@ export const getAllLichThamBenh = async (req, res, next) => {
       params.push(khung_gio);
     }
 
+    const filterClause = query;
+
     query += ' ORDER BY ltb.ngay DESC, ltb.khung_gio ASC';
     query += buildLimitOffsetClause(limitValue, offset);
 
@@ -80,12 +82,22 @@ export const getAllLichThamBenh = async (req, res, next) => {
       console.log('[Backend] First record:', lichThamBenhs[0]);
     }
 
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM (${filterClause}) AS filtered_lich_tham_benh
+    `;
+    const [countResult] = await pool.execute(countQuery, params);
+    const total = Number(countResult[0]?.total) || 0;
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limitValue);
+
     res.json({
       success: true,
       data: lichThamBenhs,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit)
+        page: safePage,
+        limit: limitValue,
+        total,
+        totalPages
       }
     });
   } catch (error) {
@@ -127,7 +139,7 @@ export const getLichThamBenhById = async (req, res, next) => {
 
 export const createLichThamBenh = async (req, res, next) => {
   try {
-    const { id_benh_nhan, id_nguoi_than, ngay, khung_gio, loai, so_nguoi_di_cung, ghi_chu, trang_thai } = req.body;
+    const { id_benh_nhan, id_nguoi_than, ngay, khung_gio, loai, so_dien_thoai, so_nguoi_di_cung, ghi_chu, trang_thai } = req.body;
 
     if (!id_benh_nhan || !id_nguoi_than || !ngay || !khung_gio) {
       return res.status(400).json({
@@ -172,17 +184,26 @@ export const createLichThamBenh = async (req, res, next) => {
       }
       return value;
     };
+    const normalizedPhone = sanitizeValue(so_dien_thoai);
+
+    if (finalLoai === 'goi_dien' && !normalizedPhone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vui lòng nhập số điện thoại khi chọn gọi điện'
+      });
+    }
 
     const ngayTaoVN = getNowForDB();
     const [result] = await pool.execute(
-      `INSERT INTO lich_tham_benh (id_benh_nhan, id_nguoi_than, ngay, khung_gio, loai, so_nguoi_di_cung, ghi_chu, trang_thai, ngay_tao)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO lich_tham_benh (id_benh_nhan, id_nguoi_than, ngay, khung_gio, loai, so_dien_thoai, so_nguoi_di_cung, ghi_chu, trang_thai, ngay_tao)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id_benh_nhan,
         id_nguoi_than,
         ngay,
         khung_gio,
         finalLoai,
+        finalLoai === 'goi_dien' ? normalizedPhone : null,
         so_nguoi_di_cung ? parseInt(so_nguoi_di_cung) : 0,
         sanitizeValue(ghi_chu),
         finalTrangThai,
@@ -224,7 +245,7 @@ export const createLichThamBenh = async (req, res, next) => {
 export const updateLichThamBenh = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { id_benh_nhan, id_nguoi_than, ngay, khung_gio, loai, so_nguoi_di_cung, ghi_chu, trang_thai } = req.body;
+    const { id_benh_nhan, id_nguoi_than, ngay, khung_gio, loai, so_dien_thoai, so_nguoi_di_cung, ghi_chu, trang_thai } = req.body;
 
     const updateFields = [];
     const updateValues = [];
@@ -266,6 +287,11 @@ export const updateLichThamBenh = async (req, res, next) => {
       }
       updateFields.push('loai = ?');
       updateValues.push(loai);
+    }
+
+    if (so_dien_thoai !== undefined) {
+      updateFields.push('so_dien_thoai = ?');
+      updateValues.push(so_dien_thoai === '' ? null : so_dien_thoai);
     }
 
     if (so_nguoi_di_cung !== undefined) {
