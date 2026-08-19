@@ -3,6 +3,8 @@ import outside1 from '../assets/Outside1.png';
 import outside2 from '../assets/Outside2.png';
 import { baiVietAPI } from '../services/api';
 import { normalizeImageUrl, normalizeHtmlContent } from '../utils/imageUtils';
+import SeoHead from './SeoHead';
+import { buildBaiVietPath } from '../utils/slugify';
 
 const BlogDetail = ({ post, onBack }) => {
   const [postData, setPostData] = useState(null);
@@ -165,10 +167,30 @@ const BlogDetail = ({ post, onBack }) => {
     );
   }
 
+  const seoTitle =
+    (postData.meta_title && String(postData.meta_title).trim()) ||
+    postData.tieu_de ||
+    postData.title ||
+    '';
+  const rawDesc =
+    (postData.meta_description && String(postData.meta_description).trim()) ||
+    getShortDescription();
+  const seoDescription = rawDesc
+    ? rawDesc.replace(/\s+/g, ' ').trim().slice(0, 320)
+    : undefined;
+  const shareImage =
+    normalizeImageUrl(postData.anh_dai_dien) ||
+    (media[0]?.url ? normalizeImageUrl(media[0].url) : null);
+
   return (
     <section className="w-full bg-white py-8 md:py-12">
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        canonicalPath={buildBaiVietPath(postData)}
+        imageUrl={shareImage || undefined}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb */}
         <nav className="mb-4">
           <span className="text-base md:text-lg text-[#1e4028] hover:text-primary cursor-pointer" onClick={onBack}>
             Blog
@@ -231,24 +253,6 @@ const BlogDetail = ({ post, onBack }) => {
                 }
               `}</style>
             </div>
-
-            {/* Display additional media images if available */}
-            {media.length > 3 && (
-              <div className="mt-8 md:mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {media.slice(3).map((item, index) => (
-                  <div key={index} className="w-full h-64 md:h-80 overflow-hidden rounded-lg">
-                    <img
-                      src={getImageUrl(item.url)}
-                      alt={item.mo_ta || `Image ${index + 4}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.src = outside2;
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         )}
       </div>

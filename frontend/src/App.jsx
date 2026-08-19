@@ -8,6 +8,7 @@ import Service from './pages/Service'
 import Amenity from './pages/Amenity'
 import Blog from './pages/Blog'
 import Contact from './pages/Contact'
+import HuongDanSuDung from './pages/HuongDanSuDung'
 import EventDetail from './pages/EventDetail'
 import AdminLayout from './components/Admin/Layout'
 import AdminHomePage from './pages/Admin/HomePage'
@@ -27,12 +28,21 @@ import PhongPage from './pages/Admin/PhongPage'
 import QuanLyPhongPage from './pages/Admin/QuanLyPhongPage'
 import QuanLyPhongPageNew from './pages/Admin/QuanLyPhongPageNew'
 import LichHenTuVanPage from './pages/Admin/LichHenTuVanPage'
+import KhaoSatChatLuongPage from './pages/Admin/KhaoSatChatLuongPage'
 import TaiKhoanPage from './pages/Admin/TaiKhoanPage'
 import CauHinhPage from './pages/Admin/CauHinhPage'
 import MediaCaNhanPage from './pages/Admin/MediaCaNhanPage'
 import DanhSachTrieuChungPage from './pages/Admin/DanhSachTrieuChungPage'
 import TrieuChungBenhNhanPage from './pages/Admin/TrieuChungBenhNhanPage'
+import duTruHoatDong30Cu from './assets/dự trù hoạt động 12 tháng cho 30 cụ.html?url'
+import soSanh30Cu50Cu from './assets/so sánh 30 cụ và 50 cụ.html?url'
 import './App.css'
+
+const HtmlAssetPage = ({ title, src }) => (
+  <div className="h-screen w-screen bg-white">
+    <iframe title={title} src={src} className="h-full w-full border-0" />
+  </div>
+)
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -45,19 +55,33 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/admin/login" />;
 };
 
+/** Trùng với `base` trong vite.config — nếu deploy tại /quanlyduonglao/ thì đặt base đó để route + asset khớp */
+const routerBasename = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || '/';
+
 function App() {
   return (
     <AuthProvider>
-      <Router basename="/">
+      <Router basename={routerBasename}>
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
           <Route path="/ve-chung-toi" element={<PublicLayout><AboutUs /></PublicLayout>} />
           <Route path="/dich-vu" element={<PublicLayout><Service /></PublicLayout>} />
           <Route path="/tien-ich" element={<PublicLayout><Amenity /></PublicLayout>} />
+          <Route path="/blog/bai-viet/:slug" element={<PublicLayout><Blog /></PublicLayout>} />
+          <Route path="/blog/tuyen-dung/:jobSlug" element={<PublicLayout><Blog /></PublicLayout>} />
           <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
           <Route path="/lien-he" element={<PublicLayout><Contact /></PublicLayout>} />
+          <Route path="/huong-dan-su-dung" element={<PublicLayout><HuongDanSuDung /></PublicLayout>} />
           <Route path="/su-kien/:id" element={<PublicLayout><EventDetail /></PublicLayout>} />
+          <Route
+            path="/du-tru-hoat-dong-12-thang-cho-30-cu"
+            element={<HtmlAssetPage title="Dự trù hoạt động 12 tháng cho 30 cụ" src={duTruHoatDong30Cu} />}
+          />
+          <Route
+            path="/so-sanh-30-cu-va-50-cu"
+            element={<HtmlAssetPage title="So sánh 30 cụ và 50 cụ" src={soSanh30Cu50Cu} />}
+          />
           
           {/* Admin routes */}
           <Route path="/admin/login" element={<Login />} />
@@ -85,6 +109,7 @@ function App() {
             <Route path="cong-viec" element={<CongViecPage />} />
             <Route path="kpi" element={<KPIPage />} />
             <Route path="lich-hen-tu-van" element={<LichHenTuVanPage />} />
+            <Route path="khao-sat-chat-luong" element={<KhaoSatChatLuongPage />} />
             <Route path="tai-khoan" element={<TaiKhoanPage />} />
             <Route path="cau-hinh" element={<CauHinhPage />} />
             <Route path="media-ca-nhan" element={<MediaCaNhanPage />} />

@@ -1,11 +1,20 @@
-import bgSession6 from '../assets/bg_session6.png';
-import session6Img from '../assets/session6_img.png';
+import { homeImages } from '../assets/homeImages';
 
 const Session6 = () => {
   return (
     <section className="py-20 sm:py-24 lg:py-32 relative overflow-hidden">
-      <div className="absolute inset-0"
-           style={{ background: 'linear-gradient(135deg, #8B0A3D 0%, #A90046 100%)' }}></div>
+      <div className="absolute inset-0">
+        <img
+          src={homeImages.communalDining}
+          alt=""
+          className="w-full h-full object-cover"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(135deg, rgba(139, 10, 61, 0.88) 0%, rgba(169, 0, 70, 0.9) 100%)' }}
+        />
+      </div>
       
       {/* Pattern Overlay */}
       <div className="absolute inset-0 opacity-10">
@@ -30,7 +39,7 @@ const Session6 = () => {
         </p>
         
         {/* Steps */}
-        <div className="grid sm:grid-cols-3 gap-8 sm:gap-10 mb-12 sm:mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-6 sm:gap-4 mb-12 sm:mb-16">
           <div>
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 sm:mb-6">
               <span className="font-serif font-light text-3xl sm:text-4xl text-white" style={{ fontFamily: "'Playfair Display', serif" }}>1</span>
@@ -38,12 +47,22 @@ const Session6 = () => {
             <h3 className="font-serif text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>Liên hệ</h3>
             <p className="text-sm sm:text-base text-white/80">Hotline VIP 24/7</p>
           </div>
+          <div className="hidden sm:flex items-center justify-center self-start mt-6" aria-hidden="true">
+            <svg className="w-12 h-12 text-white/85" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M5 12h14m0 0l-4-4m4 4l-4 4" />
+            </svg>
+          </div>
           <div>
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 sm:mb-6">
               <span className="font-serif font-light text-3xl sm:text-4xl text-white" style={{ fontFamily: "'Playfair Display', serif" }}>2</span>
             </div>
             <h3 className="font-serif text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>Tư vấn</h3>
             <p className="text-sm sm:text-base text-white/80">Chuyên gia 1-1</p>
+          </div>
+          <div className="hidden sm:flex items-center justify-center self-start mt-6" aria-hidden="true">
+            <svg className="w-12 h-12 text-white/85" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M5 12h14m0 0l-4-4m4 4l-4 4" />
+            </svg>
           </div>
           <div>
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 sm:mb-6">
@@ -54,8 +73,14 @@ const Session6 = () => {
           </div>
         </div>
         
-        <button className="px-8 sm:px-12 lg:px-16 py-3 sm:py-4 lg:py-5 bg-white font-semibold text-xs sm:text-sm tracking-wider rounded-full hover:shadow-2xl transition-all" 
-                style={{ color: '#8B0A3D' }}>
+        <button
+          type="button"
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent('openBookingModal'));
+          }}
+          className="px-8 sm:px-12 lg:px-16 py-3 sm:py-4 lg:py-5 bg-white font-semibold text-xs sm:text-sm tracking-wider rounded-full hover:shadow-2xl transition-all"
+          style={{ color: '#8B0A3D' }}
+        >
           ĐẶT LỊCH NGAY
         </button>
       </div>

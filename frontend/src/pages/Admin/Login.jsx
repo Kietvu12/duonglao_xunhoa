@@ -62,7 +62,7 @@ export default function Login() {
             </div>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-gray-800 mb-2">Đăng nhập</h1>
-          <p className="text-gray-600 text-sm sm:text-base">Hệ thống Quản lý Viện Dưỡng Lão</p>
+          <p className="text-gray-600 text-sm sm:text-base">Hệ thống Quản lý Trung tâm trường thọ</p>
         </div>
 
         {/* Error Message */}
@@ -148,7 +148,7 @@ export default function Login() {
         {/* Footer */}
         <div className="mt-8 pt-6 border-t border-gray-200 text-center">
           <p className="text-xs text-gray-500">
-            © 2024 Hệ thống Quản lý Viện Dưỡng Lão. All rights reserved.
+            © 2024 Hệ thống Quản lý Trung tâm trường thọ. All rights reserved.
           </p>
         </div>
       </div>

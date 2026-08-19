@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import session2ContentImage from '../assets/session2_content.png';
+import { homeImages } from '../assets/homeImages';
+const session2ContentImage = homeImages.coreValues;
 
 const Session2 = () => {
   return (

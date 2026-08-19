@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import session1Image from "../assets/session1.jpg";
+import { homeImages } from "../assets/homeImages";
+const session1Image = homeImages.hero;
 
 const Session1 = () => {
   return (
@@ -58,10 +59,10 @@ const Session1 = () => {
               cao cấp mà còn là tình yêu thương và sự tận tâm trong từng khoảnh khắc quý giá.
             </p>
             
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full max-w-xl">
               <Link
-                to="/dich-vu"
-                className="px-6 sm:px-8 lg:px-12 py-3 sm:py-4 rounded-full font-serif font-semibold text-xs sm:text-sm text-white transition-all duration-400 relative overflow-hidden text-center"
+                to="/lien-he"
+                className="w-full px-4 sm:px-6 py-3 sm:py-4 rounded-full font-serif font-semibold text-xs sm:text-sm text-white transition-all duration-400 relative overflow-hidden text-center flex items-center justify-center"
                 style={{ 
                   background: 'linear-gradient(135deg, #8B0A3D 0%, #A90046 100%)',
                   letterSpacing: '0.1em',
@@ -98,8 +99,8 @@ const Session1 = () => {
                 ></span>
               </Link>
               <Link
-                to="/lien-he"
-                className="px-6 sm:px-8 lg:px-12 py-3 sm:py-4 rounded-full font-serif font-semibold text-xs sm:text-sm transition-all duration-400 text-center"
+                to="/dich-vu"
+                className="w-full px-4 sm:px-6 py-3 sm:py-4 rounded-full font-serif font-semibold text-xs sm:text-sm transition-all duration-400 text-center flex items-center justify-center"
                 style={{ 
                   border: '2px solid #C9A870',
                   color: '#C9A870',

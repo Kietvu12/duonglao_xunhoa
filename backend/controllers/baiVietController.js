@@ -127,15 +127,29 @@ export const getAllBaiViet = async (req, res, next) => {
 
 export const getBaiVietById = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const raw = req.params.id;
+    const asNumber = Number(raw);
+    const isNumericId =
+      raw !== undefined &&
+      raw !== '' &&
+      Number.isInteger(asNumber) &&
+      String(asNumber) === String(raw);
 
-    const [baiViets] = await pool.execute(
-      `SELECT bv.*, tk.ho_ten as ten_tac_gia
-       FROM bai_viet bv
-       LEFT JOIN tai_khoan tk ON bv.id_tac_gia = tk.id
-       WHERE bv.id = ? AND bv.da_xoa = 0`,
-      [id]
-    );
+    const [baiViets] = isNumericId
+      ? await pool.execute(
+          `SELECT bv.*, tk.ho_ten as ten_tac_gia
+           FROM bai_viet bv
+           LEFT JOIN tai_khoan tk ON bv.id_tac_gia = tk.id
+           WHERE bv.id = ? AND bv.da_xoa = 0`,
+          [asNumber]
+        )
+      : await pool.execute(
+          `SELECT bv.*, tk.ho_ten as ten_tac_gia
+           FROM bai_viet bv
+           LEFT JOIN tai_khoan tk ON bv.id_tac_gia = tk.id
+           WHERE bv.slug = ? AND bv.da_xoa = 0`,
+          [raw]
+        );
 
     if (baiViets.length === 0) {
       return res.status(404).json({
@@ -144,11 +158,13 @@ export const getBaiVietById = async (req, res, next) => {
       });
     }
 
+    const resolvedId = baiViets[0].id;
+
     // Update view count if published
     if (baiViets[0].trang_thai === 'xuat_ban') {
       await pool.execute(
         'UPDATE bai_viet SET luot_xem = luot_xem + 1 WHERE id = ?',
-        [id]
+        [resolvedId]
       );
       baiViets[0].luot_xem += 1;
     }
@@ -156,14 +172,14 @@ export const getBaiVietById = async (req, res, next) => {
     // Get comments
     const [comments] = await pool.execute(
       'SELECT * FROM binh_luan_bai_viet WHERE id_bai_viet = ? AND duyet = 1 ORDER BY ngay_binh_luan DESC',
-      [id]
+      [resolvedId]
     );
     baiViets[0].binh_luan = comments;
 
     // Get media (images/videos)
     const [media] = await pool.execute(
       'SELECT * FROM media_bai_viet WHERE id_bai_viet = ? ORDER BY thu_tu ASC, ngay_upload ASC',
-      [id]
+      [resolvedId]
     );
     baiViets[0].media = media;
 

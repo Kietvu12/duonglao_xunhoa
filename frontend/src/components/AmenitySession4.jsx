@@ -1,11 +1,10 @@
-import home1 from "../assets/Home1.png";
-import home2 from "../assets/Home2.png";
+import { amenityImages } from "../assets/amenityImages";
 
 const AmenitySession4 = () => {
   const commonAreas = [
     {
       id: 1,
-      image: home1,
+      image: amenityImages.commonAreas[0],
       title: "Phòng Sinh Hoạt Chung",
       subtitle: "Living room sang trọng như khách sạn",
       description: "Phòng sinh hoạt rộng rãi, đầy đủ tiện nghi cao cấp là nơi cư dân thư giãn, trò chuyện và tham gia các hoạt động tập thể. Không gian ấm cúng, gần gũi giúp kết nối cộng đồng.",
@@ -17,7 +16,7 @@ const AmenitySession4 = () => {
     },
     {
       id: 2,
-      image: home2,
+      image: amenityImages.commonAreas[1],
       title: "Khu Vực Giao Lưu",
       subtitle: "Event space đa năng cao cấp",
       description: "Khu vực giao lưu đa năng, phù hợp cho các buổi sinh hoạt nhóm, xem phim hoặc sự kiện cộng đồng. Thiết kế mở, ánh sáng tự nhiên và nội thất tiện nghi cao cấp.",

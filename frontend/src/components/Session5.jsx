@@ -2,6 +2,21 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { suKienAPI } from '../services/api';
 import { normalizeImageUrl } from '../utils/imageUtils';
+import { homeImages } from '../assets/homeImages';
+
+const EVENT_FALLBACK = homeImages.eventFallback;
+
+const getEventImage = (event) => {
+  if (event?.anh_dai_dien) {
+    const url = normalizeImageUrl(event.anh_dai_dien);
+    if (url) return url;
+  }
+  if (event?.media?.length > 0 && event.media[0].loai === 'anh') {
+    const url = normalizeImageUrl(event.media[0].url);
+    if (url) return url;
+  }
+  return EVENT_FALLBACK;
+};
 
 const Session5 = () => {
   const [events, setEvents] = useState([]);
@@ -95,23 +110,15 @@ const Session5 = () => {
                 style={{ borderColor: 'rgba(201, 168, 112, 0.2)' }}
               >
                 <div className="relative">
-                  {events[0].anh_dai_dien ? (
-                    <img 
-                      src={normalizeImageUrl(events[0].anh_dai_dien)} 
-                      alt={events[0].tieu_de}
-                      className="w-full h-64 sm:h-72 md:h-80 object-cover"
-                    />
-                  ) : events[0].media && events[0].media.length > 0 && events[0].media[0].loai === 'anh' ? (
-                    <img 
-                      src={normalizeImageUrl(events[0].media[0].url)} 
-                      alt={events[0].tieu_de}
-                      className="w-full h-64 sm:h-72 md:h-80 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-64 sm:h-72 md:h-80 bg-gray-200 flex items-center justify-center">
-                      <span className="text-sm" style={{ color: '#2D2D2D' }}>Không có ảnh</span>
-                    </div>
-                  )}
+                  <img 
+                    src={getEventImage(events[0])} 
+                    alt={events[0].tieu_de}
+                    className="w-full h-64 sm:h-72 md:h-80 object-cover"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = EVENT_FALLBACK;
+                    }}
+                  />
                   <div className="absolute top-4 left-4 sm:top-6 sm:left-6">
                     <span className="px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs tracking-wide uppercase bg-accent-gold-light text-primary-burgundy font-semibold border border-accent-gold">
                       Sự kiện cao cấp
@@ -148,23 +155,15 @@ const Session5 = () => {
                   onClick={() => handleEventClick(event.id)}
                   style={{ borderColor: 'rgba(201, 168, 112, 0.2)' }}
                 >
-                  {event.anh_dai_dien ? (
-                    <img 
-                      src={normalizeImageUrl(event.anh_dai_dien)} 
-                      alt={event.tieu_de}
-                      className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg sm:rounded-xl object-cover flex-shrink-0"
-                    />
-                  ) : event.media && event.media.length > 0 && event.media[0].loai === 'anh' ? (
-                    <img 
-                      src={normalizeImageUrl(event.media[0].url)} 
-                      alt={event.tieu_de}
-                      className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg sm:rounded-xl object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg sm:rounded-xl bg-gray-200 flex items-center justify-center flex-shrink-0">
-                      <span className="text-xs" style={{ color: '#2D2D2D' }}>No img</span>
-                    </div>
-                  )}
+                  <img 
+                    src={getEventImage(event)} 
+                    alt={event.tieu_de}
+                    className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg sm:rounded-xl object-cover flex-shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = EVENT_FALLBACK;
+                    }}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="text-xs mb-1 sm:mb-2 tracking-wider" style={{ color: '#C9A870' }}>
                       {getCategoryLabel(event.trang_thai)} • {event.ngay ? formatDate(event.ngay) : ''}

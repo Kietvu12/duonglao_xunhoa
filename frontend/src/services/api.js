@@ -622,7 +622,7 @@ export const baiVietAPI = {
     const queryString = new URLSearchParams(params).toString();
     return apiCall(`/bai-viet?${queryString}`);
   },
-  getById: (id) => apiCall(`/bai-viet/${id}`),
+  getById: (id) => apiCall(`/bai-viet/${encodeURIComponent(String(id))}`),
   create: (data) => apiCall('/bai-viet', {
     method: 'POST',
     body: JSON.stringify(data),
@@ -670,6 +670,26 @@ export const taiKhoanAPI = {
   }),
   viewPassword: (id) => apiCall(`/tai-khoan/${id}/view-password`),
   delete: (id) => apiCall(`/tai-khoan/${id}`, {
+    method: 'DELETE',
+  }),
+};
+
+// Khảo sát chất lượng APIs
+export const khaoSatChatLuongAPI = {
+  getAll: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiCall(`/khao-sat-chat-luong${queryString ? `?${queryString}` : ''}`);
+  },
+  getById: (id) => apiCall(`/khao-sat-chat-luong/${id}`),
+  create: (data) => apiCall('/khao-sat-chat-luong', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  update: (id, data) => apiCall(`/khao-sat-chat-luong/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (id) => apiCall(`/khao-sat-chat-luong/${id}`, {
     method: 'DELETE',
   }),
 };

@@ -1,11 +1,10 @@
-import outside1 from "../assets/Outside1.png";
-import outside2 from "../assets/Outside2.png";
+import { amenityImages } from "../assets/amenityImages";
 
 const AmenitySession3 = () => {
   const outdoorSpaces = [
     {
       id: 1,
-      image: outside1,
+      image: amenityImages.outdoor[0],
       title: "Khuôn Viên Ngoài Trời",
       subtitle: "Lối đi dạo an toàn giữa thiên nhiên",
       description: "Khu vực đi dạo rộng rãi, thoáng mát với lối đi lát đá cao cấp, an toàn, phù hợp cho vận động nhẹ nhàng. Bao quanh bởi cây xanh và hoa theo mùa, mang lại cảm giác thư thái.",
@@ -17,7 +16,7 @@ const AmenitySession3 = () => {
     },
     {
       id: 2,
-      image: outside2,
+      image: amenityImages.outdoor[1],
       title: "Khu Vườn Thư Giãn",
       subtitle: "Thiên đường xanh giữa lòng thành phố",
       description: "Khu vườn xanh mát với ghế nghỉ cao cấp, tiểu cảnh nghệ thuật và hoa theo mùa. Nơi lý tưởng để đọc sách, trò chuyện hoặc tận hưởng không khí trong lành.",

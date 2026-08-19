@@ -6085,6 +6085,7 @@ export default function BenhNhanDetailPage() {
                   onChange={(e) => setDichVuForm({ ...dichVuForm, hinh_thuc_thanh_toan: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
+                    <option value="ngay">Theo ngày</option>
                     <option value="thang">Theo tháng</option>
                     <option value="quy">Theo quý</option>
                     <option value="nam">Theo năm</option>

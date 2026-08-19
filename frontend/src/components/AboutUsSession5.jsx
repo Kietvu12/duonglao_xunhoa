@@ -1,28 +1,29 @@
-import image1 from "../assets/1.jpg";
-import image2 from "../assets/2.jpg";
-import image3 from "../assets/3.jpg";
-import image4 from "../assets/4.jpg";
+import { aboutUsImages } from "../assets/aboutUsImages";
 
 const AboutUsSession5 = () => {
   const philosophyItems = [
     {
-      image: image1,
-      text: "Lấy người cao tuổi làm trung tâm",
+      image: aboutUsImages.philosophy[0],
+      title: 'Lấy người cao tuổi làm trung tâm',
+      description: 'Mọi quyết định đều xuất phát từ nhu cầu và mong muốn của các cụ',
       number: 1,
     },
     {
-      image: image2,
-      text: "Chăm sóc bằng sự thấu hiểu",
+      image: aboutUsImages.philosophy[1],
+      title: 'Chăm sóc bằng sự thấu hiểu',
+      description: 'Hiểu rõ tâm lý, sức khỏe và nguyện vọng của từng cá nhân',
       number: 2,
     },
     {
-      image: image3,
-      text: "Kết nối gia đình – cộng đồng – khoa học",
+      image: aboutUsImages.philosophy[2],
+      title: 'Kết nối gia đình – cộng đồng – khoa học',
+      description: 'Xây dựng mạng lưới hỗ trợ toàn diện và bền vững',
       number: 3,
     },
     {
-      image: image4,
-      text: "Cuộc sống an yên, ý nghĩa",
+      image: aboutUsImages.philosophy[3],
+      title: 'Cuộc sống an yên, ý nghĩa',
+      description: 'Mang lại cuộc sống chất lượng cao và hạnh phúc trọn vẹn',
       number: 4,
     },
   ];
@@ -44,48 +45,31 @@ const AboutUsSession5 = () => {
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {philosophyItems.map((item, index) => (
-            <div key={index} className="text-center">
-              <div className="relative mb-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 items-stretch">
+          {philosophyItems.map((item) => (
+            <div key={item.number} className="flex flex-col text-center h-full">
+              <div className="relative mb-6 flex-shrink-0">
                 <img 
                   src={item.image} 
-                  alt={item.text}
+                  alt={item.title}
                   className="w-full h-64 object-cover rounded-2xl"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-2xl"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
+                  <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center"
                        style={{ background: '#C9A870' }}>
                     <span className="font-serif font-bold text-2xl text-white" style={{ fontFamily: "'Playfair Display', serif" }}>{item.number}</span>
                   </div>
                 </div>
               </div>
-              <h3 className="font-serif text-xl font-bold mb-3" style={{ color: '#2D2D2D', fontFamily: "'Playfair Display', serif" }}>
-                {item.text.includes(' – ') ? (
-                  <>
-                    {item.text.split(' – ').map((part, i) => (
-                      <span key={i}>
-                        {part}
-                        {i < item.text.split(' – ').length - 1 && <br />}
-                      </span>
-                    ))}
-                  </>
-                ) : (
-                  item.text.split(' ').map((word, i, arr) => (
-                    <span key={i}>
-                      {word}
-                      {i === Math.floor(arr.length / 2) - 1 && <br />}
-                      {i < arr.length - 1 && ' '}
-                    </span>
-                  ))
-                )}
+              <h3
+                className="font-serif text-xl font-bold mb-3 min-h-[5rem] flex items-center justify-center leading-snug px-2"
+                style={{ color: '#2D2D2D', fontFamily: "'Playfair Display', serif" }}
+              >
+                {item.title}
               </h3>
-              <p className="text-sm text-justify" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
-                {index === 0 && "Mọi quyết định đều xuất phát từ nhu cầu và mong muốn của các cụ"}
-                {index === 1 && "Hiểu rõ tâm lý, sức khỏe và nguyện vọng của từng cá nhân"}
-                {index === 2 && "Xây dựng mạng lưới hỗ trợ toàn diện và bền vững"}
-                {index === 3 && "Mang lại cuộc sống chất lượng cao và hạnh phúc trọn vẹn"}
+              <p className="text-sm leading-relaxed px-2" style={{ color: '#2D2D2D' }}>
+                {item.description}
               </p>
             </div>
           ))}

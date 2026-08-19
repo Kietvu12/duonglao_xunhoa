@@ -1,44 +1,76 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate, useSearchParams, useParams, useLocation } from 'react-router-dom';
 import BlogSession1 from '../components/BlogSession1';
 import BlogSession2 from '../components/BlogSession2';
 import BlogDetail from '../components/BlogDetail';
+import SeoHead from '../components/SeoHead';
 import { baiVietAPI, tuyenDungAPI } from '../services/api';
+import {
+  buildBaiVietPath,
+  buildTuyenDungPath,
+  parseTuyenDungParam,
+  slugifyVietnamese,
+} from '../utils/slugify';
+
+/** decodeURIComponent an toàn — % lỗi không làm văng vào catch và coi như lỗi API */
+function safeDecodePathSegment(segment) {
+  if (segment == null || segment === '') return '';
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+}
+
+/**
+ * Lấy slug bài viết / job từ Route params; nếu thiếu thì parse pathname (dự phòng khi useMatch/useParams lệch bối cảnh).
+ */
+function useBlogRouteSegments() {
+  const params = useParams();
+  const { pathname } = useLocation();
+
+  let articleSlug = params.slug;
+  if (articleSlug === undefined || articleSlug === '') {
+    const m = pathname.match(/\/blog\/bai-viet\/([^/]+)\/?$/);
+    if (m) articleSlug = safeDecodePathSegment(m[1]);
+  } else {
+    articleSlug = safeDecodePathSegment(articleSlug);
+  }
+
+  let jobSlugParam = params.jobSlug;
+  if (jobSlugParam === undefined || jobSlugParam === '') {
+    const m = pathname.match(/\/blog\/tuyen-dung\/([^/]+)\/?$/);
+    if (m) jobSlugParam = safeDecodePathSegment(m[1]);
+  } else {
+    jobSlugParam = safeDecodePathSegment(jobSlugParam);
+  }
+
+  return { articleSlug: articleSlug || undefined, jobSlugParam: jobSlugParam || undefined };
+}
 
 const Blog = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const postId = searchParams.get('post');
-  const activeTab = searchParams.get('tab') || 'bai-viet';
-  
+  const location = useLocation();
+  const { articleSlug, jobSlugParam } = useBlogRouteSegments();
+  /** Khi mở bài từ list/home, lưu id để nếu slug trên URL lệch DB thì vẫn tải được bài */
+  const postIdNavFallback =
+    location.state && typeof location.state === 'object' && location.state.postId != null
+      ? location.state.postId
+      : undefined;
+  const legacyPostId = searchParams.get('post');
+  const tabFromQuery = searchParams.get('tab') || 'bai-viet';
+  const activeTab = articleSlug ? 'bai-viet' : jobSlugParam ? 'tuyen-dung' : tabFromQuery;
+
+  const isDetailRoute = Boolean(articleSlug || jobSlugParam);
+
   const [selectedPost, setSelectedPost] = useState(null);
   const [posts, setPosts] = useState([]);
   const [tinTuyenDungs, setTinTuyenDungs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (activeTab === 'bai-viet') {
-      // Load 100 bài viết để có thể nhóm theo category với pagination
-      // Đủ để hiển thị nhiều bài viết nhưng không quá tải
-      loadPosts({ limit: 100 });
-    } else if (activeTab === 'tuyen-dung') {
-      loadTinTuyenDungs();
-    }
-  }, [activeTab]);
-
-  useEffect(() => {
-    // Khi postId thay đổi trong URL, load bài viết tương ứng
-    if (postId) {
-      if (activeTab === 'bai-viet') {
-        loadPostById(postId);
-      } else if (activeTab === 'tuyen-dung') {
-        loadTinTuyenDungById(postId);
-      }
-    } else {
-      setSelectedPost(null);
-    }
-  }, [postId, activeTab]);
+  /** Lỗi tải chi tiết (không điều hướng về /blog để tránh nháy + mất URL debug) */
+  const [detailError, setDetailError] = useState(null);
 
   const loadPosts = async (params = {}) => {
     try {
@@ -55,21 +87,6 @@ const Blog = () => {
       console.error('Error loading posts:', err);
       setError('Không thể tải danh sách bài viết. Vui lòng thử lại sau.');
       return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadPostById = async (id) => {
-    try {
-      setLoading(true);
-      const response = await baiVietAPI.getById(id);
-      setSelectedPost(response.data);
-    } catch (err) {
-      console.error('Error loading post detail:', err);
-      setError('Không thể tải bài viết. Vui lòng thử lại sau.');
-      // Nếu không tìm thấy bài viết, quay về danh sách
-      navigate('/blog', { replace: true });
     } finally {
       setLoading(false);
     }
@@ -93,7 +110,7 @@ const Blog = () => {
     }
   };
 
-  const loadTinTuyenDungById = async (id) => {
+  const loadTinTuyenDungById = useCallback(async (id) => {
     try {
       setLoading(true);
       setError(null);
@@ -107,16 +124,177 @@ const Blog = () => {
       console.error('Error loading tin tuyen dung detail:', err);
       setError('Không thể tải tin tuyển dụng. Vui lòng thử lại sau.');
       setSelectedPost(null);
-      // Không navigate ngay, để user có thể thấy lỗi
+      navigate('/blog?tab=tuyen-dung', { replace: true });
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  const redirectLegacyBaiViet = useCallback(
+    async (id) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await baiVietAPI.getById(id);
+        const slug =
+          response.data.slug ||
+          slugifyVietnamese(response.data.tieu_de || 'bai-viet');
+        navigate(`/blog/bai-viet/${encodeURIComponent(slug)}`, { replace: true });
+      } catch (err) {
+        console.error('Error loading post detail:', err);
+        setError('Không thể tải bài viết. Vui lòng thử lại sau.');
+        navigate('/blog?tab=bai-viet', { replace: true });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate]
+  );
+
+  const redirectLegacyTuyenDung = useCallback(
+    async (id) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await tuyenDungAPI.getTinTuyenDungById(id);
+        if (response.success && response.data) {
+          navigate(buildTuyenDungPath(response.data), { replace: true });
+        } else {
+          throw new Error('Không tìm thấy tin tuyển dụng');
+        }
+      } catch (err) {
+        console.error('Error loading tin tuyen dung detail:', err);
+        setError('Không thể tải tin tuyển dụng. Vui lòng thử lại sau.');
+        navigate('/blog?tab=tuyen-dung', { replace: true });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate]
+  );
+
+  useEffect(() => {
+    if (articleSlug || jobSlugParam) return;
+    if (activeTab === 'bai-viet') {
+      loadPosts({ limit: 100 });
+    } else if (activeTab === 'tuyen-dung') {
+      loadTinTuyenDungs();
+    }
+  }, [activeTab, articleSlug, jobSlugParam]);
+
+  useEffect(() => {
+    if (!articleSlug) return undefined;
+    setSelectedPost(null);
+    setDetailError(null);
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        let row = null;
+        const fetchDetail = async (idOrSlug) => {
+          const response = await baiVietAPI.getById(idOrSlug);
+          return response?.data ?? response;
+        };
+
+        try {
+          row = await fetchDetail(articleSlug);
+        } catch (errBySlug) {
+          if (
+            postIdNavFallback != null &&
+            String(postIdNavFallback) !== String(articleSlug)
+          ) {
+            row = await fetchDetail(postIdNavFallback);
+          } else {
+            /* Truy cập trực tiếp URL: slug trên link đôi khi là slugify(tiêu đề) trong khi DB lưu
+               cùng gốc + hậu tố (-1, -2). Từ danh sách vẫn mở được nhờ fallback theo id trong state. */
+            const listRes = await baiVietAPI.getAll({
+              trang_thai: 'xuat_ban',
+              limit: 500,
+            });
+            const items = listRes.data || [];
+            const decoded = String(articleSlug).trim();
+
+            const bySlugifyTitle = items.filter(
+              (p) => slugifyVietnamese(p.tieu_de || p.title || '') === decoded
+            );
+            if (bySlugifyTitle.length === 1) {
+              row = await fetchDetail(bySlugifyTitle[0].id);
+            } else {
+              const byPrefix = items.filter(
+                (p) =>
+                  p.slug &&
+                  (String(p.slug) === decoded ||
+                    String(p.slug).startsWith(`${decoded}-`))
+              );
+              if (byPrefix.length === 1) {
+                row = await fetchDetail(byPrefix[0].id);
+              } else {
+                throw errBySlug;
+              }
+            }
+          }
+        }
+        if (!row || (typeof row === 'object' && !row.id && !row.tieu_de)) {
+          throw new Error('Dữ liệu bài viết không hợp lệ');
+        }
+        if (!cancelled) setSelectedPost(row);
+      } catch (err) {
+        console.error('Error loading post detail:', err);
+        if (!cancelled) {
+          setDetailError(
+            err?.message || 'Không thể tải bài viết. Vui lòng thử lại sau.'
+          );
+          setSelectedPost(null);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [articleSlug, postIdNavFallback]);
+
+  useEffect(() => {
+    if (!jobSlugParam) return;
+    const id = parseTuyenDungParam(jobSlugParam);
+    if (id == null) {
+      setError('Đường dẫn tin tuyển dụng không hợp lệ.');
+      navigate('/blog?tab=tuyen-dung', { replace: true });
+      return;
+    }
+    loadTinTuyenDungById(id);
+  }, [jobSlugParam, navigate, loadTinTuyenDungById]);
+
+  useEffect(() => {
+    if (articleSlug || jobSlugParam) return;
+    if (!legacyPostId) {
+      setSelectedPost(null);
+      return;
+    }
+    if (activeTab === 'bai-viet') {
+      redirectLegacyBaiViet(legacyPostId);
+    } else if (activeTab === 'tuyen-dung') {
+      redirectLegacyTuyenDung(legacyPostId);
+    }
+  }, [
+    legacyPostId,
+    activeTab,
+    articleSlug,
+    jobSlugParam,
+    redirectLegacyBaiViet,
+    redirectLegacyTuyenDung,
+  ]);
 
   const handlePostClick = (post) => {
-    // Navigate đến URL với query param post
-    const tab = activeTab === 'tuyen-dung' ? 'tuyen-dung' : 'bai-viet';
-    navigate(`/blog?tab=${tab}&post=${post.id}`, { replace: false });
+    if (activeTab === 'tuyen-dung') {
+      navigate(buildTuyenDungPath(post));
+    } else {
+      navigate(buildBaiVietPath(post), {
+        state: post?.id != null ? { postId: post.id } : undefined,
+      });
+    }
   };
 
   const handleBack = () => {
@@ -140,8 +318,51 @@ const Blog = () => {
     setSelectedPost(null);
   };
 
+  const detailLoadingView =
+    isDetailRoute && loading && !selectedPost && !detailError ? (
+      <section className="w-full bg-white py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-12">
+            <p className="text-lg text-gray-600">Đang tải nội dung...</p>
+          </div>
+        </div>
+      </section>
+    ) : null;
+
+  const detailErrorView =
+    isDetailRoute && !loading && !selectedPost && detailError ? (
+      <section className="w-full bg-white py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-12 space-y-4">
+            <p className="text-lg text-red-600">{detailError}</p>
+            <button
+              type="button"
+              className="text-[#1e4028] underline font-semibold"
+              onClick={() => {
+                setDetailError(null);
+                navigate('/blog?tab=bai-viet', { replace: false });
+              }}
+            >
+              Quay lại danh sách bài viết
+            </button>
+          </div>
+        </div>
+      </section>
+    ) : null;
+
   return (
     <div className="min-h-screen">
+      {!isDetailRoute && (
+        <SeoHead
+          title={activeTab === 'tuyen-dung' ? 'Tin tuyển dụng' : 'Blog & tin tức'}
+          description={
+            activeTab === 'tuyen-dung'
+              ? 'Cơ hội nghề nghiệp tại Trung tâm trường thọ Xuân Hoa — ứng tuyển trực tuyến, môi trường làm việc chuyên nghiệp.'
+              : 'Bài viết về sức khỏe người cao tuổi, hoạt động và tin tức từ Trung tâm trường thọ Xuân Hoa.'
+          }
+          canonicalPath={activeTab === 'tuyen-dung' ? '/blog?tab=tuyen-dung' : '/blog'}
+        />
+      )}
       <BlogSession1 />
       
       {/* Tabs */}
@@ -179,7 +400,9 @@ const Blog = () => {
       </div>
 
       {/* Content */}
-      {selectedPost ? (
+      {detailLoadingView ||
+      detailErrorView ||
+      (selectedPost ? (
         activeTab === 'tuyen-dung' ? (
           <TuyenDungDetail tinTuyenDung={selectedPost} onBack={handleBack} />
         ) : (
@@ -201,7 +424,7 @@ const Blog = () => {
             onPostClick={handlePostClick} 
           />
         )
-      )}
+      ))}
     </div>
   );
 };
@@ -436,8 +659,20 @@ const TuyenDungDetail = ({ tinTuyenDung, onBack }) => {
     );
   }
 
+  const tuyenDungCanonical = buildTuyenDungPath(tinTuyenDung);
+  const tuyenDungDesc = (
+    (tinTuyenDung.mo_ta && tinTuyenDung.mo_ta.replace(/\s+/g, ' ').trim().slice(0, 320)) ||
+    `Tuyển dụng vị trí ${tinTuyenDung.vi_tri || ''} tại Trung tâm trường thọ Xuân Hoa.`
+  ).trim();
+
   return (
     <section className="w-full bg-white py-8 md:py-12">
+      <SeoHead
+        title={tinTuyenDung.tieu_de}
+        description={tuyenDungDesc}
+        canonicalPath={tuyenDungCanonical}
+        imageUrl={getMainImage() || undefined}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="mb-4">

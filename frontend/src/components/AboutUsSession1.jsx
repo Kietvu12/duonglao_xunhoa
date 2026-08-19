@@ -1,4 +1,5 @@
-import aboutUsImage from "../assets/Aboutus_session1.png";
+import { aboutUsImages } from "../assets/aboutUsImages";
+const aboutUsImage = aboutUsImages.hero;
 
 const AboutUsSession1 = () => {
   return (

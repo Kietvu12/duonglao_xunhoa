@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import doctorImage from "../assets/doctor-hospital.jpg";
+import expertDoctorImage from "../assets/Gemini_Generated_Image_qzkd1uqzkd1uqzkd.png";
 
 const ExpertTeamSection = () => {
   const scrollContainerRef = useRef(null);
@@ -10,17 +10,26 @@ const ExpertTeamSection = () => {
   const featuredExpert = {
     id: 1,
     title: "Giám đốc chuyên môn",
-    name: "BSCK2 – Ths. BS NT Hoàng Thị Phương Nam",
+    name: "Ths. BSCKII – BSNT · Giảng viên Đại học Y Hà Nội",
     description:
-      "Bác sĩ CK2 – Ths- BSNT Hoàng Thị Phương Nam là bác sĩ chuyên ngành Nội- Lão khoa với hơn 15 năm kinh nghiệm trong khám, điều trị và chăm sóc toàn diện cho người cao tuổi. Trong quá trình công tác, bác sĩ làm việc tại nhiều chuyên khoa trọng điểm như Hồi sức tích cực, Cấp cứu, Đột quỵ, Tim mạch và Hô hấp bệnh viện Lão khoa Trung ương, giúp tích lũy kinh nghiệm sâu rộng trong xử trí các bệnh lý cấp tính và mạn tính thường gặp ở người cao tuổi.",
+      "Chúng tôi theo đuổi sự chuẩn mực trong chuyên môn, kiên định với trách nhiệm và đặt trọn tâm huyết bằng yêu thương.",
     positions: [
-      "Giảng viên Bộ môn Lão khoa – Trường ĐHY Hà Nội",
-      "Bác sĩ Bệnh viện Lão khoa Trung Ương",
-      "Bác sĩ TT Y khoa Số 1 – Tôn Thất Tùng – Bệnh viện Đại học Y Hà Nội",
+      "Thạc sĩ – Bác sĩ chuyên khoa cấp II – Điều dưỡng trưởng",
+      "Giảng viên Đại học Y Hà Nội",
     ],
+    image: expertDoctorImage,
   };
 
   const experts = [
+    {
+      id: 5,
+      title: "Giám đốc pháp lý",
+      name: "Trần Huy Hải",
+      description:
+        "Sự an tâm của gia đình không chỉ đến từ chăm sóc tốt, mà còn từ sự minh bạch và đúng chuẩn mực. Chúng tôi bảo vệ từng quyền lợi, từng quyết định, từng hành trình của người cao tuổi bằng cả trách nhiệm pháp lý và đạo đức nghề nghiệp. Chuẩn mực tạo nên an tâm — minh bạch trong từng điều nhỏ nhất.",
+      positions: [],
+      image: expertDoctorImage,
+    },
     {
       id: 2,
       title: "Bác sĩ chuyên khoa",
@@ -28,6 +37,7 @@ const ExpertTeamSection = () => {
       description:
         "PGS. TS. BSCKII Trần Nguyễn Ngọc là chuyên gia đầu ngành về Sức khỏe Tâm thần tại Việt Nam, hiện giữ chức Trưởng khoa Điều trị Rối loạn Cảm xúc – Viện Sức khỏe Tâm thần, Bệnh viện Bạch Mai và là Giảng viên cao cấp Đại học Y Hà Nội.",
       positions: [],
+      image: expertDoctorImage,
     },
     {
       id: 3,
@@ -36,6 +46,7 @@ const ExpertTeamSection = () => {
       description:
         "PGS, TS, Giảng viên cao cấp Trần Hữu Bình – Thầy thuốc Nhân dân, là bác sĩ đầu ngành chuyên khoa Tâm thần – Tâm bệnh học tại Việt Nam. Ông từng giữ nhiều vị trí lãnh đạo và học thuật quan trọng như Nguyên Viện trưởng Viện Sức khỏe Tâm thần Quốc gia (Bệnh viện Bạch Mai).",
       positions: [],
+      image: expertDoctorImage,
     },
     {
       id: 4,
@@ -44,6 +55,7 @@ const ExpertTeamSection = () => {
       description:
         "PGS Phan Toàn Thắng là nhà khoa học tiên phong trong y học tái tạo và công nghệ tế bào gốc, là người Việt Nam đầu tiên sở hữu bằng sáng chế độc quyền công nghệ tách chiết tế bào gốc từ màng dây rốn được bảo hộ ở 80 quốc gia.",
       positions: [],
+      image: expertDoctorImage,
     },
   ];
 
@@ -138,7 +150,7 @@ const ExpertTeamSection = () => {
             <div className="relative order-2 lg:order-1">
               <div className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-xl">
                 <img
-                  src={doctorImage}
+                  src={featuredExpert.image}
                   alt={featuredExpert.name}
                   className="w-full h-auto object-contain"
                 />
@@ -215,7 +227,7 @@ const ExpertTeamSection = () => {
                   {/* Image */}
                   <div className="relative overflow-hidden rounded-t-2xl sm:rounded-t-3xl">
                     <img
-                      src={doctorImage}
+                      src={expert.image}
                       alt={expert.name}
                       className="w-full h-auto object-contain rounded-t-2xl sm:rounded-t-3xl"
                     />

@@ -35,7 +35,7 @@ const ServiceSession1 = () => {
                 marginTop: '0.25rem'
               }}
             >
-              Đẳng Cấp
+              NỔI BẬT TẠI XUÂN HOA
             </span>
           </h1>
           <div className="w-16 sm:w-20 h-0.5 bg-gradient-to-r from-accent-gold via-accent-gold to-transparent mx-auto mb-6 sm:mb-8"></div>

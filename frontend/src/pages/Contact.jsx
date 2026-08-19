@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import bgContact from '../assets/bg_contact.jpg';
+import SeoHead from '../components/SeoHead';
 
 const Contact = () => {
   const googleMapsDirection = 'https://www.google.com/maps/dir/?api=1&destination=123+ABC,+Quan+XYZ,+Ho+Chi+Minh';
@@ -86,6 +87,11 @@ const Contact = () => {
         backgroundImage: `linear-gradient(180deg, rgba(255, 249, 251, 0.88) 0%, rgba(255, 249, 251, 0.96) 40%, rgba(255, 249, 251, 0.98) 100%), url(${bgContact})`,
       }}
     >
+      <SeoHead
+        title="Liên hệ"
+        description="Liên hệ Trung tâm trường thọ Xuân Hoa: hotline, địa chỉ, giờ làm việc và đặt lịch tư vấn / tham quan. Đội ngũ luôn sẵn sàng hỗ trợ gia đình bạn."
+        canonicalPath="/lien-he"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <p className="text-xs md:text-sm font-raleway-semibold text-primary uppercase tracking-[0.08em]">
@@ -146,7 +152,7 @@ const Contact = () => {
           <div className="bg-white rounded-2xl border border-primary/10 shadow-sm p-6 md:p-8 space-y-4 flex flex-col h-full">
             <h3 className="text-2xl font-raleway-bold text-gray-900">Đến với chúng tôi</h3>
             <p className="text-gray-600 font-raleway-regular">
-              Xem chỉ đường nhanh trên Google Maps hoặc đặt lịch tham quan viện dưỡng lão XUÂN HOA.
+              Xem chỉ đường nhanh trên Google Maps hoặc đặt lịch tham quan Trung tâm trường thọ Xuân Hoa.
             </p>
             <div className="space-y-2 text-gray-700 font-raleway-regular">
               <p className="font-raleway-semibold">Địa chỉ</p>

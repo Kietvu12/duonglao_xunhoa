@@ -1,23 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import zaloIcon from '../assets/zalo.svg';
 import messengerIcon from '../assets/messenger.svg';
 
 const HOTLINES = ['0961799188', '0961799588'];
 const MESSENGER_LINK = 'https://m.me/trungtamtruongthoxuanhoahalong';
+const ZALO_LINK = 'https://zalo.me/84961799588';
 
 const ContactFloatingButtons = () => {
   const [hovered, setHovered] = useState(null);
   const [phonePopupOpen, setPhonePopupOpen] = useState(false);
-  const [zaloToastOpen, setZaloToastOpen] = useState(false);
-
-  useEffect(() => {
-    if (!zaloToastOpen) return;
-    const t = setTimeout(() => setZaloToastOpen(false), 2500);
-    return () => clearTimeout(t);
-  }, [zaloToastOpen]);
 
   const buttonBase =
-    'w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center p-0 border-0 overflow-hidden';
+    'group relative w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center p-0 border-0 overflow-hidden';
 
   const iconSize = 'w-7 h-7 md:w-8 md:h-8';
 
@@ -118,10 +112,11 @@ const ContactFloatingButtons = () => {
         </>
       )}
 
-      {/* Zalo - Thông báo sẽ cập nhật sau */}
-      <button
-        type="button"
-        onClick={() => setZaloToastOpen(true)}
+      {/* Zalo */}
+      <a
+        href={ZALO_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
         className={buttonBase}
         style={{
           background:
@@ -136,21 +131,11 @@ const ContactFloatingButtons = () => {
         }}
         onMouseEnter={() => setHovered('zalo')}
         onMouseLeave={() => setHovered(null)}
-        aria-label="Zalo"
+        aria-label="Nhắn tin qua Zalo"
         title="Zalo"
       >
         <img src={zaloIcon} alt="Zalo" className={iconSize} />
-      </button>
-
-      {/* Toast Zalo "sẽ cập nhật sau" */}
-      {zaloToastOpen && (
-        <div
-          className="fixed right-4 bottom-24 md:right-6 md:bottom-32 z-[61] px-4 py-3 rounded-xl bg-white shadow-lg border border-gray-200 text-sm font-semibold animate-in fade-in duration-200"
-          style={{ color: '#2D2D2D', maxWidth: '240px' }}
-        >
-          Sẽ cập nhật sau.
-        </div>
-      )}
+      </a>
 
       {/* Messenger */}
       <a

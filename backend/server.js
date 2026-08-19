@@ -43,6 +43,7 @@ import mediaCaNhanBenhNhanRoutes from './routes/mediaCaNhanBenhNhanRoutes.js';
 import thongBaoRoutes from './routes/thongBaoRoutes.js';
 import externalNotificationRoutes from './routes/externalNotificationRoutes.js';
 import publicHealthAlertsRoutes from './routes/publicHealthAlertsRoutes.js';
+import khaoSatChatLuongRoutes from './routes/khaoSatChatLuongRoutes.js';
 import { startPhanCaScheduler } from './services/phanCaScheduler.js';
 import { startMediaCleanupScheduler } from './services/mediaCleanupScheduler.js';
 import { startBaiVietScheduler } from './services/baiVietScheduler.js';
@@ -110,6 +111,7 @@ app.use('/api/media-ca-nhan-benh-nhan', mediaCaNhanBenhNhanRoutes);
 app.use('/api/thong-bao', thongBaoRoutes);
 app.use('/api/external/notify', externalNotificationRoutes);
 app.use('/api/public/health-alerts', publicHealthAlertsRoutes);
+app.use('/api/khao-sat-chat-luong', khaoSatChatLuongRoutes);
 
 // Error handling
 app.use(notFound);

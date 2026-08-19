@@ -1,25 +1,28 @@
 import { useState, useEffect } from "react";
-import avatarImage from "../assets/avatar_session4.png";
+import { homeImages } from "../assets/homeImages";
 
 const Session4 = () => {
   const testimonials = [
     {
       id: 0,
-      quote: "Viện dưỡng lão mang đến một môi trường sống ấm áp, an toàn và tràn đầy yêu thương. Nhân viên chăm sóc tận tâm, luôn quan tâm đến sức khỏe và cảm xúc của từng cư dân.",
+      quote: "Trung tâm trường thọ mang đến một môi trường sống ấm áp, an toàn và tràn đầy yêu thương. Nhân viên chăm sóc tận tâm, luôn quan tâm đến sức khỏe và cảm xúc của từng cư dân.",
       name: "Nguyễn Hữu Minh",
       company: "Con trai cư dân",
+      avatar: homeImages.testimonialAvatars[0],
     },
     {
       id: 1,
       quote: "Dịch vụ chăm sóc tại đây thực sự xuất sắc. Đội ngũ nhân viên chuyên nghiệp, luôn hỗ trợ mọi nhu cầu của người cao tuổi. Tôi rất yên tâm khi cha mẹ mình sinh sống tại đây.",
       name: "Nguyễn Văn An",
       company: "Gia đình cư dân",
+      avatar: homeImages.testimonialAvatars[1],
     },
     {
       id: 2,
-      quote: "Viện dưỡng lão có cơ sở vật chất hiện đại, môi trường thoải mái và an toàn. Các hoạt động giải trí, rèn luyện sức khỏe và chế độ dinh dưỡng khoa học giúp người cao tuổi luôn vui vẻ và khỏe mạnh.",
+      quote: "Trung tâm trường thọ có cơ sở vật chất hiện đại, môi trường thoải mái và an toàn. Các hoạt động giải trí, rèn luyện sức khỏe và chế độ dinh dưỡng khoa học giúp người cao tuổi luôn vui vẻ và khỏe mạnh.",
       name: "Trần Thị Bình",
       company: "Gia đình cư dân",
+      avatar: homeImages.testimonialAvatars[2],
     },
   ];
 
@@ -94,7 +97,7 @@ const Session4 = () => {
             >
               <div className="flex items-center mb-4 sm:mb-6">
                 <img 
-                  src={avatarImage} 
+                  src={testimonial.avatar} 
                   alt={testimonial.name}
                   className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover border-2 flex-shrink-0"
                   style={{ borderColor: '#C9A870' }}

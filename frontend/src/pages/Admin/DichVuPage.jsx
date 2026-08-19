@@ -12,6 +12,7 @@ export default function DichVuPage() {
     ten_dich_vu: '',
     mo_ta_ngan: '',
     mo_ta_day_du: '',
+    gia_ngay: '',
     gia_thang: '',
     gia_quy: '',
     gia_nam: '',
@@ -71,6 +72,7 @@ export default function DichVuPage() {
       ten_dich_vu: dv.ten_dich_vu || '',
       mo_ta_ngan: dv.mo_ta_ngan || '',
       mo_ta_day_du: dv.mo_ta_day_du || '',
+      gia_ngay: dv.gia_ngay || '',
       gia_thang: dv.gia_thang || '',
       gia_quy: dv.gia_quy || '',
       gia_nam: dv.gia_nam || '',
@@ -95,6 +97,7 @@ export default function DichVuPage() {
       ten_dich_vu: '',
       mo_ta_ngan: '',
       mo_ta_day_du: '',
+      gia_ngay: '',
       gia_thang: '',
       gia_quy: '',
       gia_nam: '',
@@ -152,6 +155,12 @@ export default function DichVuPage() {
               </div>
               
               <div className="space-y-2 mb-4 pb-4 border-b border-gray-100">
+                {dv.gia_ngay && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Ngày:</span>
+                    <span className="font-bold text-[#4A90E2]">{parseInt(dv.gia_ngay).toLocaleString('vi-VN')} đ</span>
+                  </div>
+                )}
                 {dv.gia_thang && (
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Tháng:</span>
@@ -265,7 +274,20 @@ export default function DichVuPage() {
                   placeholder="Mô tả chi tiết về dịch vụ..."
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Giá ngày (đ)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.gia_ngay}
+                    onChange={(e) => setFormData({ ...formData, gia_ngay: e.target.value })}
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-white focus:outline-0 focus:ring-2 focus:ring-[#4A90E2]/50 text-gray-800"
+                    placeholder="0"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Giá tháng (đ)

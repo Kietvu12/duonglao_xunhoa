@@ -1,0 +1,466 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.w{padding:1rem 0 2rem;font-family:var(--font-sans)}
+.tabs{display:flex;gap:3px;margin-bottom:1.25rem;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:4px}
+.tab{flex:1;font-size:11px;font-weight:500;text-align:center;padding:6px 3px;border-radius:6px;cursor:pointer;color:var(--color-text-secondary);border:none;background:transparent;transition:all .15s}
+.tab.active{background:var(--color-background-primary);color:var(--color-text-primary);border:0.5px solid var(--color-border-tertiary)}
+.page{display:none}.page.active{display:block}
+
+.floor-banner{border-radius:var(--border-radius-lg);padding:11px 15px;margin-bottom:10px;border:0.5px solid var(--color-border-tertiary)}
+.fb-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+.fb-sub{font-size:11px;color:var(--color-text-secondary);line-height:1.5}
+
+/* layout map */
+.layout-map{display:grid;gap:8px;margin-bottom:10px}
+.layout-row{display:flex;gap:8px;align-items:stretch}
+.layout-zone{flex:1;border-radius:var(--border-radius-md);padding:8px 12px;border:0.5px solid var(--color-border-tertiary);font-size:11px}
+.lz-label{font-size:10px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:3px}
+.lz-name{font-size:12px;font-weight:500;margin-bottom:1px}
+.lz-desc{font-size:10px;color:var(--color-text-secondary)}
+.layout-arrow{display:flex;align-items:center;font-size:16px;color:var(--color-text-tertiary);padding:0 2px}
+.layout-center{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:6px 10px;text-align:center;font-size:10px;color:var(--color-text-tertiary);border:0.5px dashed var(--color-border-secondary);min-width:60px}
+
+.section-label{font-size:10px;font-weight:500;letter-spacing:.05em;color:var(--color-text-tertiary);text-transform:uppercase;margin:10px 0 5px}
+
+.day-block{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);margin-bottom:8px;overflow:hidden;background:var(--color-background-primary)}
+.day-head{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.dh-icon{font-size:16px;flex-shrink:0}
+.dh-info{flex:1}
+.dh-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.dh-desc{font-size:10px;color:var(--color-text-secondary)}
+.dh-badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:12px;white-space:nowrap;flex-shrink:0}
+
+.room-block{border-bottom:0.5px solid var(--color-border-tertiary)}
+.room-block:last-child{border-bottom:none}
+.room-label{display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.rl-name{font-size:11px;font-weight:500;color:var(--color-text-primary)}
+.rl-note{font-size:10px;color:var(--color-text-tertiary);margin-left:6px}
+.rl-beds{font-size:10px;color:var(--color-text-tertiary);margin-left:auto}
+.beds-row{display:flex;flex-wrap:wrap;gap:0;padding:0}
+.bed{padding:7px 10px;border-right:0.5px solid var(--color-border-tertiary);text-align:center;min-width:52px}
+.bed:last-child{border-right:none}
+.bed-n{font-size:14px;font-weight:500}
+.bed-l{font-size:9px;color:var(--color-text-tertiary)}
+
+.func-row{padding:7px 14px;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);font-size:10px;color:var(--color-text-tertiary);display:flex;align-items:center;gap:8px}
+.func-row:last-child{border-bottom:none}
+.func-badge{font-size:10px;font-weight:500;padding:1px 7px;border-radius:8px;margin-left:auto}
+
+/* summary */
+.sum-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:8px}
+.sum-head{padding:8px 14px;font-size:12px;font-weight:500;color:var(--color-text-primary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.sum-row{display:grid;grid-template-columns:20px 110px 1fr 70px;gap:6px;align-items:center;padding:7px 14px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px}
+.sum-row:last-child{border-bottom:none}
+.sum-icon{font-size:12px;text-align:center}
+.sum-name{font-weight:500;color:var(--color-text-primary)}
+.sum-detail{color:var(--color-text-secondary);line-height:1.4;font-size:10px}
+.sum-badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;text-align:center}
+.sum-func{background:var(--color-background-secondary)}
+
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:1rem}
+.stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px;text-align:center}
+.stat-n{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+.stat-l{font-size:10px;color:var(--color-text-secondary);margin-top:1px}
+.note{border-left:3px solid #c4b09a;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;padding:8px 12px;font-size:11px;color:var(--color-text-secondary);line-height:1.6;margin-top:8px;background:var(--color-background-secondary)}
+
+/* colors */
+.db-tung{--a:#2d6e2d;--b:#F2F8F2;--c:#a8d8a8}
+.db-truc{--a:#1a5c5c;--b:#F0F8F8;--c:#88cccc}
+.db-cuc{--a:#a06030;--b:#FFF9F0;--c:#e8c8a0}
+.db-mai{--a:#c07820;--b:#FFFBF0;--c:#f0d890}
+.db-maudon{--a:#7a3c7a;--b:#FDF5FB;--c:#d8a8d8}
+.db-hoahong{--a:#a03030;--b:#FFF5F5;--c:#f0b8b8}
+.db-cattuong{--a:#3c5ca0;--b:#F5F7FD;--c:#a8b8e8}
+.db-dao{--a:#c05878;--b:#FDF5F8;--c:#e8b8c8}
+.db-sen3{--a:#8a7055;--b:#FAF7F3;--c:#ddd4c8}
+.db-lavender{--a:#5a3c9a;--b:#FAF8FE;--c:#c8b8ec}
+.db-huongduong{--a:#8a6c10;--b:#FFFEF5;--c:#f0d880}
+.db-tulip{--a:#903070;--b:#FDF5FA;--c:#e0a8d8}
+
+[class*="db-"] .day-head{background:var(--b)}
+[class*="db-"] .dh-badge{background:var(--b);color:var(--a);border:0.5px solid var(--c)}
+[class*="db-"] .bed-n{color:var(--a)}
+[class*="db-"]{border-color:var(--c)}
+[class*="db-"] .room-label{background:var(--color-background-secondary)}
+</style>
+
+<div class="w">
+<div class="tabs">
+  <button class="tab active" onclick="go('t1')">Tầng 1</button>
+  <button class="tab" onclick="go('t2')">Tầng 2</button>
+  <button class="tab" onclick="go('t3')">Tầng 3</button>
+  <button class="tab" onclick="go('sum')">Tổng hợp</button>
+</div>
+
+<!-- TẦNG 1 -->
+<div id="page-t1" class="page active">
+  <div class="floor-banner" style="background:#FAF8F4;border-color:#d8d0c4">
+    <div class="fb-title">Tầng 1 — Tùng · Trúc · Cúc · Mai</div>
+    <div class="fb-sub">Trúc 103 → Kho · Nhà tắm chung cạnh kho · Bỏ hẳn đuôi 04 và 07 · Số giường bỏ số 4</div>
+  </div>
+
+  <!-- TÙNG -->
+  <div class="section-label">🌲 Dãy Tùng — bên lễ tân</div>
+  <div class="day-block db-tung">
+    <div class="day-head">
+      <span class="dh-icon">🌲</span>
+      <div class="dh-info"><div class="dh-name">Dãy Tùng</div><div class="dh-desc">Vững chắc · Gần lễ tân · Không có phòng 04 & 07</div></div>
+      <span class="dh-badge">101,102,103,105 · 8 giường</span>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Tùng 101</span><span class="rl-note">1 giường</span><span class="rl-beds">G1</span></div>
+      <div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">T.101</div></div></div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Tùng 102</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div>
+      <div class="beds-row">
+        <div class="bed"><div class="bed-n">1</div><div class="bed-l">T.102</div></div>
+        <div class="bed"><div class="bed-n">2</div><div class="bed-l">T.102</div></div>
+        <div class="bed"><div class="bed-n">3</div><div class="bed-l">T.102</div></div>
+      </div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Tùng 103</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div>
+      <div class="beds-row">
+        <div class="bed"><div class="bed-n">1</div><div class="bed-l">T.103</div></div>
+        <div class="bed"><div class="bed-n">2</div><div class="bed-l">T.103</div></div>
+      </div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Tùng 105</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div>
+      <div class="beds-row">
+        <div class="bed"><div class="bed-n">1</div><div class="bed-l">T.105</div></div>
+        <div class="bed"><div class="bed-n">2</div><div class="bed-l">T.105</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRÚC -->
+  <div class="section-label">🎋 Dãy Trúc — phục hồi chức năng</div>
+  <div class="day-block db-truc">
+    <div class="day-head">
+      <span class="dh-icon">🎋</span>
+      <div class="dh-info"><div class="dh-name">Dãy Trúc</div><div class="dh-desc">Trúc 103 → Kho · Nhà tắm chung cạnh kho</div></div>
+      <span class="dh-badge">101,102 · Kho+NTắm · 6 giường</span>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Trúc 101</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div>
+      <div class="beds-row">
+        <div class="bed"><div class="bed-n">1</div><div class="bed-l">Trúc 101</div></div>
+        <div class="bed"><div class="bed-n">2</div><div class="bed-l">Trúc 101</div></div>
+        <div class="bed"><div class="bed-n">3</div><div class="bed-l">Trúc 101</div></div>
+      </div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Trúc 102</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div>
+      <div class="beds-row">
+        <div class="bed"><div class="bed-n">1</div><div class="bed-l">Trúc 102</div></div>
+        <div class="bed"><div class="bed-n">2</div><div class="bed-l">Trúc 102</div></div>
+        <div class="bed"><div class="bed-n">3</div><div class="bed-l">Trúc 102</div></div>
+      </div>
+    </div>
+    <div class="func-row" style="background:#F0F8F8">
+      <span>🗄️ Trúc 103 → Kho</span>
+      <span class="func-badge" style="background:#D8F0F0;color:#1a5c5c;border:0.5px solid #88cccc">Kho</span>
+    </div>
+    <div class="func-row" style="background:#F0F8F8">
+      <span>🛁 Nhà tắm chung — cạnh kho</span>
+      <span class="func-badge" style="background:#D8F0F0;color:#1a5c5c;border:0.5px solid #88cccc">Tiện ích</span>
+    </div>
+  </div>
+
+  <!-- CÚC -->
+  <div class="section-label">🌼 Dãy Cúc ⭐ — khu y tế</div>
+  <div class="day-block db-cuc">
+    <div class="day-head">
+      <span class="dh-icon">🌼</span>
+      <div class="dh-info"><div class="dh-name">Dãy Cúc — Trường Thọ ⭐</div><div class="dh-desc">Khu y tế · 101,102,103,105 (bỏ 04)</div></div>
+      <span class="dh-badge">101,102,103,105 · 28 giường</span>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Cúc 101</span><span class="rl-note">8 giường</span><span class="rl-beds">G1,2,3,5,6,7,8,9</span></div>
+      <div class="beds-row">
+        <div class="bed"><div class="bed-n">1</div><div class="bed-l">C.101</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">C.101</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">C.101</div></div><div class="bed"><div class="bed-n">5</div><div class="bed-l">C.101</div></div><div class="bed"><div class="bed-n">6</div><div class="bed-l">C.101</div></div><div class="bed"><div class="bed-n">7</div><div class="bed-l">C.101</div></div><div class="bed"><div class="bed-n">8</div><div class="bed-l">C.101</div></div><div class="bed"><div class="bed-n">9</div><div class="bed-l">C.101</div></div>
+      </div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Cúc 102</span><span class="rl-note">8 giường</span><span class="rl-beds">G1,2,3,5,6,7,8,9</span></div>
+      <div class="beds-row">
+        <div class="bed"><div class="bed-n">1</div><div class="bed-l">C.102</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">C.102</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">C.102</div></div><div class="bed"><div class="bed-n">5</div><div class="bed-l">C.102</div></div><div class="bed"><div class="bed-n">6</div><div class="bed-l">C.102</div></div><div class="bed"><div class="bed-n">7</div><div class="bed-l">C.102</div></div><div class="bed"><div class="bed-n">8</div><div class="bed-l">C.102</div></div><div class="bed"><div class="bed-n">9</div><div class="bed-l">C.102</div></div>
+      </div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Cúc 103</span><span class="rl-note">6 giường</span><span class="rl-beds">G1,2,3,5,6,7</span></div>
+      <div class="beds-row">
+        <div class="bed"><div class="bed-n">1</div><div class="bed-l">C.103</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">C.103</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">C.103</div></div><div class="bed"><div class="bed-n">5</div><div class="bed-l">C.103</div></div><div class="bed"><div class="bed-n">6</div><div class="bed-l">C.103</div></div><div class="bed"><div class="bed-n">7</div><div class="bed-l">C.103</div></div>
+      </div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Cúc 105</span><span class="rl-note">6 giường</span><span class="rl-beds">G1,2,3,5,6,7</span></div>
+      <div class="beds-row">
+        <div class="bed"><div class="bed-n">1</div><div class="bed-l">C.105</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">C.105</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">C.105</div></div><div class="bed"><div class="bed-n">5</div><div class="bed-l">C.105</div></div><div class="bed"><div class="bed-n">6</div><div class="bed-l">C.105</div></div><div class="bed"><div class="bed-n">7</div><div class="bed-l">C.105</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAI -->
+  <div class="section-label">🌸 Dãy Mai — hướng cổng</div>
+  <div class="day-block db-mai">
+    <div class="day-head">
+      <span class="dh-icon">🌸</span>
+      <div class="dh-info"><div class="dh-name">Dãy Mai</div><div class="dh-desc">Hướng cổng · 101,102,103,105,106,108,109,110</div></div>
+      <span class="dh-badge">8 phòng · 20 giường</span>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Mai 101</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div>
+      <div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">M.101</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">M.101</div></div></div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Mai 102</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div>
+      <div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">M.102</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">M.102</div></div></div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Mai 103</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div>
+      <div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">M.103</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">M.103</div></div></div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Mai 105</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div>
+      <div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">M.105</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">M.105</div></div></div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Mai 106</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div>
+      <div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">M.106</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">M.106</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">M.106</div></div></div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Mai 108</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div>
+      <div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">M.108</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">M.108</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">M.108</div></div></div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Mai 109</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div>
+      <div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">M.109</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">M.109</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">M.109</div></div></div>
+    </div>
+    <div class="room-block">
+      <div class="room-label"><span class="rl-name">Mai 110</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div>
+      <div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">M.110</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">M.110</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">M.110</div></div></div>
+    </div>
+  </div>
+  <div class="note" style="border-color:#c4b09a">Tầng 1 · Trúc 103=Kho · Nhà tắm chung cạnh kho · Số giường mỗi phòng: 1,2,3,5,6,7,8,9... (bỏ số 4)</div>
+</div>
+
+<!-- TẦNG 2 -->
+<div id="page-t2" class="page">
+  <div class="floor-banner" style="background:#FDFAF8;border-color:#d8d0c4">
+    <div class="fb-title">Tầng 2 — Bố cục từ thang máy ra</div>
+    <div class="fb-sub">Phải: Mẫu Đơn (ao sen) ↔ Hoa Hồng song song · Trái: Đào (vườn rau) ↔ Cát Tường song song · Hoa Hồng 210=3G · Cạnh Đào 203=NTắm chung · Cạnh Đào 202=SH chung</div>
+  </div>
+
+  <!-- BẢN ĐỒ BỐ CỤC -->
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:10px;font-size:11px;color:var(--color-text-secondary)">
+    <div style="display:grid;grid-template-columns:1fr 60px 1fr;gap:6px;align-items:center;margin-bottom:6px">
+      <div style="background:#FDF5FB;border:0.5px solid #d8a8d8;border-radius:8px;padding:6px 10px;text-align:center">
+        <div style="font-size:10px;color:#7a3c7a;font-weight:500">🌼 Mẫu Đơn</div>
+        <div style="font-size:9px;color:#7a3c7a">Phải · Hướng ao sen</div>
+      </div>
+      <div style="text-align:center;font-size:9px;color:var(--color-text-tertiary)">song<br>song</div>
+      <div style="background:#FFF5F5;border:0.5px solid #f0b8b8;border-radius:8px;padding:6px 10px;text-align:center">
+        <div style="font-size:10px;color:#a03030;font-weight:500">🌹 Hoa Hồng</div>
+        <div style="font-size:9px;color:#a03030">Phải · Hướng ao sen</div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:10px;color:var(--color-text-tertiary);margin-bottom:6px">⬆ Thang máy ⬆</div>
+    <div style="display:grid;grid-template-columns:1fr 60px 1fr;gap:6px;align-items:center">
+      <div style="background:#FDF5F8;border:0.5px solid #e8b8c8;border-radius:8px;padding:6px 10px;text-align:center">
+        <div style="font-size:10px;color:#c05878;font-weight:500">🌺 Đào</div>
+        <div style="font-size:9px;color:#c05878">Trái · Hướng vườn rau</div>
+      </div>
+      <div style="text-align:center;font-size:9px;color:var(--color-text-tertiary)">song<br>song</div>
+      <div style="background:#F5F7FD;border:0.5px solid #a8b8e8;border-radius:8px;padding:6px 10px;text-align:center">
+        <div style="font-size:10px;color:#3c5ca0;font-weight:500">🔷 Cát Tường</div>
+        <div style="font-size:9px;color:#3c5ca0">Trái · Song song Đào</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MẪU ĐƠN -->
+  <div class="section-label">🌼 Mẫu Đơn — phải · hướng ao sen</div>
+  <div class="day-block db-maudon">
+    <div class="day-head">
+      <span class="dh-icon">🌼</span>
+      <div class="dh-info"><div class="dh-name">Dãy Mẫu Đơn · VIP 201 · View ao sen</div><div class="dh-desc">201,202,203,205,206,208,209,210 · bỏ 04 & 07</div></div>
+      <span class="dh-badge">8 phòng · 20G</span>
+    </div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">M.Đơn 201</span><span class="rl-note">3 giường · VIP ⭐</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">MĐ.201</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">MĐ.201</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">MĐ.201</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">M.Đơn 202</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">MĐ.202</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">MĐ.202</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">MĐ.202</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">M.Đơn 203</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">MĐ.203</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">MĐ.203</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">MĐ.203</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">M.Đơn 205</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">MĐ.205</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">MĐ.205</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">MĐ.205</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">M.Đơn 206</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">MĐ.206</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">MĐ.206</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">M.Đơn 208</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">MĐ.208</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">MĐ.208</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">M.Đơn 209</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">MĐ.209</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">MĐ.209</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">M.Đơn 210</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">MĐ.210</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">MĐ.210</div></div></div></div>
+  </div>
+
+  <!-- HOA HỒNG -->
+  <div class="section-label">🌹 Hoa Hồng — phải · song song Mẫu Đơn · hướng ao sen</div>
+  <div class="day-block db-hoahong">
+    <div class="day-head">
+      <span class="dh-icon">🌹</span>
+      <div class="dh-info"><div class="dh-name">Dãy Hoa Hồng · Song song Mẫu Đơn</div><div class="dh-desc">201,202,203,205,206,208,209,210 · 210 chỉ 3 giường</div></div>
+      <span class="dh-badge">8 phòng · 21G</span>
+    </div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">H.Hồng 201</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">HH.201</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">HH.201</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">H.Hồng 202</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">HH.202</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">HH.202</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">H.Hồng 203</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">HH.203</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">HH.203</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">H.Hồng 205</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">HH.205</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">HH.205</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">H.Hồng 206</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">HH.206</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">HH.206</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">HH.206</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">H.Hồng 208</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">HH.208</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">HH.208</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">HH.208</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">H.Hồng 209</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">HH.209</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">HH.209</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">HH.209</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">H.Hồng 210</span><span class="rl-note">3 giường ← điều chỉnh</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">HH.210</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">HH.210</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">HH.210</div></div></div></div>
+  </div>
+
+  <!-- ĐÀO -->
+  <div class="section-label">🌺 Đào — trái · hướng vườn rau</div>
+  <div class="day-block db-dao">
+    <div class="day-head">
+      <span class="dh-icon">🌺</span>
+      <div class="dh-info"><div class="dh-name">Dãy Đào · Trái · Vườn rau</div><div class="dh-desc">Cạnh 202=SH chung · Cạnh 203=NTắm chung</div></div>
+      <span class="dh-badge">3 phòng · 8G</span>
+    </div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Đào 201</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Đ.201</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Đ.201</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">Đ.201</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Đào 202</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Đ.202</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Đ.202</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">Đ.202</div></div></div></div>
+    <div class="func-row" style="background:#FDF5F8"><span>🎭 Phòng sinh hoạt chung — cạnh Đào 202</span><span class="func-badge" style="background:#F8E0E8;color:#c05878;border:0.5px solid #e8b8c8">SH chung</span></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Đào 203</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Đ.203</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Đ.203</div></div></div></div>
+    <div class="func-row" style="background:#FDF5F8"><span>🛁 Nhà tắm chung — cạnh Đào 203</span><span class="func-badge" style="background:#F8E0E8;color:#c05878;border:0.5px solid #e8b8c8">NTắm chung</span></div>
+  </div>
+
+  <!-- CÁT TƯỜNG -->
+  <div class="section-label">🔷 Cát Tường — trái · song song Đào</div>
+  <div class="day-block db-cattuong">
+    <div class="day-head">
+      <span class="dh-icon">🔷</span>
+      <div class="dh-info"><div class="dh-name">Dãy Cát Tường · Song song Đào · Trái</div><div class="dh-desc">201,202,203,205,206,208,209,210</div></div>
+      <span class="dh-badge">8 phòng · 20G</span>
+    </div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">C.Tường 201</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">CT.201</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">CT.201</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">C.Tường 202</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">CT.202</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">CT.202</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">C.Tường 203</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">CT.203</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">CT.203</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">C.Tường 205</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">CT.205</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">CT.205</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">C.Tường 206</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">CT.206</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">CT.206</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">CT.206</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">C.Tường 208</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">CT.208</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">CT.208</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">CT.208</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">C.Tường 209</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">CT.209</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">CT.209</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">CT.209</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">C.Tường 210</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">CT.210</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">CT.210</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">CT.210</div></div></div></div>
+  </div>
+  <div class="note" style="border-color:#a8b8e8">Tầng 2 · Phải: Mẫu Đơn ↔ Hoa Hồng (ao sen) · Trái: Đào ↔ Cát Tường (vườn rau) · Hoa Hồng 210=3G · SH chung cạnh Đào 202 · NTắm chung cạnh Đào 203</div>
+</div>
+
+<!-- TẦNG 3 -->
+<div id="page-t3" class="page">
+  <div class="floor-banner" style="background:#FAF8FE;border-color:#c8b8ec">
+    <div class="fb-title">Tầng 3 — Sen · Tulip (vị trí cũ Lavender) · Hướng Dương · Lavender (vị trí cũ Tulip)</div>
+    <div class="fb-sub">Tulip vào vị trí 301–310 · Lavender vào vị trí 301–310 của Tulip cũ · Tulip 303=2G · Bỏ đuôi 04 & 07</div>
+  </div>
+
+  <!-- SEN -->
+  <div class="section-label">🪷 Dãy Sen — cạnh hội trường</div>
+  <div class="day-block db-sen3">
+    <div class="day-head">
+      <span class="dh-icon">🪷</span>
+      <div class="dh-info"><div class="dh-name">Dãy Sen · Cạnh hội trường</div><div class="dh-desc">301,302,303 · 2 giường mỗi phòng</div></div>
+      <span class="dh-badge">3 phòng · 6G</span>
+    </div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Sen 301</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Sen.301</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Sen.301</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Sen 302</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Sen.302</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Sen.302</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Sen 303</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Sen.303</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Sen.303</div></div></div></div>
+  </div>
+
+  <!-- TULIP — vị trí cũ của Lavender -->
+  <div class="section-label">🌷 Dãy Tulip — VIP · vị trí cũ Lavender (301–310)</div>
+  <div class="day-block db-tulip">
+    <div class="day-head">
+      <span class="dh-icon">🌷</span>
+      <div class="dh-info"><div class="dh-name">Dãy Tulip — VIP · Vị trí cũ Lavender</div><div class="dh-desc">301,302,303,305,306,308,309,310 · 303=2G (điều chỉnh)</div></div>
+      <span class="dh-badge">8 phòng · 19G</span>
+    </div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Tulip 301</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Tulip.301</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Tulip.301</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Tulip 302</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Tulip.302</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Tulip.302</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Tulip 303</span><span class="rl-note">2 giường ← điều chỉnh</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Tulip.303</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Tulip.303</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Tulip 305</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Tulip.305</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Tulip.305</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Tulip 306</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Tulip.306</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Tulip.306</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">Tulip.306</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Tulip 308</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Tulip.308</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Tulip.308</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">Tulip.308</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Tulip 309</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Tulip.309</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Tulip.309</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">Tulip.309</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Tulip 310</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Tulip.310</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Tulip.310</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">Tulip.310</div></div></div></div>
+  </div>
+
+  <!-- HƯỚNG DƯƠNG -->
+  <div class="section-label">🌻 Dãy Hướng Dương</div>
+  <div class="day-block db-huongduong">
+    <div class="day-head">
+      <span class="dh-icon">🌻</span>
+      <div class="dh-info"><div class="dh-name">Dãy Hướng Dương</div><div class="dh-desc">301,302 · 6 giường mỗi phòng</div></div>
+      <span class="dh-badge">2 phòng · 12G</span>
+    </div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">H.Dương 301</span><span class="rl-note">6 giường</span><span class="rl-beds">G1,2,3,5,6,7</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">HD.301</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">HD.301</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">HD.301</div></div><div class="bed"><div class="bed-n">5</div><div class="bed-l">HD.301</div></div><div class="bed"><div class="bed-n">6</div><div class="bed-l">HD.301</div></div><div class="bed"><div class="bed-n">7</div><div class="bed-l">HD.301</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">H.Dương 302</span><span class="rl-note">6 giường</span><span class="rl-beds">G1,2,3,5,6,7</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">HD.302</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">HD.302</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">HD.302</div></div><div class="bed"><div class="bed-n">5</div><div class="bed-l">HD.302</div></div><div class="bed"><div class="bed-n">6</div><div class="bed-l">HD.302</div></div><div class="bed"><div class="bed-n">7</div><div class="bed-l">HD.302</div></div></div></div>
+  </div>
+
+  <!-- LAVENDER — vị trí cũ của Tulip -->
+  <div class="section-label">💜 Dãy Lavender — Premium · vị trí cũ Tulip (301–310)</div>
+  <div class="day-block db-lavender">
+    <div class="day-head">
+      <span class="dh-icon">💜</span>
+      <div class="dh-info"><div class="dh-name">Dãy Lavender — Vị trí cũ Tulip</div><div class="dh-desc">301,302,303,305,306,308,309,310 · Premium · Chữa lành</div></div>
+      <span class="dh-badge">8 phòng · 20G</span>
+    </div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Lavender 301</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Lav.301</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Lav.301</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Lavender 302</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Lav.302</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Lav.302</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Lavender 303</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Lav.303</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Lav.303</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Lavender 305</span><span class="rl-note">2 giường</span><span class="rl-beds">G1,2</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Lav.305</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Lav.305</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Lavender 306</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Lav.306</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Lav.306</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">Lav.306</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Lavender 308</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Lav.308</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Lav.308</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">Lav.308</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Lavender 309</span><span class="rl-note">3 giường</span><span class="rl-beds">G1,2,3</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Lav.309</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Lav.309</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">Lav.309</div></div></div></div>
+    <div class="room-block"><div class="room-label"><span class="rl-name">Lavender 310</span><span class="rl-note">5 giường</span><span class="rl-beds">G1,2,3,5,6</span></div><div class="beds-row"><div class="bed"><div class="bed-n">1</div><div class="bed-l">Lav.310</div></div><div class="bed"><div class="bed-n">2</div><div class="bed-l">Lav.310</div></div><div class="bed"><div class="bed-n">3</div><div class="bed-l">Lav.310</div></div><div class="bed"><div class="bed-n">5</div><div class="bed-l">Lav.310</div></div><div class="bed"><div class="bed-n">6</div><div class="bed-l">Lav.310</div></div></div></div>
+  </div>
+  <div class="note" style="border-color:#c8b8ec">Tầng 3 · Tulip vào vị trí Lavender cũ · Lavender vào vị trí Tulip cũ · Tulip 303=2G · Số giường bỏ số 4 (1,2,3,5,6,7...)</div>
+</div>
+
+<!-- TỔNG HỢP -->
+<div id="page-sum" class="page">
+  <div class="sum-card" style="border-color:#d8d0c4">
+    <div class="sum-head" style="background:#FAF8F4;border-color:#d8d0c4">Tầng 1</div>
+    <div class="sum-row"><span class="sum-icon">🌲</span><span class="sum-name">Tùng</span><span class="sum-detail">101,102,103,105 · Bên lễ tân</span><span class="sum-badge" style="background:#E0F0E0;color:#2d6e2d;border:0.5px solid #a8d8a8">8G</span></div>
+    <div class="sum-row"><span class="sum-icon">🎋</span><span class="sum-name">Trúc</span><span class="sum-detail">101,102 · 103=Kho · NTắm chung cạnh kho</span><span class="sum-badge" style="background:#D8F0F0;color:#1a5c5c;border:0.5px solid #88cccc">6G</span></div>
+    <div class="sum-row"><span class="sum-icon">🌼</span><span class="sum-name">Cúc ⭐</span><span class="sum-detail">101,102,103,105 · Khu y tế · G: 1,2,3,5,6,7,8,9</span><span class="sum-badge" style="background:#FFF0E0;color:#a06030;border:0.5px solid #e8c8a0">28G</span></div>
+    <div class="sum-row"><span class="sum-icon">🌸</span><span class="sum-name">Mai</span><span class="sum-detail">101,102,103,105,106,108,109,110 · Hướng cổng</span><span class="sum-badge" style="background:#FFF6E0;color:#c07820;border:0.5px solid #f0d890">20G</span></div>
+  </div>
+  <div class="sum-card" style="border-color:#d8d0c4">
+    <div class="sum-head" style="background:#FDFAF8;border-color:#d8d0c4">Tầng 2</div>
+    <div class="sum-row"><span class="sum-icon">🌼</span><span class="sum-name">Mẫu Đơn</span><span class="sum-detail">201–210 (bỏ 04,07) · Phải · Ao sen · VIP 201</span><span class="sum-badge" style="background:#F5E8F5;color:#7a3c7a;border:0.5px solid #d8a8d8">20G</span></div>
+    <div class="sum-row"><span class="sum-icon">🌹</span><span class="sum-name">Hoa Hồng</span><span class="sum-detail">201–210 (bỏ 04,07) · Phải · Song song MĐ · 210=3G</span><span class="sum-badge" style="background:#FFE8E8;color:#a03030;border:0.5px solid #f0b8b8">21G</span></div>
+    <div class="sum-row"><span class="sum-icon">🌺</span><span class="sum-name">Đào</span><span class="sum-detail">201,202,203 · Trái · Vườn rau · SH chung~202 · NTắm~203</span><span class="sum-badge" style="background:#F8E0E8;color:#c05878;border:0.5px solid #e8b8c8">8G</span></div>
+    <div class="sum-row"><span class="sum-icon">🔷</span><span class="sum-name">Cát Tường</span><span class="sum-detail">201–210 (bỏ 04,07) · Trái · Song song Đào</span><span class="sum-badge" style="background:#E8EDF8;color:#3c5ca0;border:0.5px solid #a8b8e8">20G</span></div>
+  </div>
+  <div class="sum-card" style="border-color:#c8b8ec">
+    <div class="sum-head" style="background:#FAF8FE;border-color:#c8b8ec">Tầng 3</div>
+    <div class="sum-row"><span class="sum-icon">🪷</span><span class="sum-name">Sen</span><span class="sum-detail">301,302,303 · Cạnh hội trường · 2G/phòng</span><span class="sum-badge" style="background:#F5F1EC;color:#8a7055;border:0.5px solid #ddd4c8">6G</span></div>
+    <div class="sum-row"><span class="sum-icon">🌷</span><span class="sum-name">Tulip ↔</span><span class="sum-detail">Vị trí cũ Lavender · 301–310 (bỏ 04,07) · 303=2G</span><span class="sum-badge" style="background:#F5E0F0;color:#903070;border:0.5px solid #e0a8d8">19G</span></div>
+    <div class="sum-row"><span class="sum-icon">🌻</span><span class="sum-name">Hướng Dương</span><span class="sum-detail">301,302 · 6G/phòng · G: 1,2,3,5,6,7</span><span class="sum-badge" style="background:#FFF6E0;color:#8a6c10;border:0.5px solid #f0d880">12G</span></div>
+    <div class="sum-row"><span class="sum-icon">💜</span><span class="sum-name">Lavender ↔</span><span class="sum-detail">Vị trí cũ Tulip · 301–310 (bỏ 04,07) · 310=5G</span><span class="sum-badge" style="background:#EEE8F8;color:#5a3c9a;border:0.5px solid #c8b8ec">20G</span></div>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-n">162</div><div class="stat-l">Tổng giường (bỏ số 4)</div></div>
+    <div class="stat"><div class="stat-n">12</div><div class="stat-l">Dãy · 3 tầng</div></div>
+    <div class="stat"><div class="stat-n">1,2,3,5...</div><div class="stat-l">Số giường trong phòng</div></div>
+  </div>
+  <div class="note">Quy tắc số giường trong mỗi phòng: 1, 2, 3, 5, 6, 7, 8, 9... (bỏ số 4) · Phòng Cúc 8 giường: 1,2,3,5,6,7,8,9 · Phòng 6 giường: 1,2,3,5,6,7 · Phòng 5 giường: 1,2,3,5,6 · Phòng 3 giường: 1,2,3 · Phòng 2 giường: 1,2</div>
+</div>
+</div>
+
+<script>
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const m={t1:0,t2:1,t3:2,sum:3};
+  document.querySelectorAll('.tab')[m[id]].classList.add('active');
+}
+</script>

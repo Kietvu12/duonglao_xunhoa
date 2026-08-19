@@ -1,0 +1,393 @@
+
+<h2 class="sr-only">So sánh chi phí kế hoạch 12 tháng viện dưỡng lão cho 30 cụ và 50 cụ</h2>
+<style>
+*{box-sizing:border-box;}
+.w{padding:1rem 0;font-family:var(--font-sans);}
+.tab-row{display:flex;gap:0;margin-bottom:1.25rem;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);overflow:hidden;width:fit-content;}
+.tab-btn{padding:8px 22px;font-size:13px;cursor:pointer;background:transparent;border:none;color:var(--color-text-secondary);border-right:0.5px solid var(--color-border-secondary);}
+.tab-btn:last-child{border-right:none;}
+.tab-btn.on{background:#1D9E75;color:#fff;font-weight:500;}
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem;}
+.cmp-card{border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);overflow:hidden;}
+.cmp-hdr{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
+.cmp-hdr-title{font-weight:500;font-size:14px;}
+.cmp-hdr-sub{font-size:11px;margin-top:1px;}
+.cmp-total{font-size:18px;font-weight:500;padding:10px 14px 4px;}
+.cmp-pp{font-size:11px;color:var(--color-text-tertiary);padding:0 14px 10px;}
+.cmp-divider{height:0.5px;background:var(--color-border-tertiary);}
+.diff-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--color-background-secondary);font-size:12px;border-radius:0 0 var(--border-radius-lg) var(--border-radius-lg);}
+.mblock{margin-bottom:.85rem;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;}
+.mhdr{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:var(--color-background-secondary);cursor:pointer;user-select:none;}
+.mhdr-l{display:flex;align-items:center;gap:8px;}
+.mnum{font-size:11px;font-weight:500;color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mname{font-weight:500;font-size:13px;color:var(--color-text-primary);}
+.mhdr-costs{display:flex;gap:12px;align-items:center;}
+.mc30{font-size:12px;font-weight:500;color:#0F6E56;}
+.mc50{font-size:12px;font-weight:500;color:#185FA5;}
+.chev{font-size:10px;color:var(--color-text-tertiary);transition:transform .15s;}
+.chev.o{transform:rotate(180deg);}
+.mbody{border-top:0.5px solid var(--color-border-tertiary);}
+.ghdr{padding:6px 13px 3px;font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);}
+.ev-row{display:grid;grid-template-columns:1fr 80px 80px;gap:8px;padding:8px 13px;border-bottom:0.5px solid var(--color-border-tertiary);align-items:start;}
+.ev-row:last-child{border-bottom:none;}
+.ev-row.big{background:var(--color-background-primary);}
+.ev-row.sm{background:transparent;}
+.ev-top{display:flex;gap:6px;align-items:flex-start;}
+.ev-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.ev-name{font-size:12px;font-weight:500;color:var(--color-text-primary);}
+.ev-date{font-size:10px;color:var(--color-text-tertiary);}
+.ev-desc{font-size:11px;color:var(--color-text-secondary);margin-top:2px;line-height:1.45;}
+.cost-col{text-align:right;}
+.cost-val{font-size:12px;font-weight:500;}
+.cost-30{color:#0F6E56;}
+.cost-50{color:#185FA5;}
+.cost-brk{font-size:9px;color:var(--color-text-tertiary);margin-top:1px;line-height:1.4;}
+.free-tag{font-size:9px;padding:1px 5px;border-radius:5px;background:#E1F5EE;color:#085041;}
+.col-hdr-row{display:grid;grid-template-columns:1fr 80px 80px;gap:8px;padding:5px 13px;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-secondary);}
+.col-lbl{font-size:10px;font-weight:500;text-align:right;}
+.mfoot{display:flex;justify-content:space-between;align-items:center;padding:7px 13px;background:var(--color-background-secondary);border-top:1px solid var(--color-border-secondary);font-size:11px;}
+.mfoot span{color:var(--color-text-secondary);}
+.mfoot-vals{display:flex;gap:16px;}
+.grand{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:1rem 0;}
+.grand-card{padding:12px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);}
+.grand-lbl{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;}
+.grand-val{font-size:20px;font-weight:500;}
+.grand-pp{font-size:11px;color:var(--color-text-tertiary);margin-top:2px;}
+.note{background:var(--color-background-secondary);border-left:3px solid #1D9E75;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;padding:.65rem 1rem;font-size:11px;color:var(--color-text-secondary);margin-top:1rem;line-height:1.7;}
+.btn-row{margin-top:.85rem;display:flex;gap:8px;flex-wrap:wrap;}
+.abtn{background:transparent;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:6px 13px;font-size:12px;cursor:pointer;color:var(--color-text-secondary);}
+.abtn:hover{background:var(--color-background-secondary);}
+.legend{display:flex;gap:14px;font-size:11px;color:var(--color-text-secondary);margin-bottom:1rem;align-items:center;flex-wrap:wrap;}
+.ldot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;}
+</style>
+
+<div class="w">
+
+<div class="tab-row">
+  <button class="tab-btn on" onclick="setView('both',this)">So sánh 30 vs 50 cụ</button>
+  <button class="tab-btn" onclick="setView('30',this)">30 cụ</button>
+  <button class="tab-btn" onclick="setView('50',this)">50 cụ</button>
+</div>
+
+<div id="summary-area"></div>
+
+<div class="legend">
+  <div><span class="ldot" style="background:#1D9E75;"></span>Ngày lễ lớn</div>
+  <div><span class="ldot" style="background:#888780;"></span>Hoạt động nội bộ</div>
+  <div><span style="font-weight:500;color:#0F6E56;">Xanh</span> = 30 cụ &nbsp;·&nbsp; <span style="font-weight:500;color:#185FA5;">Xanh dương</span> = 50 cụ</div>
+</div>
+
+<div id="months-area"></div>
+
+<div class="grand" id="grand-area"></div>
+
+<div class="note">
+  <strong>Cách tính chi phí theo quy mô:</strong> Chi phí cố định (trang trí, thuê dịch vụ, âm thanh, in ấn) giữ nguyên. Chi phí biến đổi theo đầu người (quà, ăn uống, hoa) tính thẳng × số cụ. Hoạt động nội bộ chỉ tính vật liệu tiêu hao. Mức thực tế dao động ±20%.
+</div>
+<div class="btn-row">
+  <button class="abtn" onclick="sendPrompt('Xuất bảng chi phí kế hoạch viện dưỡng lão 30 cụ và 50 cụ ra file Excel')">Xuất Excel ↗</button>
+  <button class="abtn" onclick="sendPrompt('Lên kế hoạch chi tiết tổ chức Lễ Vu Lan báo hiếu trong viện dưỡng lão 30 cụ')">Chi tiết Lễ Vu Lan ↗</button>
+  <button class="abtn" onclick="sendPrompt('Gợi ý cách xin tài trợ cho viện dưỡng lão')">Cách gây quỹ ↗</button>
+</div>
+</div>
+
+<script>
+const MONTHS=[
+  {id:1,label:"Tháng 1",color:"#0F6E56",
+   big:[{group:"Lễ Tết & Năm mới",items:[
+     {name:"Tết Dương lịch",date:"1/1",desc:"Tiệc đón năm mới, xem pháo hoa TV, karaoke",
+      costs:[{k:"Quà tặng",unit:40000,type:"pp"},{k:"Ăn tiệc nhẹ",unit:80000,type:"pp"},{k:"Trang trí, bong bóng",unit:400000,type:"fixed"}]}
+   ]}],
+   small:[
+     {name:"Tập khí công & dưỡng sinh",date:"Hàng sáng",desc:"30 phút/ngày, nhân viên hướng dẫn",costs:[]},
+     {name:"Chiếu phim hoài cổ",date:"Tối cuối tuần",desc:"Phim kinh điển, phục vụ trà nóng",costs:[{k:"Trà, bánh quy",unit:200000,type:"fixed"}]},
+     {name:"Viết thư tay gửi con cháu",date:"Giữa tháng",desc:"Giấy, bút, bưu thiếp đầu năm",costs:[{k:"Giấy, phong bì",unit:150000,type:"fixed"}]},
+   ]},
+  {id:2,label:"Tháng 1–2 (Tết Âm)",color:"#993C1D",
+   big:[
+     {group:"Lễ Tết Nguyên Đán",items:[
+       {name:"Tết Nguyên Đán",date:"Mùng 1 Tết",desc:"Mâm cỗ, lì xì, múa lân, chúc Tết",
+        costs:[{k:"Mâm cỗ Tết",unit:200000,type:"pp"},{k:"Lì xì",unit:100000,type:"pp"},{k:"Thuê múa lân",unit:1500000,type:"fixed"},{k:"Trang trí hoa mai/đào",unit:800000,type:"fixed"}]},
+       {name:"Rằm tháng Giêng",date:"15/1 âm",desc:"Cúng rằm, làm chè, thả đèn hoa đăng",
+        costs:[{k:"Hương hoa, lễ vật",unit:500000,type:"fixed"},{k:"Nguyên liệu làm chè",unit:15000,type:"pp"},{k:"Đèn hoa đăng",unit:300000,type:"fixed"}]},
+     ]},
+     {group:"Chuẩn bị Tết",items:[
+       {name:"Gói bánh chưng cùng nhau",date:"26–28 tháng Chạp",desc:"Gói bánh chưng, bánh tét truyền thống",
+        costs:[{k:"Lá dong, gạo nếp, đậu, thịt",unit:20000,type:"pp"},{k:"Dây lạt, nồi luộc",unit:200000,type:"fixed"}]},
+     ]},
+   ],
+   small:[
+     {name:"Kể chuyện Tết xưa",date:"Tuần đầu",desc:"Chia sẻ ký ức Tết, ghi chép thành tập",costs:[]},
+     {name:"Làm lì xì handmade",date:"Trước Tết",desc:"Gấp phong bao đỏ, vẽ trang trí hoa mai",costs:[{k:"Giấy đỏ, bút màu",unit:100000,type:"fixed"}]},
+   ]},
+  {id:3,label:"Tháng 3",color:"#993556",
+   big:[{group:"Tôn vinh Phụ nữ",items:[
+     {name:"Ngày Quốc tế Phụ nữ",date:"8/3",desc:"Tặng hoa, làm đẹp tóc, tiệc trà, văn nghệ",
+      costs:[{k:"Hoa tươi (cụ bà ~60%)",unit:50000,type:"pp60"},{k:"Tiệc trà bánh ngọt",unit:800000,type:"fixed"},{k:"Làm đẹp tóc",unit:600000,type:"fixed"},{k:"Trang trí, băng rôn",unit:300000,type:"fixed"}]}
+   ]}],
+   small:[
+     {name:"Lớp học vẽ tranh màu nước",date:"Tuần 2",desc:"Vẽ đơn giản, trưng bày hành lang",costs:[{k:"Màu nước, giấy vẽ",unit:350000,type:"fixed"}]},
+     {name:"Làm bánh truyền thống",date:"Tuần 3",desc:"Bánh đúc, bánh bèo – vừa học vừa ăn",costs:[{k:"Nguyên liệu bánh",unit:500000,type:"fixed"}]},
+     {name:"Bình thơ xuân",date:"Cuối tháng",desc:"Đọc và bình thơ xuân, thơ quê hương",costs:[]},
+   ]},
+  {id:4,label:"Tháng 4",color:"#185FA5",
+   big:[{group:"Lịch sử & Yêu nước",items:[
+     {name:"Ngày Giải phóng miền Nam",date:"30/4",desc:"Chiếu phim lịch sử, giao lưu cựu chiến binh",
+      costs:[{k:"Tiệc nhẹ",unit:30000,type:"pp"},{k:"In ảnh lịch sử trang trí",unit:300000,type:"fixed"},{k:"Mời cựu chiến binh giao lưu",unit:500000,type:"fixed"}]}
+   ]}],
+   small:[
+     {name:"Trồng rau thơm trong chậu",date:"Đầu tháng",desc:"Rau thơm, hoa nhỏ tại sân viện",costs:[{k:"Hạt giống, chậu đất",unit:300000,type:"fixed"}]},
+     {name:"Hội thi kể chuyện lịch sử",date:"Tuần 3",desc:"Thi kể chuyện yêu thích, trao giải nhỏ",costs:[{k:"Phần thưởng",unit:200000,type:"fixed"}]},
+     {name:"Học hát dân ca",date:"Cuối tháng",desc:"Dân ca theo vùng miền của các cụ",costs:[]},
+   ]},
+  {id:5,label:"Tháng 5",color:"#3B6D11",
+   big:[{group:"Lao động & Bác Hồ",items:[
+     {name:"Ngày Quốc tế Lao động",date:"1/5",desc:"Tiệc nhẹ, chiếu phim, ôn ký ức xưa",
+      costs:[{k:"Tiệc nhẹ",unit:60000,type:"pp"},{k:"Trang trí",unit:200000,type:"fixed"}]},
+     {name:"Sinh nhật Bác Hồ",date:"19/5",desc:"Triển lãm ảnh Bác, đọc thơ, hát",
+      costs:[{k:"In ảnh, làm triển lãm",unit:400000,type:"fixed"},{k:"Hoa trang trí",unit:200000,type:"fixed"}]},
+   ]}],
+   small:[
+     {name:"Chăm sóc vườn rau viện",date:"Hàng tuần",desc:"Tưới cây, nhổ cỏ – gắn kết thiên nhiên",costs:[]},
+     {name:"Buổi karaoke nội bộ",date:"Cuối tháng",desc:"Hát theo yêu cầu, không khí vui vẻ",costs:[{k:"Nước uống, hoa quả",unit:150000,type:"fixed"}]},
+   ]},
+  {id:6,label:"Tháng 6",color:"#BA7517",
+   big:[{group:"Gia đình & Con cháu",items:[
+     {name:"Ngày Thiếu nhi – Thăm cháu",date:"1/6",desc:"Mời con cháu đến thăm, vẽ tranh, kể chuyện",
+      costs:[{k:"Quà nhỏ cho trẻ đến thăm",unit:600000,type:"fixed"},{k:"Tiệc trà bánh kẹo",unit:700000,type:"fixed"},{k:"Vật liệu vẽ cùng cháu",unit:300000,type:"fixed"}]}
+   ]}],
+   small:[
+     {name:"Triển lãm ảnh ký ức",date:"Tuần 1",desc:"Ảnh gia đình, ảnh thời trẻ của các cụ",costs:[{k:"In ảnh, khung",unit:300000,type:"fixed"}]},
+     {name:"Làm đồ thủ công",date:"Tuần 2–3",desc:"Đan, thêu, đồ trang trí từ vật liệu tái chế",costs:[{k:"Len sợi, kim, vật liệu",unit:250000,type:"fixed"}]},
+     {name:"Giải cờ tướng nội bộ",date:"Cuối tháng",desc:"Thi đấu, trao cúp nhỏ",costs:[{k:"Cúp, giải thưởng nhỏ",unit:200000,type:"fixed"}]},
+   ]},
+  {id:7,label:"Tháng 7",color:"#534AB7",
+   big:[{group:"Tâm linh & Báo hiếu",items:[
+     {name:"Lễ Vu Lan báo hiếu",date:"15/7 âm lịch",desc:"Cài hoa hồng, cúng lễ, tiệc chay, đọc văn Vu Lan",
+      costs:[{k:"Hoa hồng cài áo",unit:15000,type:"pp"},{k:"Mâm lễ cúng, hương hoa",unit:800000,type:"fixed"},{k:"In văn Vu Lan",unit:150000,type:"fixed"},{k:"Tiệc chay nhẹ",unit:60000,type:"pp"}]},
+     {name:"Ngày Thương binh – Liệt sĩ",date:"27/7",desc:"Tưởng niệm, thắp hương, chia sẻ ký ức",
+      costs:[{k:"Hương hoa, nến tưởng niệm",unit:300000,type:"fixed"},{k:"Tiệc nhỏ sau lễ",unit:500000,type:"fixed"}]},
+   ]}],
+   small:[
+     {name:"Lớp học smartphone",date:"Tuần 1",desc:"Gọi video call, nhắn tin Zalo với con cháu",costs:[]},
+     {name:"Thiền định & yoga nhẹ",date:"Sáng thứ 3–5",desc:"Thiền, bài tập thở và giãn cơ 20 phút",costs:[]},
+     {name:"Thi làm bánh dân gian",date:"Cuối tháng",desc:"Bánh ít, bánh in – trưng bày và thưởng thức",costs:[{k:"Nguyên liệu bánh",unit:400000,type:"fixed"}]},
+   ]},
+  {id:8,label:"Tháng 8",color:"#993C1D",
+   big:[{group:"Trung Thu & Truyền thống",items:[
+     {name:"Tết Trung Thu",date:"15/8 âm lịch",desc:"Phá cỗ trông trăng, múa lân, ăn bánh",
+      costs:[{k:"Bánh Trung Thu",unit:60000,type:"pp"},{k:"Mâm cỗ hoa quả",unit:1000000,type:"fixed"},{k:"Thuê múa lân",unit:1200000,type:"fixed"},{k:"Lồng đèn trang trí",unit:500000,type:"fixed"}]}
+   ]}],
+   small:[
+     {name:"Tự làm lồng đèn giấy",date:"Tuần 2–3",desc:"Lồng đèn truyền thống chuẩn bị Trung Thu",costs:[{k:"Giấy màu, que tre, hồ",unit:250000,type:"fixed"}]},
+     {name:"Kể truyện cổ tích",date:"Tối cuối tuần",desc:"Chuyện dân gian Việt Nam, thảo luận nhẹ",costs:[]},
+     {name:"Chụp ảnh kỷ niệm nhóm",date:"Ngày Trung Thu",desc:"Ảnh áo dài theo nhóm, in tặng các cụ",costs:[{k:"In ảnh tặng",unit:300000,type:"fixed"}]},
+   ]},
+  {id:9,label:"Tháng 9",color:"#3B6D11",
+   big:[{group:"Quốc khánh & Dân tộc",items:[
+     {name:"Ngày Quốc khánh",date:"2/9",desc:"Xem diễu hành TV, tiệc nhỏ, hát quốc ca",
+      costs:[{k:"Tiệc nhẹ",unit:80000,type:"pp"},{k:"Cờ, trang trí",unit:300000,type:"fixed"}]}
+   ]}],
+   small:[
+     {name:"Hội thi ẩm thực",date:"Tuần 2",desc:"Mỗi cụ mang món ăn yêu thích chia sẻ",costs:[{k:"Hỗ trợ nguyên liệu",unit:400000,type:"fixed"}]},
+     {name:"Vẽ tranh phong cảnh quê hương",date:"Tuần 3",desc:"Vẽ nơi sinh ra, trưng bày hành lang",costs:[{k:"Màu vẽ, giấy",unit:300000,type:"fixed"}]},
+     {name:"Đọc báo & điểm tin hàng ngày",date:"Sáng hàng ngày",desc:"Điểm tin trong ngày cho cả nhóm nghe",costs:[]},
+   ]},
+  {id:10,label:"Tháng 10",color:"#534AB7",
+   big:[{group:"Tôn vinh Người cao tuổi & Phụ nữ",items:[
+     {name:"Ngày Quốc tế Người cao tuổi",date:"1/10",desc:"Khám sức khoẻ, tặng quà, văn nghệ tri ân",
+      costs:[{k:"Quà tặng",unit:100000,type:"pp"},{k:"Mời đoàn văn nghệ",unit:2000000,type:"fixed"},{k:"Tiệc liên hoan",unit:100000,type:"pp"},{k:"Trang trí sân khấu",unit:600000,type:"fixed"}]},
+     {name:"Ngày Phụ nữ Việt Nam",date:"20/10",desc:"Hoa tươi cụ bà, tiệc trà đặc biệt",
+      costs:[{k:"Hoa tươi (cụ bà ~60%)",unit:50000,type:"pp60"},{k:"Tiệc trà bánh ngọt",unit:700000,type:"fixed"},{k:"Trang trí",unit:200000,type:"fixed"}]},
+   ]}],
+   small:[
+     {name:"Tư vấn sức khoẻ mùa lạnh",date:"Đầu tháng",desc:"Y tá tư vấn dinh dưỡng, phòng bệnh mùa lạnh",costs:[]},
+     {name:"Làm album ký ức cả năm",date:"Cuối tháng",desc:"Cắt dán ảnh, viết ghi chú kỷ niệm",costs:[{k:"Album, giấy in ảnh, bút",unit:350000,type:"fixed"}]},
+   ]},
+  {id:11,label:"Tháng 11",color:"#5F5E5A",
+   big:[{group:"Văn nghệ & Kết nối",items:[
+     {name:"Ngày hội văn nghệ nội bộ",date:"Giữa tháng 11",desc:"Các cụ biểu diễn: hát, thơ, kể chuyện, đàn",
+      costs:[{k:"Âm thanh, micro thuê",unit:500000,type:"fixed"},{k:"Tiệc nhỏ sau văn nghệ",unit:600000,type:"fixed"},{k:"Giải thưởng tượng trưng",unit:300000,type:"fixed"}]}
+   ]}],
+   small:[
+     {name:"Lớp học vẽ tranh mùa đông",date:"Tuần 1–2",desc:"Tranh mùa đông, trưng bày hành lang",costs:[{k:"Màu vẽ, giấy",unit:250000,type:"fixed"}]},
+     {name:"Nấu ăn cùng nhau",date:"Tuần 3",desc:"Nấu bữa đặc biệt theo công thức của cụ",costs:[{k:"Nguyên liệu nấu ăn",unit:500000,type:"fixed"}]},
+     {name:"Buổi trò chuyện thế hệ",date:"Cuối tháng",desc:"Mời sinh viên tình nguyện giao lưu cùng cụ",costs:[]},
+   ]},
+  {id:12,label:"Tháng 12",color:"#0F6E56",
+   big:[{group:"Cuối năm & Tri ân",items:[
+     {name:"Giáng sinh & Tất niên",date:"25/12",desc:"Cây thông, tiệc tất niên, nhóm nhạc, trao quà",
+      costs:[{k:"Quà tặng cuối năm",unit:80000,type:"pp"},{k:"Tiệc tất niên",unit:150000,type:"pp"},{k:"Cây thông, trang trí",unit:600000,type:"fixed"},{k:"Thuê nhóm nhạc",unit:1500000,type:"fixed"}]}
+   ]}],
+   small:[
+     {name:"Trang trí Giáng sinh handmade",date:"Đầu tháng",desc:"Ngôi sao, vòng lá từ giấy màu",costs:[{k:"Giấy màu, keo, ruy băng",unit:200000,type:"fixed"}]},
+     {name:"Viết thư cảm ơn cuối năm",date:"Tuần 3",desc:"Thư cảm ơn nhân viên và gia đình",costs:[{k:"Giấy thư, phong bì đẹp",unit:100000,type:"fixed"}]},
+     {name:"Ôn lại kỷ niệm cả năm",date:"Tuần cuối",desc:"Xem ảnh các sự kiện, bình chọn kỷ niệm đẹp nhất",costs:[]},
+   ]},
+];
+
+function calcCost(cost, n){
+  if(cost.type==='pp') return cost.unit*n;
+  if(cost.type==='pp60') return Math.round(cost.unit*(n*0.6));
+  return cost.unit;
+}
+function sumItem(item,n){return item.costs.reduce((s,c)=>s+calcCost(c,n),0);}
+function sumMonth(m,n){
+  return m.big.flatMap(g=>g.items).reduce((s,e)=>s+sumItem(e,n),0)
+       + m.small.reduce((s,e)=>s+sumItem(e,n),0);
+}
+function fmtV(n){
+  if(n===0)return'Miễn phí';
+  if(n>=1000000)return(n/1000000).toFixed(1).replace(/\.0$/,'')+'M';
+  return Math.round(n/1000)+'K';
+}
+function fmtFull(n){return n.toLocaleString('vi-VN')+'đ';}
+
+let view='both';
+let openSet=new Set(MONTHS.map(m=>m.id));
+function setView(v,btn){
+  view=v;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+function toggleM(id){
+  if(openSet.has(id))openSet.delete(id);else openSet.add(id);
+  render();
+}
+
+function makeCostBreakdown(item, n){
+  return item.costs.map(c=>{
+    const v=calcCost(c,n);
+    const label=c.type==='pp'?`${c.k} (×${n})`:c.type==='pp60'?`${c.k} (×${Math.round(n*0.6)})`:c.k;
+    return `${label}: ${fmtFull(v)}`;
+  }).join('<br>');
+}
+
+function render(){
+  const tot30=MONTHS.reduce((s,m)=>s+sumMonth(m,30),0);
+  const tot50=MONTHS.reduce((s,m)=>s+sumMonth(m,50),0);
+  const diff=tot50-tot30;
+
+  const sumArea=document.getElementById('summary-area');
+  if(view==='both'){
+    sumArea.innerHTML=`<div class="cmp-grid">
+      <div class="cmp-card">
+        <div class="cmp-hdr" style="background:#E1F5EE;">
+          <div><div class="cmp-hdr-title" style="color:#085041;">30 cụ</div><div class="cmp-hdr-sub" style="color:#0F6E56;">Quy mô nhỏ</div></div>
+        </div>
+        <div class="cmp-total" style="color:#0F6E56;">${fmtFull(tot30)}</div>
+        <div class="cmp-pp" style="color:#0F6E56;">${fmtFull(Math.round(tot30/30))} / cụ / năm</div>
+        <div class="cmp-divider"></div>
+        <div class="diff-bar"><span style="color:var(--color-text-tertiary);">/ tháng trung bình</span><strong style="color:#0F6E56;">${fmtFull(Math.round(tot30/12))}</strong></div>
+      </div>
+      <div class="cmp-card">
+        <div class="cmp-hdr" style="background:#E6F1FB;">
+          <div><div class="cmp-hdr-title" style="color:#042C53;">50 cụ</div><div class="cmp-hdr-sub" style="color:#185FA5;">Quy mô lớn</div></div>
+        </div>
+        <div class="cmp-total" style="color:#185FA5;">${fmtFull(tot50)}</div>
+        <div class="cmp-pp" style="color:#185FA5;">${fmtFull(Math.round(tot50/50))} / cụ / năm</div>
+        <div class="cmp-divider"></div>
+        <div class="diff-bar"><span style="color:var(--color-text-tertiary);">/ tháng trung bình</span><strong style="color:#185FA5;">${fmtFull(Math.round(tot50/12))}</strong></div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:12px;color:var(--color-text-secondary);margin-bottom:1rem;padding:8px 14px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);">
+      Chênh lệch 50 cụ so với 30 cụ: <strong style="color:#185FA5;">+${fmtFull(diff)}</strong> &nbsp;·&nbsp; +${Math.round(diff/tot30*100)}% ngân sách &nbsp;·&nbsp; Tiết kiệm <strong style="color:#0F6E56;">${fmtFull(Math.round(tot50/50-tot30/30))}</strong>/cụ khi tăng quy mô
+    </div>`;
+  } else {
+    sumArea.innerHTML='';
+  }
+
+  const mArea=document.getElementById('months-area');
+  mArea.innerHTML=MONTHS.map(m=>{
+    const m30=sumMonth(m,30);
+    const m50=sumMonth(m,50);
+    const isOpen=openSet.has(m.id);
+    const bigItems=m.big.flatMap(g=>g.items);
+
+    const costHdr=view==='both'
+      ?`<div class="col-hdr-row"><div></div><div class="col-lbl" style="color:#0F6E56;">30 cụ</div><div class="col-lbl" style="color:#185FA5;">50 cụ</div></div>`
+      :view==='30'
+        ?`<div class="col-hdr-row"><div></div><div class="col-lbl" style="color:#0F6E56;">30 cụ</div><div></div></div>`
+        :`<div class="col-hdr-row"><div></div><div></div><div class="col-lbl" style="color:#185FA5;">50 cụ</div></div>`;
+
+    const bigRows=m.big.map(g=>`
+      <div class="ghdr">${g.group}</div>`+
+      g.items.map(e=>{
+        const c30=sumItem(e,30), c50=sumItem(e,50);
+        const brk30=makeCostBreakdown(e,30), brk50=makeCostBreakdown(e,50);
+        return `<div class="ev-row big">
+          <div><div class="ev-top"><div class="ev-dot" style="background:#1D9E75;"></div><div>
+            <div class="ev-name">${e.name}</div><div class="ev-date">${e.date}</div>
+          </div></div><div class="ev-desc">${e.desc}</div></div>
+          ${view!=='50'?`<div class="cost-col"><div class="cost-val cost-30">${fmtV(c30)}</div><div class="cost-brk">${brk30}</div></div>`:'<div></div>'}
+          ${view!=='30'?`<div class="cost-col"><div class="cost-val cost-50">${fmtV(c50)}</div><div class="cost-brk">${brk50}</div></div>`:'<div></div>'}
+        </div>`;
+      }).join('')
+    ).join('');
+
+    const smallRows=m.small.length>0?
+      `<div class="ghdr">Hoạt động nội bộ</div>`+
+      m.small.map(e=>{
+        const c30=sumItem(e,30), c50=sumItem(e,50);
+        const brk30=makeCostBreakdown(e,30), brk50=makeCostBreakdown(e,50);
+        return `<div class="ev-row sm">
+          <div><div class="ev-top"><div class="ev-dot" style="background:#888780;"></div><div>
+            <div class="ev-name">${e.name}</div><div class="ev-date">${e.date}</div>
+          </div></div><div class="ev-desc">${e.desc}</div></div>
+          ${view!=='50'?`<div class="cost-col">${c30===0?'<span class="free-tag">Miễn phí</span>':`<div class="cost-val cost-30">${fmtV(c30)}</div><div class="cost-brk">${brk30}</div>`}</div>`:'<div></div>'}
+          ${view!=='30'?`<div class="cost-col">${c50===0?'<span class="free-tag">Miễn phí</span>':`<div class="cost-val cost-50">${fmtV(c50)}</div><div class="cost-brk">${brk50}</div>`}</div>`:'<div></div>'}
+        </div>`;
+      }).join(''):'';
+
+    const mhdrCosts=view==='both'
+      ?`<span class="mc30">${fmtV(m30)}</span><span style="font-size:11px;color:var(--color-text-tertiary);">vs</span><span class="mc50">${fmtV(m50)}</span>`
+      :view==='30'?`<span class="mc30">${fmtV(m30)}</span>`:`<span class="mc50">${fmtV(m50)}</span>`;
+
+    const mfootContent=view==='both'
+      ?`<div class="mfoot-vals"><span style="color:#0F6E56;font-weight:500;">30 cụ: ${fmtFull(m30)}</span><span style="color:#185FA5;font-weight:500;">50 cụ: ${fmtFull(m50)}</span></div>`
+      :view==='30'?`<strong style="color:#0F6E56;">${fmtFull(m30)}</strong>`:`<strong style="color:#185FA5;">${fmtFull(m50)}</strong>`;
+
+    return `<div class="mblock">
+      <div class="mhdr" onclick="toggleM(${m.id})">
+        <div class="mhdr-l">
+          <div class="mnum" style="background:${m.color};">${m.id}</div>
+          <div><div class="mname">${m.label}</div></div>
+        </div>
+        <div class="mhdr-costs">${mhdrCosts}<span class="chev${isOpen?' o':''}">&#9660;</span></div>
+      </div>
+      ${isOpen?`<div class="mbody">${costHdr}${bigRows}${smallRows}
+        <div class="mfoot"><span>Tổng ${m.label}</span>${mfootContent}</div>
+      </div>`:''}
+    </div>`;
+  }).join('');
+
+  const grandArea=document.getElementById('grand-area');
+  if(view==='both'||view==='30'){
+    grandArea.innerHTML=(view==='both'?
+      `<div class="grand-card" style="border-color:#0F6E56;">
+        <div class="grand-lbl">Tổng cả năm — 30 cụ</div>
+        <div class="grand-val" style="color:#0F6E56;">${fmtFull(tot30)}</div>
+        <div class="grand-pp">${fmtFull(Math.round(tot30/30))} / cụ &nbsp;·&nbsp; ${fmtFull(Math.round(tot30/12))} / tháng</div>
+      </div>
+      <div class="grand-card" style="border-color:#185FA5;">
+        <div class="grand-lbl">Tổng cả năm — 50 cụ</div>
+        <div class="grand-val" style="color:#185FA5;">${fmtFull(tot50)}</div>
+        <div class="grand-pp">${fmtFull(Math.round(tot50/50))} / cụ &nbsp;·&nbsp; ${fmtFull(Math.round(tot50/12))} / tháng</div>
+      </div>`
+      :view==='30'?
+      `<div class="grand-card" style="border-color:#0F6E56;grid-column:span 2;">
+        <div class="grand-lbl">Tổng cả năm — 30 cụ</div>
+        <div class="grand-val" style="color:#0F6E56;">${fmtFull(tot30)}</div>
+        <div class="grand-pp">${fmtFull(Math.round(tot30/30))} / cụ / năm &nbsp;·&nbsp; ${fmtFull(Math.round(tot30/12))} / tháng trung bình</div>
+      </div>`
+      :`<div class="grand-card" style="border-color:#185FA5;grid-column:span 2;">
+        <div class="grand-lbl">Tổng cả năm — 50 cụ</div>
+        <div class="grand-val" style="color:#185FA5;">${fmtFull(tot50)}</div>
+        <div class="grand-pp">${fmtFull(Math.round(tot50/50))} / cụ / năm &nbsp;·&nbsp; ${fmtFull(Math.round(tot50/12))} / tháng trung bình</div>
+      </div>`
+    );
+  }
+}
+render();
+</script>

@@ -907,7 +907,8 @@ export default function BenhNhanPage() {
                           <div className="font-semibold text-gray-900">{bn.dich_vu_dang_su_dung.ten_dich_vu}</div>
                           <div className="text-xs text-gray-500 capitalize mt-1">
                             <span className="px-2 py-0.5 bg-gray-100 rounded">
-                              {bn.dich_vu_dang_su_dung.hinh_thuc_thanh_toan === 'thang' ? 'Tháng' :
+                              {bn.dich_vu_dang_su_dung.hinh_thuc_thanh_toan === 'ngay' ? 'Ngày' :
+                               bn.dich_vu_dang_su_dung.hinh_thuc_thanh_toan === 'thang' ? 'Tháng' :
                                bn.dich_vu_dang_su_dung.hinh_thuc_thanh_toan === 'quy' ? 'Quý' :
                                bn.dich_vu_dang_su_dung.hinh_thuc_thanh_toan === 'nam' ? 'Năm' : ''}
                             </span>
@@ -1456,6 +1457,7 @@ export default function BenhNhanPage() {
                         onChange={(e) => setHinhThucThanhToan(e.target.value)}
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-0 focus:ring-2 focus:ring-[#4A90E2]/50 text-gray-800"
                       >
+                        <option value="ngay">Theo ngày</option>
                         <option value="thang">Theo tháng</option>
                         <option value="quy">Theo quý</option>
                         <option value="nam">Theo năm</option>

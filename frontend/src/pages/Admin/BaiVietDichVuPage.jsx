@@ -495,7 +495,7 @@ export default function BaiVietDichVuPage() {
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.08c-2.03.19-3.93-1.09-4.57-3.08-.64-1.99.19-4.14 2.18-4.78 1.99-.64 4.14.19 4.78 2.18.64 1.99-.19 4.14-2.18 4.78l.41 1.34-1.54.47-.42-1.34c-.21.07-.42.13-.64.19v1.24h-1.5v-1zM13 11c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"></path>
                 </svg>
               </div>
-              <h2 className="text-lg font-bold tracking-tight">Quản lý Viện DL</h2>
+              <h2 className="text-lg font-bold tracking-tight">Quản lý Trung tâm trường thọ</h2>
             </div>
             <div className="flex items-center gap-2">
               <button

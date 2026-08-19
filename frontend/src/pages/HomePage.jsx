@@ -8,9 +8,14 @@ import Session5 from "../components/Session5";
 import Session6 from "../components/Session6";
 import Session7 from "../components/Session7";
 import ExpertTeamSection from "../components/ExpertTeamSection";
+import TeamVoicesSection from "../components/TeamVoicesSection";
 import AnimatedSection from "../components/AnimatedSection";
-import HealthAlertsCard from "../components/HealthAlertsCard";
 import { baiVietAPI } from "../services/api";
+import SeoHead from "../components/SeoHead";
+import { buildBaiVietPath } from "../utils/slugify";
+import { normalizeImageUrl } from "../utils/imageUtils";
+import { homeImages } from "../assets/homeImages";
+const outside1 = homeImages.postFallback;
 
 // Lấy mô tả ngắn từ nội dung HTML
 const getShortExcerpt = (noiDung, maxLength = 160) => {
@@ -43,6 +48,14 @@ const getCategoryDisplayName = (category) => {
   return categoryMap[category] || category;
 };
 
+const getPostImage = (post) => {
+  if (post?.anh_dai_dien) {
+    const normalizedUrl = normalizeImageUrl(post.anh_dai_dien);
+    if (normalizedUrl) return normalizedUrl;
+  }
+  return outside1;
+};
+
 const HomePage = () => {
   const [featuredPosts, setFeaturedPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,20 +84,23 @@ const HomePage = () => {
   }, []);
   return (
     <div className="min-h-screen font-raleway">
+      <SeoHead
+        title="Trang chủ"
+        description="Trung tâm trường thọ Xuân Hoa – chăm sóc người cao tuổi chuyên nghiệp, môi trường sống an lành, đội ngũ y tế tận tâm và tiện ích hiện đại trong khuôn viên xanh."
+        canonicalPath="/"
+      />
       {/* Session1 không cần animation vì đã có typing effect */}
       <Session1 />
       <AnimatedSection delay={0}>
         <Session2 />
       </AnimatedSection>
       <AnimatedSection delay={0}>
+        <TeamVoicesSection />
+      </AnimatedSection>
+      <AnimatedSection delay={0}>
         <ExpertTeamSection />
       </AnimatedSection>
       
-      {/* Card Cảnh báo chỉ số sức khỏe */}
-      <div className="container mx-auto px-4 py-8">
-        <HealthAlertsCard />
-      </div>
-
       {/* Bài viết tiêu biểu - dữ liệu từ API (cùng nguồn với trang Blog) */}
       <AnimatedSection delay={100}>
         <section className="bg-slate-50/60 py-12 md:py-16">
@@ -139,12 +155,22 @@ const HomePage = () => {
                   const postDate = formatDate(
                     post.ngay_dang || post.ngay_tao
                   );
-                  const postUrl = `/blog?tab=bai-viet&post=${post.id}`;
+                  const postUrl = buildBaiVietPath(post);
                   return (
                     <article
                       key={post.id}
                       className="group h-full rounded-2xl bg-white shadow-sm hover:shadow-lg border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col"
                     >
+                      <div className="w-full h-48 md:h-52 overflow-hidden">
+                        <img
+                          src={getPostImage(post)}
+                          alt={post.tieu_de}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          onError={(e) => {
+                            e.currentTarget.src = outside1;
+                          }}
+                        />
+                      </div>
                       <div className="px-5 pt-5 pb-4 flex-1 flex flex-col">
                         <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
                           <span className="inline-flex items-center px-3 py-1 rounded-full bg-rose-50 text-rose-700 font-semibold">
@@ -162,6 +188,7 @@ const HomePage = () => {
                       <div className="px-5 pb-5 pt-2">
                         <Link
                           to={postUrl}
+                          state={{ postId: post.id }}
                           className="inline-flex items-center text-sm font-semibold text-rose-800 group-hover:text-rose-900"
                         >
                           Đọc tiếp
@@ -178,21 +205,17 @@ const HomePage = () => {
           </div>
         </section>
       </AnimatedSection>
-      
-      <AnimatedSection delay={50}>
-        <Session3 />
+      <AnimatedSection delay={0}>
+        <Session5 />
       </AnimatedSection>
+      {/* <AnimatedSection delay={50}>
+        <Session3 />
+      </AnimatedSection> */}
       <AnimatedSection delay={100}>
         <Session4 />
       </AnimatedSection>
       <AnimatedSection delay={0}>
-        <Session5 />
-      </AnimatedSection>
-      <AnimatedSection delay={0}>
         <Session6 />
-      </AnimatedSection>
-      <AnimatedSection delay={250}>
-        <Session7 />
       </AnimatedSection>
 
     </div>

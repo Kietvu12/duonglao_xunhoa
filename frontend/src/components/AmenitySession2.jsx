@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { loaiPhongAPI } from '../services/api';
 import { normalizeImageUrl } from '../utils/imageUtils';
+import { amenityImages } from '../assets/amenityImages';
 
 const AmenitySession2 = ({ onRoomClick }) => {
   const [loaiPhongs, setLoaiPhongs] = useState([]);
@@ -22,6 +23,14 @@ const AmenitySession2 = ({ onRoomClick }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getRoomImage = (loaiPhong, index) => {
+    if (loaiPhong.anh_mau) {
+      const url = normalizeImageUrl(loaiPhong.anh_mau);
+      if (url) return url;
+    }
+    return amenityImages.roomFallbacks[index % amenityImages.roomFallbacks.length];
   };
 
   return (
@@ -51,7 +60,7 @@ const AmenitySession2 = ({ onRoomClick }) => {
           </div>
         ) : (
           <div className="grid lg:grid-cols-2 gap-12">
-            {loaiPhongs.map((loaiPhong) => (
+            {loaiPhongs.map((loaiPhong, index) => (
               <div
                 key={loaiPhong.id}
                 className="bg-white rounded-3xl overflow-hidden border border-accent-gold/20 transition-all duration-500 group hover:shadow-2xl hover:-translate-y-2.5 relative"
@@ -68,22 +77,16 @@ const AmenitySession2 = ({ onRoomClick }) => {
 
                 {/* Image */}
                 <div className="relative h-80 overflow-hidden">
-                  {loaiPhong.anh_mau ? (
-                    <img
-                      src={normalizeImageUrl(loaiPhong.anh_mau)}
-                      alt={loaiPhong.ten || `Loại phòng #${loaiPhong.id}`}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                      <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                  )}
+                  <img
+                    src={getRoomImage(loaiPhong, index)}
+                    alt={loaiPhong.ten || `Loại phòng #${loaiPhong.id}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src =
+                        amenityImages.roomFallbacks[index % amenityImages.roomFallbacks.length];
+                    }}
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                   <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
                     <h3 className="font-serif text-3xl font-semibold mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>

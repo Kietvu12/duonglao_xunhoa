@@ -2,6 +2,25 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { suKienAPI } from '../services/api';
 import { normalizeImageUrl } from '../utils/imageUtils';
+import SeoHead from '../components/SeoHead';
+import { homeImages } from '../assets/homeImages';
+
+const EVENT_FALLBACK = homeImages.eventFallback;
+
+const getEventImage = (event) => {
+  if (event?.anh_dai_dien) {
+    const url = normalizeImageUrl(event.anh_dai_dien);
+    if (url) return url;
+  }
+  if (event?.media?.length > 0) {
+    const firstImage = event.media.find((m) => m.loai === 'anh') || event.media[0];
+    if (firstImage?.url) {
+      const url = normalizeImageUrl(firstImage.url);
+      if (url) return url;
+    }
+  }
+  return EVENT_FALLBACK;
+};
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -106,8 +125,24 @@ const EventDetail = () => {
     );
   }
 
+  const eventDesc =
+    event.mo_ta &&
+    String(event.mo_ta)
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 320);
+
   return (
     <section className="w-full bg-white py-8 md:py-12">
+      <SeoHead
+        title={event.tieu_de}
+        description={
+          eventDesc ||
+          `Sự kiện tại Trung tâm trường thọ Xuân Hoa: ${event.tieu_de}. Xem thời gian, địa điểm và nội dung chương trình.`
+        }
+        canonicalPath={`/su-kien/${id}`}
+        imageUrl={normalizeImageUrl(event.anh_dai_dien) || undefined}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <div className="mb-6">
@@ -141,15 +176,17 @@ const EventDetail = () => {
             </div>
 
             {/* Main Image */}
-            {event.anh_dai_dien && (
-              <div className="w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg">
-                <img
-                  src={normalizeImageUrl(event.anh_dai_dien)}
-                  alt={event.tieu_de}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
+            <div className="w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg">
+              <img
+                src={getEventImage(event)}
+                alt={event.tieu_de}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = EVENT_FALLBACK;
+                }}
+              />
+            </div>
 
             {/* Video */}
             {event.video && (

@@ -20,7 +20,7 @@ export const getAllDichVu = async (req, res, next) => {
 
     let query = `
       SELECT dv.*, 
-             bgd.gia_thang, bgd.gia_quy, bgd.gia_nam,
+             bgd.gia_ngay, bgd.gia_thang, bgd.gia_quy, bgd.gia_nam,
              ldv.ten as ten_loai_dich_vu
       FROM dich_vu dv
       LEFT JOIN bang_gia_dich_vu bgd ON dv.id = bgd.id_dich_vu
@@ -57,7 +57,7 @@ export const getDichVuById = async (req, res, next) => {
     const { id } = req.params;
 
     const [dichVus] = await pool.execute(
-      `SELECT dv.*, bgd.gia_thang, bgd.gia_quy, bgd.gia_nam,
+      `SELECT dv.*, bgd.gia_ngay, bgd.gia_thang, bgd.gia_quy, bgd.gia_nam,
               ldv.ten as ten_loai_dich_vu
        FROM dich_vu dv
        LEFT JOIN bang_gia_dich_vu bgd ON dv.id = bgd.id_dich_vu
@@ -84,7 +84,7 @@ export const getDichVuById = async (req, res, next) => {
 
 export const createDichVu = async (req, res, next) => {
   try {
-    const { id_loai_dich_vu, ten_dich_vu, mo_ta_ngan, mo_ta_day_du, anh_dai_dien, gia_thang, gia_quy, gia_nam } = req.body;
+    const { id_loai_dich_vu, ten_dich_vu, mo_ta_ngan, mo_ta_day_du, anh_dai_dien, gia_ngay, gia_thang, gia_quy, gia_nam } = req.body;
 
     if (!ten_dich_vu) {
       return res.status(400).json({
@@ -116,12 +116,13 @@ export const createDichVu = async (req, res, next) => {
     );
 
     // Add pricing if provided
-    if (gia_thang || gia_quy || gia_nam) {
+    if (gia_ngay || gia_thang || gia_quy || gia_nam) {
       await pool.execute(
-        `INSERT INTO bang_gia_dich_vu (id_dich_vu, gia_thang, gia_quy, gia_nam)
-         VALUES (?, ?, ?, ?)`,
+        `INSERT INTO bang_gia_dich_vu (id_dich_vu, gia_ngay, gia_thang, gia_quy, gia_nam)
+         VALUES (?, ?, ?, ?, ?)`,
         [
           result.insertId,
+          sanitizeValue(gia_ngay),
           sanitizeValue(gia_thang),
           sanitizeValue(gia_quy),
           sanitizeValue(gia_nam)
@@ -142,7 +143,7 @@ export const createDichVu = async (req, res, next) => {
 export const updateDichVu = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { id_loai_dich_vu, ten_dich_vu, mo_ta_ngan, mo_ta_day_du, anh_dai_dien, gia_thang, gia_quy, gia_nam } = req.body;
+    const { id_loai_dich_vu, ten_dich_vu, mo_ta_ngan, mo_ta_day_du, anh_dai_dien, gia_ngay, gia_thang, gia_quy, gia_nam } = req.body;
 
     // Helper to sanitize values
     const sanitizeValue = (value) => {
@@ -188,7 +189,7 @@ export const updateDichVu = async (req, res, next) => {
     }
 
     // Update pricing
-    if (gia_thang !== undefined || gia_quy !== undefined || gia_nam !== undefined) {
+    if (gia_ngay !== undefined || gia_thang !== undefined || gia_quy !== undefined || gia_nam !== undefined) {
       const [existingPrice] = await pool.execute(
         'SELECT id FROM bang_gia_dich_vu WHERE id_dich_vu = ?',
         [id]
@@ -197,8 +198,9 @@ export const updateDichVu = async (req, res, next) => {
       if (existingPrice.length > 0) {
         const ngayCapNhatVN = getNowForDB();
         await pool.execute(
-          'UPDATE bang_gia_dich_vu SET gia_thang = ?, gia_quy = ?, gia_nam = ?, ngay_cap_nhat = ? WHERE id_dich_vu = ?',
+          'UPDATE bang_gia_dich_vu SET gia_ngay = ?, gia_thang = ?, gia_quy = ?, gia_nam = ?, ngay_cap_nhat = ? WHERE id_dich_vu = ?',
           [
+            sanitizeValue(gia_ngay),
             sanitizeValue(gia_thang),
             sanitizeValue(gia_quy),
             sanitizeValue(gia_nam),
@@ -209,9 +211,10 @@ export const updateDichVu = async (req, res, next) => {
       } else {
         const ngayTaoVN = getNowForDB();
         await pool.execute(
-          'INSERT INTO bang_gia_dich_vu (id_dich_vu, gia_thang, gia_quy, gia_nam, ngay_tao) VALUES (?, ?, ?, ?, ?)',
+          'INSERT INTO bang_gia_dich_vu (id_dich_vu, gia_ngay, gia_thang, gia_quy, gia_nam, ngay_tao) VALUES (?, ?, ?, ?, ?, ?)',
           [
             id,
+            sanitizeValue(gia_ngay),
             sanitizeValue(gia_thang),
             sanitizeValue(gia_quy),
             sanitizeValue(gia_nam),

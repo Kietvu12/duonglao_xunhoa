@@ -110,6 +110,30 @@ const Navbar = () => {
     setSuccess(false);
   };
 
+  useEffect(() => {
+    const handleOpenBookingModal = () => {
+      setIsMobileMenuOpen(false);
+      setIsBookingModalOpen(true);
+      setSelectedServices([]);
+      setFormData({
+        ho_ten: '',
+        so_dien_thoai: '',
+        email: '',
+        loai_dich_vu_quan_tam: '',
+        ngay_mong_muon: '',
+        gio_mong_muon: '',
+        ghi_chu: ''
+      });
+      setError('');
+      setSuccess(false);
+    };
+
+    window.addEventListener('openBookingModal', handleOpenBookingModal);
+    return () => {
+      window.removeEventListener('openBookingModal', handleOpenBookingModal);
+    };
+  }, []);
+
   const closeBookingModal = () => {
     setIsBookingModalOpen(false);
     setSelectedServices([]);
@@ -159,6 +183,37 @@ const Navbar = () => {
     return tomorrow.toISOString().split('T')[0];
   };
 
+  const formatDateWithWeekday = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(`${dateString}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return '';
+
+    const weekdays = [
+      'Chủ nhật',
+      'Thứ hai',
+      'Thứ ba',
+      'Thứ tư',
+      'Thứ năm',
+      'Thứ sáu',
+      'Thứ bảy'
+    ];
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${weekdays[date.getDay()]}, ${day}/${month}/${year}`;
+  };
+
+  const formatTimeVietnamese = (timeString) => {
+    if (!timeString || !timeString.includes(':')) return '';
+    const [hourRaw, minuteRaw] = timeString.split(':');
+    const hour = Number(hourRaw);
+    if (Number.isNaN(hour)) return '';
+    const minute = String(minuteRaw ?? '00').padStart(2, '0');
+    const period = hour < 12 ? 'Sáng' : 'Chiều';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minute} ${period}`;
+  };
+
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -170,16 +225,6 @@ const Navbar = () => {
         setError('Vui lòng điền đầy đủ thông tin bắt buộc');
         setLoading(false);
         return;
-      }
-
-      // Validate email chỉ khi có nhập
-      if (formData.email && formData.email.trim() !== '') {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email.trim())) {
-          setError('Email không hợp lệ');
-          setLoading(false);
-          return;
-        }
       }
 
       // Validate phone (Vietnamese format)
@@ -283,10 +328,10 @@ const Navbar = () => {
             </div>
 
             {/* CTA Button */}
-            <button
-              type="button"
-              onClick={openBookingModal}
-              className="hidden lg:block px-4 py-2 xl:px-6 xl:py-2.5 2xl:px-8 2xl:py-3 rounded-full text-xs xl:text-sm font-serif font-bold text-white transition-all duration-400 relative overflow-hidden"
+            <Link
+              to="/huong-dan-su-dung"
+              onClick={scrollToTop}
+              className="hidden lg:inline-flex px-4 py-2 xl:px-6 xl:py-2.5 2xl:px-8 2xl:py-3 rounded-full text-xs xl:text-sm font-serif font-bold text-white transition-all duration-400 relative overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, #8B0A3D 0%, #A90046 100%)',
                 letterSpacing: '0.1em',
@@ -298,7 +343,6 @@ const Navbar = () => {
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-3px)';
                 e.currentTarget.style.boxShadow = '0 15px 40px rgba(139, 10, 61, 0.4)';
-                // Hiệu ứng màu bạc chạy qua
                 const shine = e.currentTarget.querySelector('.btn-shine');
                 if (shine) {
                   shine.style.left = '100%';
@@ -313,7 +357,7 @@ const Navbar = () => {
                 }
               }}
             >
-              <span className="relative z-10">Đặt lịch tư vấn</span>
+              <span className="relative z-10">Hướng dẫn sử dụng</span>
               <span 
                 className="btn-shine absolute top-0 left-[-100%] w-full h-full transition-all duration-600"
                 style={{
@@ -321,7 +365,7 @@ const Navbar = () => {
                   transition: 'left 0.6s ease'
                 }}
               ></span>
-            </button>
+            </Link>
 
             {/* Mobile Menu Button */}
             <div className="lg:hidden ml-2 sm:ml-4">
@@ -386,10 +430,10 @@ const Navbar = () => {
                     {link.label}
                   </Link>
                 ))}
-                <button
-                  type="button"
-                  onClick={openBookingModal}
-                  className="mx-4 px-8 py-3 rounded-full text-sm font-serif font-bold text-white transition-all duration-400 relative overflow-hidden"
+                <Link
+                  to="/huong-dan-su-dung"
+                  onClick={scrollToTop}
+                  className="mx-4 px-8 py-3 rounded-full text-sm font-serif font-bold text-white transition-all duration-400 relative overflow-hidden inline-flex justify-center"
                   style={{
                     background: 'linear-gradient(135deg, #8B0A3D 0%, #A90046 100%)',
                     letterSpacing: '0.1em',
@@ -411,7 +455,7 @@ const Navbar = () => {
                     }
                   }}
                 >
-                  <span className="relative z-10">Đặt lịch tư vấn</span>
+                  <span className="relative z-10">Hướng dẫn sử dụng</span>
                   <span 
                     className="btn-shine absolute top-0 left-[-100%] w-full h-full transition-all duration-600"
                     style={{
@@ -419,7 +463,7 @@ const Navbar = () => {
                       transition: 'left 0.6s ease'
                     }}
                   ></span>
-                </button>
+                </Link>
               </div>
             </div>
           )}
@@ -796,21 +840,6 @@ const Navbar = () => {
                         />
                       </div>
 
-                      {/* Email (tùy chọn) */}
-                      <div>
-                        <label className="block text-sm font-semibold mb-2" style={{ color: '#2D2D2D' }}>
-                          Email (tùy chọn)
-                        </label>
-                        <input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleFormChange}
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-rose focus:border-transparent"
-                          placeholder="example@email.com"
-                        />
-                      </div>
-
                       {/* Ngày và giờ */}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -826,6 +855,11 @@ const Navbar = () => {
                             required
                             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-rose focus:border-transparent"
                           />
+                          {formData.ngay_mong_muon && (
+                            <p className="mt-2 text-sm font-semibold" style={{ color: '#4A4A4A' }}>
+                              {formatDateWithWeekday(formData.ngay_mong_muon)}
+                            </p>
+                          )}
                         </div>
                         <div>
                           <label className="block text-sm font-semibold mb-2" style={{ color: '#2D2D2D' }}>
@@ -839,6 +873,11 @@ const Navbar = () => {
                             required
                             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-rose focus:border-transparent"
                           />
+                          {formData.gio_mong_muon && (
+                            <p className="mt-2 text-sm font-semibold" style={{ color: '#4A4A4A' }}>
+                              {formatTimeVietnamese(formData.gio_mong_muon)}
+                            </p>
+                          )}
                         </div>
                       </div>
 

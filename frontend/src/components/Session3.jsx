@@ -1,21 +1,8 @@
-import session3Image from "../assets/session3.png";
-
 const Session3 = () => {
   const services = [
     {
       id: 1,
-      title: "Chăm Sóc Nội Trú",
-      description: "Suite cao cấp với đầy đủ tiện nghi 5 sao, môi trường yên tĩnh và sang trọng. Chăm sóc toàn diện 24/7.",
-      icon: (
-        <svg className="w-10 h-10" style={{ color: '#A90046' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" 
-                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-        </svg>
-      ),
-    },
-    {
-      id: 2,
-      title: "Chăm Sóc Ban Ngày",
+      title: "Chăm Sóc Bán Trú",
       description: "Dịch vụ linh hoạt với không gian sang trọng. Các hoạt động phong phú và chương trình giải trí đa dạng.",
       icon: (
         <svg className="w-10 h-10" style={{ color: '#A90046' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -25,13 +12,13 @@ const Session3 = () => {
       ),
     },
     {
-      id: 3,
-      title: "Chăm Sóc Tại Nhà",
-      description: "Đội ngũ chuyên gia đến tận nhà với dịch vụ cao cấp. Linh hoạt về thời gian và nhu cầu cá nhân.",
+      id: 2,
+      title: "Chăm Sóc Nội Trú",
+      description: "Suite cao cấp với đầy đủ tiện nghi 5 sao, môi trường yên tĩnh và sang trọng. Chăm sóc toàn diện 24/7.",
       icon: (
         <svg className="w-10 h-10" style={{ color: '#A90046' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" 
-                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
         </svg>
       ),
     },
@@ -102,16 +89,9 @@ const Session3 = () => {
               <h3 className="font-serif text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 leading-tight" style={{ color: '#2D2D2D', fontFamily: "'Playfair Display', serif" }}>
                 {service.title}
               </h3>
-              <p className="mb-6 sm:mb-8 text-sm sm:text-base leading-relaxed text-justify" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
+              <p className="text-sm sm:text-base leading-relaxed text-justify" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
                 {service.description}
               </p>
-              <a href="#" className="inline-flex items-center font-semibold text-xs sm:text-sm tracking-wide hover:gap-2 transition-all" 
-                 style={{ color: '#C9A870' }}>
-                TÌM HIỂU THÊM
-                <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </a>
             </div>
           ))}
           
@@ -126,8 +106,14 @@ const Session3 = () => {
                 Để chúng tôi thiết kế giải pháp chăm sóc hoàn hảo 
                 cho người thân quý giá của bạn.
               </p>
-              <button className="px-6 sm:px-8 py-2.5 sm:py-3 bg-white rounded-full font-semibold text-xs sm:text-sm tracking-wide hover:shadow-2xl transition-all" 
-                      style={{ color: '#8B0A3D' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('openBookingModal'));
+                }}
+                className="px-6 sm:px-8 py-2.5 sm:py-3 bg-white rounded-full font-semibold text-xs sm:text-sm tracking-wide hover:shadow-2xl transition-all"
+                style={{ color: '#8B0A3D' }}
+              >
                 LIÊN HỆ NGAY
               </button>
             </div>

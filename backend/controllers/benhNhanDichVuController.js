@@ -11,7 +11,7 @@ export const getAllBenhNhanDichVu = async (req, res, next) => {
              bn.ho_ten as ten_benh_nhan,
              dv.ten_dich_vu,
              dv.mo_ta_ngan,
-             bgd.gia_thang, bgd.gia_quy, bgd.gia_nam
+             bgd.gia_ngay, bgd.gia_thang, bgd.gia_quy, bgd.gia_nam
       FROM benh_nhan_dich_vu bndv
       JOIN benh_nhan bn ON bndv.id_benh_nhan = bn.id
       JOIN dich_vu dv ON bndv.id_dich_vu = dv.id
@@ -59,7 +59,7 @@ export const getBenhNhanDichVuById = async (req, res, next) => {
               dv.ten_dich_vu,
               dv.mo_ta_ngan,
               dv.mo_ta_day_du,
-              bgd.gia_thang, bgd.gia_quy, bgd.gia_nam
+              bgd.gia_ngay, bgd.gia_thang, bgd.gia_quy, bgd.gia_nam
        FROM benh_nhan_dich_vu bndv
        JOIN benh_nhan bn ON bndv.id_benh_nhan = bn.id
        JOIN dich_vu dv ON bndv.id_dich_vu = dv.id
@@ -142,7 +142,7 @@ export const createBenhNhanDichVu = async (req, res, next) => {
 
     // Lấy giá dịch vụ từ bang_gia_dich_vu
     const [bangGia] = await pool.execute(
-      'SELECT gia_thang, gia_quy, gia_nam FROM bang_gia_dich_vu WHERE id_dich_vu = ?',
+      'SELECT gia_ngay, gia_thang, gia_quy, gia_nam FROM bang_gia_dich_vu WHERE id_dich_vu = ?',
       [id_dich_vu]
     );
 
@@ -150,7 +150,9 @@ export const createBenhNhanDichVu = async (req, res, next) => {
     let finalThanhTien = thanh_tien || 0;
     if (!thanh_tien && bangGia.length > 0) {
       const gia = bangGia[0];
-      if (hinh_thuc_thanh_toan === 'thang') {
+      if (hinh_thuc_thanh_toan === 'ngay') {
+        finalThanhTien = gia.gia_ngay || 0;
+      } else if (hinh_thuc_thanh_toan === 'thang') {
         finalThanhTien = gia.gia_thang || 0;
       } else if (hinh_thuc_thanh_toan === 'quy') {
         finalThanhTien = gia.gia_quy || 0;

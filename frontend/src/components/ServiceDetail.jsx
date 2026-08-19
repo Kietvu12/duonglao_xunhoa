@@ -13,6 +13,11 @@ const ServiceDetail = ({ service, onBack }) => {
   useEffect(() => {
     setSelectedService(service);
     loadBaiViet(service.id);
+    // Ưu tiên chọn mức giá có sẵn: ngày → tháng → quý → năm
+    if (service.gia_ngay) setSelectedPaymentType('ngay');
+    else if (service.gia_thang) setSelectedPaymentType('thang');
+    else if (service.gia_quy) setSelectedPaymentType('quy');
+    else if (service.gia_nam) setSelectedPaymentType('nam');
   }, [service]);
 
   const loadBaiViet = async (idDichVu) => {
@@ -45,6 +50,10 @@ const ServiceDetail = ({ service, onBack }) => {
   const handleServiceClick = (dichVu) => {
     setSelectedService(dichVu);
     loadBaiViet(dichVu.id);
+    if (dichVu.gia_ngay) setSelectedPaymentType('ngay');
+    else if (dichVu.gia_thang) setSelectedPaymentType('thang');
+    else if (dichVu.gia_quy) setSelectedPaymentType('quy');
+    else if (dichVu.gia_nam) setSelectedPaymentType('nam');
   };
 
   const formatPrice = (price) => {
@@ -54,6 +63,8 @@ const ServiceDetail = ({ service, onBack }) => {
 
   const getDisplayPrice = () => {
     switch (selectedPaymentType) {
+      case 'ngay':
+        return formatPrice(selectedService.gia_ngay);
       case 'thang':
         return formatPrice(selectedService.gia_thang);
       case 'quy':
@@ -67,6 +78,8 @@ const ServiceDetail = ({ service, onBack }) => {
 
   const getPaymentLabel = () => {
     switch (selectedPaymentType) {
+      case 'ngay':
+        return 'Thanh toán theo ngày';
       case 'thang':
         return 'Thanh toán theo tháng';
       case 'quy':
@@ -146,6 +159,27 @@ const ServiceDetail = ({ service, onBack }) => {
 
               {/* Payment Options */}
               <div className="space-y-3">
+                {selectedService.gia_ngay && (
+                  <label className="flex items-center justify-between p-3 border border-gray-200 rounded cursor-pointer hover:bg-gray-50">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        name="paymentType"
+                        value="ngay"
+                        checked={selectedPaymentType === 'ngay'}
+                        onChange={(e) => setSelectedPaymentType(e.target.value)}
+                        className="w-4 h-4 text-primary"
+                      />
+                      <span className="text-sm md:text-base font-raleway-regular text-gray-800">
+                        Theo ngày
+                      </span>
+                    </div>
+                    <span className="text-sm md:text-base font-raleway-bold text-gray-800">
+                      {formatPrice(selectedService.gia_ngay)}
+                    </span>
+                  </label>
+                )}
+
                 {selectedService.gia_thang && (
                   <label className="flex items-center justify-between p-3 border border-gray-200 rounded cursor-pointer hover:bg-gray-50">
                     <div className="flex items-center gap-3">
