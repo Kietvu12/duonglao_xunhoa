@@ -235,7 +235,7 @@ export const createNhanVien = async (req, res, next) => {
 export const updateNhanVien = async (req, res, next) => {
   try {
     const { id } = req.params; // id là ho_so_nhan_vien.id
-    const { ho_ten, email, so_dien_thoai, chuc_vu, bang_cap, luong_co_ban, trang_thai,
+    const { ho_ten, email, so_dien_thoai, vai_tro, chuc_vu, bang_cap, luong_co_ban, trang_thai,
             gioi_thieu, chuyen_mon, so_nam_kinh_nghiem, danh_gia, so_benh_nhan_da_dieu_tri,
             noi_cong_tac, lich_lam_viec, cccd, so_bhyt, dia_chi } = req.body;
 
@@ -269,6 +269,10 @@ export const updateNhanVien = async (req, res, next) => {
     if (so_dien_thoai !== undefined) {
       updateFields.push('so_dien_thoai = ?');
       updateValues.push(so_dien_thoai);
+    }
+    if (vai_tro !== undefined && vai_tro !== '') {
+      updateFields.push('vai_tro = ?');
+      updateValues.push(vai_tro);
     }
     if (trang_thai !== undefined) {
       updateFields.push('trang_thai = ?');
@@ -378,7 +382,7 @@ export const updateNhanVien = async (req, res, next) => {
     );
 
     // Gửi thông báo cho admin khi có thay đổi quan trọng (không block response nếu có lỗi)
-    if (nhanVien.length > 0 && (trang_thai !== undefined || luong_co_ban !== undefined || chuc_vu !== undefined)) {
+    if (nhanVien.length > 0 && (trang_thai !== undefined || luong_co_ban !== undefined || chuc_vu !== undefined || vai_tro !== undefined)) {
       createNotificationForAdmins({
         loai: 'he_thong',
         tieu_de: 'Thay đổi thông tin nhân sự',
