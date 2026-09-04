@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { congViecAPI, benhNhanAPI, nhanVienAPI } from '../../services/api';
 import { formatDateTimeVN, formatDateTimeForInput, getVNNow, toISOStringVN } from '../../utils/dateUtils';
+import ImportExcelModal from '../../components/Admin/ImportExcelModal';
 
 export default function CongViecPage() {
   const [congViecs, setCongViecs] = useState([]);
@@ -8,6 +9,7 @@ export default function CongViecPage() {
   const [nhanViens, setNhanViens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [showPhanCongModal, setShowPhanCongModal] = useState(false);
   const [selectedCongViec, setSelectedCongViec] = useState(null);
   const [editing, setEditing] = useState(null);
@@ -253,16 +255,25 @@ export default function CongViecPage() {
           <h1 className="text-4xl font-black leading-tight tracking-tight text-gray-800">Quản lý Công việc</h1>
           <p className="text-gray-600 mt-2">Phân công và theo dõi công việc chăm sóc</p>
         </div>
-        <button
-          onClick={() => {
-            resetForm();
-            setShowModal(true);
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#4A90E2]/90 transition-colors text-sm font-semibold"
-        >
-          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>add</span>
-          <span>Tạo công việc</span>
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm font-semibold"
+          >
+            <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>upload_file</span>
+            <span>Import danh sách công việc</span>
+          </button>
+          <button
+            onClick={() => {
+              resetForm();
+              setShowModal(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#4A90E2]/90 transition-colors text-sm font-semibold"
+          >
+            <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>add</span>
+            <span>Tạo công việc</span>
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -802,7 +813,22 @@ export default function CongViecPage() {
           </div>
         </div>
       )}
+      <ImportExcelModal
+        open={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        title="Import danh sách công việc theo tháng"
+        description="Tạo trước công việc chăm sóc từ file Excel"
+        templateFilePrefix="mau-cong-viec"
+        previewType="cong_viec"
+        replaceConfirmText="Import sẽ XÓA toàn bộ công việc trong tháng {thang}/{nam} rồi tạo lại. Tiếp tục?"
+        supplementConfirmText="Import sẽ bổ sung công việc tháng {thang}/{nam} (bỏ qua bản ghi trùng). Tiếp tục?"
+        downloadTemplate={congViecAPI.downloadImportTemplate}
+        downloadStaffList={congViecAPI.downloadNhanVienDanhMuc}
+        downloadPatientList={congViecAPI.downloadBenhNhanDanhMuc}
+        previewImport={congViecAPI.previewImport}
+        importData={congViecAPI.importFromExcel}
+        onSuccess={() => loadCongViecs()}
+      />
     </div>
   );
 }
-

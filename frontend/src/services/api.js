@@ -309,6 +309,52 @@ export const benhNhanAPI = {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
+  downloadCongViecTemplateForBenhNhan: async (idBenhNhan, thang, nam) => {
+    const token = getToken();
+    const response = await fetch(
+      `${API_BASE_URL}/benh-nhan/${idBenhNhan}/import/cong-viec/mau?thang=${thang}&nam=${nam}`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    );
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Không tải được file mẫu');
+    }
+    return response.blob();
+  },
+  downloadDieuDuongPhuTrachForBenhNhan: async (idBenhNhan) => {
+    const token = getToken();
+    const response = await fetch(
+      `${API_BASE_URL}/benh-nhan/${idBenhNhan}/import/cong-viec/danh-muc-nhan-vien/mau`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    );
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Không tải được danh sách điều dưỡng');
+    }
+    return response.blob();
+  },
+  previewCongViecImportForBenhNhan: async (idBenhNhan, formData) => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/benh-nhan/${idBenhNhan}/import/cong-viec/xem-truoc`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Xem trước thất bại');
+    return data;
+  },
+  importCongViecForBenhNhan: async (idBenhNhan, formData) => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/benh-nhan/${idBenhNhan}/import/cong-viec/import`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Import thất bại');
+    return data;
+  },
   // QR Code
   getQRCode: (id) => apiCall(`/benh-nhan/${id}/qr-code`),
   createQRCode: (id) => apiCall(`/benh-nhan/${id}/qr-code`, {
@@ -393,6 +439,132 @@ export const nhanVienAPI = {
   deleteMediaHoSo: (id) => apiCall(`/nhan-vien/media-ho-so/${id}`, {
     method: 'DELETE',
   }),
+  downloadPhanCaTemplate: async (thang, nam) => {
+    const token = getToken();
+    const response = await fetch(
+      `${API_BASE_URL}/nhan-vien/phan-ca/mau?thang=${thang}&nam=${nam}`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    );
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Không tải được file mẫu');
+    }
+    return response.blob();
+  },
+  downloadNhanVienDanhMuc: async () => {
+    const token = getToken();
+    const response = await fetch(
+      `${API_BASE_URL}/nhan-vien/danh-muc-nhan-vien/mau`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    );
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Không tải được danh sách nhân viên');
+    }
+    return response.blob();
+  },
+  previewPhanCaImport: async (formData) => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/nhan-vien/phan-ca/xem-truoc`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Xem trước thất bại');
+    return data;
+  },
+  importPhanCa: async (formData) => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/nhan-vien/phan-ca/import`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Import thất bại');
+    return data;
+  },
+  downloadPhanCaTemplateForNhanVien: async (idHoSo, thang, nam) => {
+    const token = getToken();
+    const response = await fetch(
+      `${API_BASE_URL}/nhan-vien/${idHoSo}/import/phan-ca/mau?thang=${thang}&nam=${nam}`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    );
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Không tải được file mẫu');
+    }
+    return response.blob();
+  },
+  downloadBenhNhanPhuTrachForNhanVien: async (idHoSo) => {
+    const token = getToken();
+    const response = await fetch(
+      `${API_BASE_URL}/nhan-vien/${idHoSo}/import/cong-viec/danh-muc-benh-nhan/mau`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    );
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Không tải được danh sách bệnh nhân');
+    }
+    return response.blob();
+  },
+  previewPhanCaImportForNhanVien: async (idHoSo, formData) => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/nhan-vien/${idHoSo}/import/phan-ca/xem-truoc`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Xem trước thất bại');
+    return data;
+  },
+  importPhanCaForNhanVien: async (idHoSo, formData) => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/nhan-vien/${idHoSo}/import/phan-ca/import`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Import thất bại');
+    return data;
+  },
+  downloadCongViecTemplateForNhanVien: async (idHoSo, thang, nam) => {
+    const token = getToken();
+    const response = await fetch(
+      `${API_BASE_URL}/nhan-vien/${idHoSo}/import/cong-viec/mau?thang=${thang}&nam=${nam}`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    );
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Không tải được file mẫu');
+    }
+    return response.blob();
+  },
+  previewCongViecImportForNhanVien: async (idHoSo, formData) => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/nhan-vien/${idHoSo}/import/cong-viec/xem-truoc`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Xem trước thất bại');
+    return data;
+  },
+  importCongViecForNhanVien: async (idHoSo, formData) => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/nhan-vien/${idHoSo}/import/cong-viec/import`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Import thất bại');
+    return data;
+  },
 };
 
 // Lịch khám APIs
@@ -566,6 +738,48 @@ export const baiVietDichVuAPI = {
     body: JSON.stringify({ duyet }),
   }),
   deleteBinhLuan: (id) => apiCall(`/bai-viet-dich-vu/binh-luan/${id}`, {
+    method: 'DELETE',
+  }),
+};
+
+// Bài viết sự kiện APIs
+export const baiVietSuKienAPI = {
+  getAll: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiCall(`/bai-viet-su-kien?${queryString}`);
+  },
+  getById: (id) => apiCall(`/bai-viet-su-kien/${id}`),
+  create: (data) => apiCall('/bai-viet-su-kien', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  update: (id, data) => apiCall(`/bai-viet-su-kien/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (id) => apiCall(`/bai-viet-su-kien/${id}`, {
+    method: 'DELETE',
+  }),
+  addMedia: (data) => apiCall('/bai-viet-su-kien/media', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  deleteMedia: (id) => apiCall(`/bai-viet-su-kien/media/${id}`, {
+    method: 'DELETE',
+  }),
+  getBinhLuan: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiCall(`/bai-viet-su-kien/binh-luan/all?${queryString}`);
+  },
+  createBinhLuan: (data) => apiCall('/bai-viet-su-kien/binh-luan', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  duyetBinhLuan: (id, duyet) => apiCall(`/bai-viet-su-kien/binh-luan/${id}/duyet`, {
+    method: 'PUT',
+    body: JSON.stringify({ duyet }),
+  }),
+  deleteBinhLuan: (id) => apiCall(`/bai-viet-su-kien/binh-luan/${id}`, {
     method: 'DELETE',
   }),
 };
@@ -1025,6 +1239,64 @@ export const congViecAPI = {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
+  downloadImportTemplate: async (thang, nam) => {
+    const token = getToken();
+    const response = await fetch(
+      `${API_BASE_URL}/cong-viec/import/mau?thang=${thang}&nam=${nam}`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    );
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Không tải được file mẫu');
+    }
+    return response.blob();
+  },
+  downloadNhanVienDanhMuc: async () => {
+    const token = getToken();
+    const response = await fetch(
+      `${API_BASE_URL}/cong-viec/import/danh-muc-nhan-vien`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    );
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Không tải được danh sách nhân viên');
+    }
+    return response.blob();
+  },
+  downloadBenhNhanDanhMuc: async () => {
+    const token = getToken();
+    const response = await fetch(
+      `${API_BASE_URL}/cong-viec/import/danh-muc-benh-nhan`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    );
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Không tải được danh sách bệnh nhân');
+    }
+    return response.blob();
+  },
+  previewImport: async (formData) => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/cong-viec/import/xem-truoc`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Xem trước thất bại');
+    return data;
+  },
+  importFromExcel: async (formData) => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/cong-viec/import`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Import thất bại');
+    return data;
+  },
 };
 
 // KPI APIs
@@ -1088,6 +1360,69 @@ export const danhSachTrieuChungAPI = {
     body: JSON.stringify(data),
   }),
   delete: (id) => apiCall(`/danh-sach-trieu-chung/${id}`, {
+    method: 'DELETE',
+  }),
+};
+
+// Phân loại thuốc/vật tư APIs
+export const phanLoaiThuocAPI = {
+  getAll: () => apiCall('/phan-loai-thuoc'),
+  getById: (id) => apiCall(`/phan-loai-thuoc/${id}`),
+  create: (data) => apiCall('/phan-loai-thuoc', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  update: (id, data) => apiCall(`/phan-loai-thuoc/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (id) => apiCall(`/phan-loai-thuoc/${id}`, {
+    method: 'DELETE',
+  }),
+};
+
+// Tủ thuốc APIs
+export const tuThuocAPI = {
+  getThongKe: () => apiCall('/tu-thuoc/thong-ke'),
+  getAll: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiCall(`/tu-thuoc?${queryString}`);
+  },
+  getById: (id) => apiCall(`/tu-thuoc/${id}`),
+  create: (data) => apiCall('/tu-thuoc', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  update: (id, data) => apiCall(`/tu-thuoc/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (id) => apiCall(`/tu-thuoc/${id}`, {
+    method: 'DELETE',
+  }),
+};
+
+// Vật tư tiêu hao APIs
+export const vatTuTieuHaoAPI = {
+  getDanhMucNgoaiKho: () => apiCall('/vat-tu-tieu-hao/danh-muc-ngoai-kho'),
+  getHomNay: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiCall(`/vat-tu-tieu-hao/hom-nay?${queryString}`);
+  },
+  getAll: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiCall(`/vat-tu-tieu-hao?${queryString}`);
+  },
+  getById: (id) => apiCall(`/vat-tu-tieu-hao/${id}`),
+  create: (data) => apiCall('/vat-tu-tieu-hao', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  updateTrangThai: (id, trang_thai) => apiCall(`/vat-tu-tieu-hao/${id}/trang-thai`, {
+    method: 'PATCH',
+    body: JSON.stringify({ trang_thai }),
+  }),
+  delete: (id) => apiCall(`/vat-tu-tieu-hao/${id}`, {
     method: 'DELETE',
   }),
 };

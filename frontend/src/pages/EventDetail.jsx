@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { suKienAPI } from '../services/api';
+import { suKienAPI, baiVietSuKienAPI } from '../services/api';
 import { normalizeImageUrl } from '../utils/imageUtils';
 import SeoHead from '../components/SeoHead';
 import { homeImages } from '../assets/homeImages';
@@ -26,6 +26,7 @@ const EventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
+  const [baiViet, setBaiViet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -41,6 +42,7 @@ const EventDetail = () => {
       
       if (response && response.success) {
         setEvent(response.data);
+        await loadBaiViet(response.data.id);
       } else {
         setError('Không tìm thấy sự kiện');
       }
@@ -49,6 +51,30 @@ const EventDetail = () => {
       setError('Lỗi khi tải thông tin sự kiện');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadBaiViet = async (idSuKien) => {
+    try {
+      const response = await baiVietSuKienAPI.getAll({
+        id_su_kien: idSuKien,
+        trang_thai: 'xuat_ban',
+        limit: 1,
+      });
+
+      if (response?.success && response.data?.length > 0) {
+        const detail = await baiVietSuKienAPI.getById(response.data[0].id);
+        if (detail?.success) {
+          setBaiViet(detail.data);
+        } else {
+          setBaiViet(null);
+        }
+      } else {
+        setBaiViet(null);
+      }
+    } catch (err) {
+      console.error('Error loading bai viet su kien:', err);
+      setBaiViet(null);
     }
   };
 
@@ -126,22 +152,25 @@ const EventDetail = () => {
   }
 
   const eventDesc =
-    event.mo_ta &&
-    String(event.mo_ta)
+    (baiViet?.mo_ta_ngan || event.mo_ta) &&
+    String(baiViet?.mo_ta_ngan || event.mo_ta)
       .replace(/\s+/g, ' ')
       .trim()
       .slice(0, 320);
 
+  const displayTitle = baiViet?.tieu_de || event.tieu_de;
+  const displayImage = baiViet?.anh_dai_dien || event.anh_dai_dien;
+
   return (
     <section className="w-full bg-white py-8 md:py-12">
       <SeoHead
-        title={event.tieu_de}
+        title={displayTitle}
         description={
           eventDesc ||
-          `Sự kiện tại Trung tâm trường thọ Xuân Hoa: ${event.tieu_de}. Xem thời gian, địa điểm và nội dung chương trình.`
+          `Sự kiện tại Trung tâm trường thọ Xuân Hoa: ${displayTitle}. Xem thời gian, địa điểm và nội dung chương trình.`
         }
         canonicalPath={`/su-kien/${id}`}
-        imageUrl={normalizeImageUrl(event.anh_dai_dien) || undefined}
+        imageUrl={normalizeImageUrl(displayImage) || undefined}
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
@@ -154,9 +183,14 @@ const EventDetail = () => {
               Trang chủ
             </span>
             <span className="mx-2">/</span>
-            <span className="text-gray-800">Sự kiện</span>
+            <span 
+              className="hover:text-primary cursor-pointer" 
+              onClick={() => navigate('/su-kien')}
+            >
+              Sự kiện
+            </span>
             <span className="mx-2">/</span>
-            <span className="text-gray-800">{event.tieu_de}</span>
+            <span className="text-gray-800">{displayTitle}</span>
           </nav>
         </div>
 
@@ -171,7 +205,7 @@ const EventDetail = () => {
                 </span>
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-raleway-bold text-gray-800 leading-tight mb-4">
-                {event.tieu_de}
+                {displayTitle}
               </h1>
             </div>
 
@@ -201,16 +235,19 @@ const EventDetail = () => {
               </div>
             )}
 
-            {/* Description */}
-            {event.mo_ta && (
+            {/* Article / Description */}
+            {baiViet?.noi_dung ? (
+              <div
+                className="prose prose-lg max-w-none text-gray-600 font-raleway-regular leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: baiViet.noi_dung }}
+              />
+            ) : event.mo_ta ? (
               <div className="prose max-w-none">
-                <div 
-                  className="text-base md:text-lg text-gray-600 font-raleway-regular leading-relaxed whitespace-pre-wrap"
-                >
+                <div className="text-base md:text-lg text-gray-600 font-raleway-regular leading-relaxed whitespace-pre-wrap">
                   {event.mo_ta}
                 </div>
               </div>
-            )}
+            ) : null}
 
             {/* Media Gallery */}
             {event.media && event.media.length > 0 && (

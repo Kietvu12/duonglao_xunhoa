@@ -10,6 +10,7 @@ import Blog from './pages/Blog'
 import Contact from './pages/Contact'
 import HuongDanSuDung from './pages/HuongDanSuDung'
 import EventDetail from './pages/EventDetail'
+import SuKienListPage from './pages/SuKienListPage'
 import AdminLayout from './components/Admin/Layout'
 import AdminHomePage from './pages/Admin/HomePage'
 import Login from './pages/Admin/Login'
@@ -18,7 +19,7 @@ import BenhNhanDetailPage from './pages/Admin/BenhNhanDetailPage'
 import NhanVienPage from './pages/Admin/NhanVienPage'
 import LichKhamPage from './pages/Admin/LichKhamPage'
 import QuanLyDichVuPage from './pages/Admin/QuanLyDichVuPage'
-import SuKienPage from './pages/Admin/SuKienPage'
+import QuanLySuKienPage from './pages/Admin/QuanLySuKienPage'
 import BaiVietPage from './pages/Admin/BaiVietPage'
 import TuyenDungPage from './pages/Admin/TuyenDungPage'
 import ThuocPage from './pages/Admin/ThuocPage'
@@ -34,6 +35,8 @@ import CauHinhPage from './pages/Admin/CauHinhPage'
 import MediaCaNhanPage from './pages/Admin/MediaCaNhanPage'
 import DanhSachTrieuChungPage from './pages/Admin/DanhSachTrieuChungPage'
 import TrieuChungBenhNhanPage from './pages/Admin/TrieuChungBenhNhanPage'
+import TuThuocPage from './pages/Admin/TuThuocPage'
+import VatTuTieuHaoPage from './pages/Admin/VatTuTieuHaoPage'
 import duTruHoatDong30Cu from './assets/dự trù hoạt động 12 tháng cho 30 cụ.html?url'
 import soSanh30Cu50Cu from './assets/so sánh 30 cụ và 50 cụ.html?url'
 import './App.css'
@@ -73,6 +76,7 @@ function App() {
           <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
           <Route path="/lien-he" element={<PublicLayout><Contact /></PublicLayout>} />
           <Route path="/huong-dan-su-dung" element={<PublicLayout><HuongDanSuDung /></PublicLayout>} />
+          <Route path="/su-kien" element={<PublicLayout><SuKienListPage /></PublicLayout>} />
           <Route path="/su-kien/:id" element={<PublicLayout><EventDetail /></PublicLayout>} />
           <Route
             path="/du-tru-hoat-dong-12-thang-cho-30-cu"
@@ -102,10 +106,12 @@ function App() {
             <Route path="lich-kham" element={<LichKhamPage />} />
             <Route path="quan-ly-phong" element={<QuanLyPhongPageNew />} />
             <Route path="dich-vu" element={<QuanLyDichVuPage />} />
-            <Route path="su-kien" element={<SuKienPage />} />
+            <Route path="su-kien" element={<QuanLySuKienPage />} />
             <Route path="bai-viet" element={<BaiVietPage />} />
             <Route path="tuyen-dung" element={<TuyenDungPage />} />
             <Route path="thuoc" element={<ThuocPage />} />
+            <Route path="tu-thuoc" element={<TuThuocPage />} />
+            <Route path="vat-tu-tieu-hao" element={<VatTuTieuHaoPage />} />
             <Route path="cong-viec" element={<CongViecPage />} />
             <Route path="kpi" element={<KPIPage />} />
             <Route path="lich-hen-tu-van" element={<LichHenTuVanPage />} />

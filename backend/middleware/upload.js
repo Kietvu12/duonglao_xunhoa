@@ -75,6 +75,26 @@ export const uploadMedia = multer({
   fileFilter: mediaFilter
 });
 
+// Upload middleware for Excel import
+const excelFilter = (req, file, cb) => {
+  const allowedTypes = /xlsx|xls|csv/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = /spreadsheet|excel|csv/.test(file.mimetype) || extname;
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  }
+  cb(new Error('Chỉ cho phép upload file Excel (.xlsx, .xls)'));
+};
+
+export const uploadExcel = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: parseInt(process.env.MAX_EXCEL_SIZE) || 10 * 1024 * 1024
+  },
+  fileFilter: excelFilter
+});
+
 // Upload middleware for documents (images and PDF) - for employee profile documents
 export const uploadDocument = multer({
   storage: storage,

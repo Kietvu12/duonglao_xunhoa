@@ -60,6 +60,13 @@ import {
 } from '../controllers/vanDongPhucHoiController.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import { uploadMedia } from '../middleware/upload.js';
+import { uploadExcel } from '../middleware/upload.js';
+import {
+  downloadCongViecTemplateForBenhNhan,
+  downloadDieuDuongPhuTrachForBenhNhan,
+  previewCongViecImportForBenhNhan,
+  importCongViecForBenhNhan,
+} from '../controllers/lichThangImportController.js';
 
 const router = express.Router();
 
@@ -74,6 +81,12 @@ router.get('/dieu-duong/:id_dieu_duong', authorize('super_admin', 'quan_ly_y_te'
 router.get('/:id/qr-code', authorize('super_admin', 'quan_ly_y_te', 'dieu_duong_truong', 'dieu_duong'), getQRCodeByBenhNhan);
 router.post('/:id/qr-code', authorize('super_admin', 'quan_ly_y_te', 'dieu_duong_truong', 'dieu_duong'), createQRCodeForBenhNhanAPI);
 router.post('/:id/qr-code/regenerate', authorize('super_admin', 'quan_ly_y_te', 'dieu_duong_truong', 'dieu_duong'), regenerateQRCodeForBenhNhan);
+
+// Import công việc theo từng bệnh nhân
+router.get('/:idBenhNhan/import/cong-viec/mau', authorize('super_admin', 'quan_ly_y_te', 'dieu_duong_truong'), downloadCongViecTemplateForBenhNhan);
+router.get('/:idBenhNhan/import/cong-viec/danh-muc-nhan-vien/mau', authorize('super_admin', 'quan_ly_y_te', 'dieu_duong_truong'), downloadDieuDuongPhuTrachForBenhNhan);
+router.post('/:idBenhNhan/import/cong-viec/xem-truoc', authorize('super_admin', 'quan_ly_y_te', 'dieu_duong_truong'), uploadExcel.single('file'), previewCongViecImportForBenhNhan);
+router.post('/:idBenhNhan/import/cong-viec/import', authorize('super_admin', 'quan_ly_y_te', 'dieu_duong_truong'), uploadExcel.single('file'), importCongViecForBenhNhan);
 
 router.get('/:id', authorize('super_admin', 'quan_ly_y_te', 'dieu_duong_truong', 'dieu_duong'), getBenhNhanById);
 router.post('/', authorize('super_admin', 'quan_ly_y_te'), uploadMedia.single('avatar'), createBenhNhan);

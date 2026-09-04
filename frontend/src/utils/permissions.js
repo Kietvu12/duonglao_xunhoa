@@ -118,6 +118,26 @@ export const MENU_PERMISSIONS = {
       ROLES.DIEU_DUONG
     ]
   },
+  '/admin/tu-thuoc': {
+    // Tủ thuốc - admin, quản lý y tế, điều dưỡng
+    allowedRoles: [
+      ROLES.SUPER_ADMIN,
+      ROLES.ADMIN,
+      ROLES.QUAN_LY_Y_TE,
+      ROLES.DIEU_DUONG_TRUONG,
+      ROLES.DIEU_DUONG
+    ]
+  },
+  '/admin/vat-tu-tieu-hao': {
+    // Vật tư tiêu hao - admin, quản lý y tế, điều dưỡng
+    allowedRoles: [
+      ROLES.SUPER_ADMIN,
+      ROLES.ADMIN,
+      ROLES.QUAN_LY_Y_TE,
+      ROLES.DIEU_DUONG_TRUONG,
+      ROLES.DIEU_DUONG
+    ]
+  },
   '/admin/cong-viec': {
     // Công việc - admin, quản lý y tế, điều dưỡng
     allowedRoles: [
@@ -229,6 +249,8 @@ export function getFirstAllowedRoute(userRole) {
     '/admin/bai-viet',
     '/admin/tuyen-dung',
     '/admin/thuoc',
+    '/admin/tu-thuoc',
+    '/admin/vat-tu-tieu-hao',
     '/admin/cong-viec',
     '/admin/kpi',
     '/admin/media-ca-nhan',

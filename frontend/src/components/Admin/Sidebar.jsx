@@ -15,6 +15,8 @@ const menuItems = [
   { path: '/admin/bai-viet', icon: 'article', label: 'Bài viết' },
   { path: '/admin/tuyen-dung', icon: 'work', label: 'Tuyển dụng' },
   { path: '/admin/thuoc', icon: 'medication', label: 'Thuốc' },
+  { path: '/admin/tu-thuoc', icon: 'medical_services', label: 'Tủ thuốc' },
+  { path: '/admin/vat-tu-tieu-hao', icon: 'inventory', label: 'Vật tư tiêu hao' },
   { path: '/admin/cong-viec', icon: 'task', label: 'Công việc' },
   { path: '/admin/kpi', icon: 'bar_chart', label: 'KPI Nhân viên' },
   { path: '/admin/media-ca-nhan', icon: 'chat', label: 'Media cá nhân' },

@@ -87,13 +87,17 @@ const Session5 = () => {
               <span style={{ color: '#A90046', display: 'block', marginTop: '0.25rem' }}>Nổi Bật</span>
             </h2>
           </div>
-          <a href="#" className="hidden lg:inline-flex items-center font-semibold text-sm tracking-wide hover:gap-2 transition-all flex-shrink-0 ml-4" 
-             style={{ color: '#C9A870' }}>
+          <button
+            type="button"
+            onClick={() => navigate('/su-kien')}
+            className="hidden lg:inline-flex items-center font-semibold text-sm tracking-wide hover:gap-2 transition-all flex-shrink-0 ml-4"
+            style={{ color: '#C9A870' }}
+          >
             XEM TẤT CẢ
             <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
-          </a>
+          </button>
         </div>
 
         {loading ? (
@@ -135,13 +139,20 @@ const Session5 = () => {
                   <p className="mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed text-justify" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
                     {events[0].mo_ta || 'Không có mô tả'}
                   </p>
-                  <a href="#" className="inline-flex items-center font-semibold text-xs sm:text-sm tracking-wide hover:gap-2 transition-all" 
-                     style={{ color: '#C9A870' }}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEventClick(events[0].id);
+                    }}
+                    className="inline-flex items-center font-semibold text-xs sm:text-sm tracking-wide hover:gap-2 transition-all"
+                    style={{ color: '#C9A870' }}
+                  >
                     ĐỌC THÊM
                     <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
-                  </a>
+                  </button>
                 </div>
               </div>
             )}

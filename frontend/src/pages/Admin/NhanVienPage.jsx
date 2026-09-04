@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
 import { nhanVienAPI, benhNhanAPI } from '../../services/api';
+import ImportExcelModal from '../../components/Admin/ImportExcelModal';
+import {
+  buildPhanCaNvFileFromRows,
+  buildCongViecNvFileFromRows,
+  PHAN_CA_NV_EDIT_FIELDS,
+  CONG_VIEC_NV_EDIT_FIELDS,
+} from '../../utils/importExcelBuilder';
 
 export default function NhanVienPage() {
   const [nhanViens, setNhanViens] = useState([]);
@@ -106,6 +113,9 @@ export default function NhanVienPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [showPhanCaModal, setShowPhanCaModal] = useState(false);
+  const [showImportPhanCaModal, setShowImportPhanCaModal] = useState(false);
+  const [showImportPhanCaNvModal, setShowImportPhanCaNvModal] = useState(false);
+  const [showImportCongViecNvModal, setShowImportCongViecNvModal] = useState(false);
   const [selectedNhanVien, setSelectedNhanVien] = useState(null);
   const [lichPhanCa, setLichPhanCa] = useState([]);
   const [showPhanCaForm, setShowPhanCaForm] = useState(false);
@@ -1119,6 +1129,13 @@ export default function NhanVienPage() {
         </div>
         <div className="flex gap-3">
           <button
+            onClick={() => setShowImportPhanCaModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm font-semibold"
+          >
+            <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>upload_file</span>
+            <span>Import phân ca</span>
+          </button>
+          <button
             onClick={() => {
               const today = new Date();
               setShowCalendarModal(true);
@@ -1279,6 +1296,16 @@ export default function NhanVienPage() {
                         >
                           <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>schedule</span>
                           <span>Phân ca</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedNhanVien(nv);
+                            setShowImportCongViecNvModal(true);
+                          }}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors text-sm font-semibold"
+                        >
+                          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>upload_file</span>
+                          <span>Import CV</span>
                         </button>
                         {(nv.vai_tro === 'dieu_duong' || nv.vai_tro === 'dieu_duong_truong') && (
                           <button
@@ -1928,14 +1955,23 @@ export default function NhanVienPage() {
             </div>
             
             <div className="mb-6 space-y-4">
-              <div className="flex items-center justify-between gap-4">
-                <button
-                  onClick={() => handleOpenPhanCaForm()}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#4A90E2]/90 transition-colors text-sm font-semibold"
-                >
-                  <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>add</span>
-                  <span>Thêm phân ca</span>
-                </button>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handleOpenPhanCaForm()}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#4A90E2]/90 transition-colors text-sm font-semibold"
+                  >
+                    <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>add</span>
+                    <span>Thêm phân ca</span>
+                  </button>
+                  <button
+                    onClick={() => setShowImportPhanCaNvModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm font-semibold"
+                  >
+                    <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>upload_file</span>
+                    <span>Import phân ca</span>
+                  </button>
+                </div>
               </div>
 
               {/* Filters for phan ca */}
@@ -2763,7 +2799,62 @@ export default function NhanVienPage() {
           </div>
         </div>
       )}
+      <ImportExcelModal
+        open={showImportPhanCaModal}
+        onClose={() => setShowImportPhanCaModal(false)}
+        title="Import phân ca theo tháng"
+        description="Tạo trước lịch phân ca cho nhân viên từ file Excel"
+        templateFilePrefix="mau-phan-ca"
+        previewType="phan_ca"
+        replaceConfirmText="Import sẽ XÓA toàn bộ phân ca trong tháng {thang}/{nam} rồi tạo lại. Tiếp tục?"
+        supplementConfirmText="Import sẽ bổ sung phân ca tháng {thang}/{nam} (bỏ qua bản ghi trùng). Tiếp tục?"
+        downloadTemplate={nhanVienAPI.downloadPhanCaTemplate}
+        downloadStaffList={nhanVienAPI.downloadNhanVienDanhMuc}
+        previewImport={nhanVienAPI.previewPhanCaImport}
+        importData={nhanVienAPI.importPhanCa}
+        onSuccess={() => loadAllLichPhanCa()}
+      />
+      {selectedNhanVien && (
+        <>
+          <ImportExcelModal
+            open={showImportPhanCaNvModal}
+            onClose={() => setShowImportPhanCaNvModal(false)}
+            title={`Import phân ca — ${selectedNhanVien.ho_ten}`}
+            description="Import lịch phân ca riêng cho nhân viên này"
+            templateFilePrefix={`mau-phan-ca-nv-${selectedNhanVien.id}`}
+            previewType="phan_ca"
+            editFields={PHAN_CA_NV_EDIT_FIELDS}
+            buildFileFromRows={buildPhanCaNvFileFromRows}
+            replaceConfirmText="Import sẽ XÓA toàn bộ phân ca của nhân viên này trong tháng {thang}/{nam} rồi tạo lại. Tiếp tục?"
+            supplementConfirmText="Import sẽ bổ sung phân ca của nhân viên này trong tháng {thang}/{nam}. Tiếp tục?"
+            downloadTemplate={(thang, nam) => nhanVienAPI.downloadPhanCaTemplateForNhanVien(selectedNhanVien.id, thang, nam)}
+            previewImport={(formData) => nhanVienAPI.previewPhanCaImportForNhanVien(selectedNhanVien.id, formData)}
+            importData={(formData) => nhanVienAPI.importPhanCaForNhanVien(selectedNhanVien.id, formData)}
+            onSuccess={() => {
+              loadLichPhanCa(selectedNhanVien.id);
+              loadAllLichPhanCa();
+            }}
+          />
+          <ImportExcelModal
+            open={showImportCongViecNvModal}
+            onClose={() => setShowImportCongViecNvModal(false)}
+            title={`Import công việc — ${selectedNhanVien.ho_ten}`}
+            description="Import công việc riêng cho nhân viên này (chọn bệnh nhân phụ trách)"
+            templateFilePrefix={`mau-cong-viec-nv-${selectedNhanVien.id}`}
+            previewType="cong_viec"
+            editFields={CONG_VIEC_NV_EDIT_FIELDS}
+            buildFileFromRows={buildCongViecNvFileFromRows}
+            replaceConfirmText="Import sẽ XÓA toàn bộ công việc của nhân viên này trong tháng {thang}/{nam} rồi tạo lại. Tiếp tục?"
+            supplementConfirmText="Import sẽ bổ sung công việc của nhân viên này trong tháng {thang}/{nam}. Tiếp tục?"
+            downloadTemplate={(thang, nam) => nhanVienAPI.downloadCongViecTemplateForNhanVien(selectedNhanVien.id, thang, nam)}
+            downloadCatalog={() => nhanVienAPI.downloadBenhNhanPhuTrachForNhanVien(selectedNhanVien.id)}
+            catalogFileName={`benh-nhan-phu-trach-nv-${selectedNhanVien.id}.xlsx`}
+            catalogLabel="Tải danh sách bệnh nhân phụ trách"
+            previewImport={(formData) => nhanVienAPI.previewCongViecImportForNhanVien(selectedNhanVien.id, formData)}
+            importData={(formData) => nhanVienAPI.importCongViecForNhanVien(selectedNhanVien.id, formData)}
+          />
+        </>
+      )}
     </div>
   );
 }
-

@@ -10,6 +10,11 @@ import {
   formatDateVN, formatDateTimeVN, formatDateForInput, formatDateTimeForInput,
   getTodayVN, getVNNow, toISOStringVN, toVNDate
 } from '../../utils/dateUtils';
+import ImportExcelModal from '../../components/Admin/ImportExcelModal';
+import {
+  buildCongViecBnFileFromRows,
+  CONG_VIEC_BN_EDIT_FIELDS,
+} from '../../utils/importExcelBuilder';
 
 export default function BenhNhanDetailPage() {
   const { id } = useParams();
@@ -147,6 +152,7 @@ export default function BenhNhanDetailPage() {
   const [showNhietDoModal, setShowNhietDoModal] = useState(false);
   const [showThuocModal, setShowThuocModal] = useState(false);
   const [showCongViecModal, setShowCongViecModal] = useState(false);
+  const [showImportCongViecModal, setShowImportCongViecModal] = useState(false);
   const [showNguoiThanModal, setShowNguoiThanModal] = useState(false);
   const [showSelectNguoiThanModal, setShowSelectNguoiThanModal] = useState(false);
   const [showDoDungModal, setShowDoDungModal] = useState(false);
@@ -3529,16 +3535,26 @@ export default function BenhNhanDetailPage() {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold text-gray-800">Công việc chăm sóc</h3>
-                <button
-                  onClick={() => {
-                    resetCongViecForm();
-                    setShowCongViecModal(true);
-                  }}
-                  disabled={benhNhan?.tinh_trang_hien_tai === 'Đã xuất viện'}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#4A90E2]/90 transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  + Thêm công việc
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowImportCongViecModal(true)}
+                    disabled={benhNhan?.tinh_trang_hien_tai === 'Đã xuất viện'}
+                    className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>upload_file</span>
+                    Import công việc
+                  </button>
+                  <button
+                    onClick={() => {
+                      resetCongViecForm();
+                      setShowCongViecModal(true);
+                    }}
+                    disabled={benhNhan?.tinh_trang_hien_tai === 'Đã xuất viện'}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#4A90E2]/90 transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    + Thêm công việc
+                  </button>
+                </div>
               </div>
               {congViecs.length === 0 ? (
                 <div className="bg-gray-50 rounded-xl p-12 text-center border border-gray-200">
@@ -6687,6 +6703,25 @@ export default function BenhNhanDetailPage() {
           </div>
         </div>
       )}
+      <ImportExcelModal
+        open={showImportCongViecModal}
+        onClose={() => setShowImportCongViecModal(false)}
+        title={`Import công việc — ${benhNhan?.ho_ten || 'Bệnh nhân'}`}
+        description="Import công việc chăm sóc riêng cho bệnh nhân này"
+        templateFilePrefix={`mau-cong-viec-bn-${id}`}
+        previewType="cong_viec"
+        editFields={CONG_VIEC_BN_EDIT_FIELDS}
+        buildFileFromRows={buildCongViecBnFileFromRows}
+        replaceConfirmText="Import sẽ XÓA toàn bộ công việc của bệnh nhân này trong tháng {thang}/{nam} rồi tạo lại. Tiếp tục?"
+        supplementConfirmText="Import sẽ bổ sung công việc của bệnh nhân này trong tháng {thang}/{nam}. Tiếp tục?"
+        downloadTemplate={(thang, nam) => benhNhanAPI.downloadCongViecTemplateForBenhNhan(id, thang, nam)}
+        downloadCatalog={() => benhNhanAPI.downloadDieuDuongPhuTrachForBenhNhan(id)}
+        catalogFileName={`dieu-duong-phu-trach-bn-${id}.xlsx`}
+        catalogLabel="Tải danh sách điều dưỡng phụ trách"
+        previewImport={(formData) => benhNhanAPI.previewCongViecImportForBenhNhan(id, formData)}
+        importData={(formData) => benhNhanAPI.importCongViecForBenhNhan(id, formData)}
+        onSuccess={() => loadCongViecs()}
+      />
     </div>
   );
 }

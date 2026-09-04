@@ -6,9 +6,10 @@ import { getNowForDB } from '../utils/dateUtils.js';
 export const getAllSuKien = async (req, res, next) => {
   try {
     const { page = 1, limit = 10, search, trang_thai, start_date, end_date } = req.query;
+    const shouldGetAll = limit === '-1' || limit === 'all' || Number(limit) === -1;
     const safePage = Math.max(1, Math.floor(Number(page) || 1));
-    const limitValue = sanitizeLimit(limit, 10);
-    const offset = (safePage - 1) * limitValue;
+    const limitValue = shouldGetAll ? null : sanitizeLimit(limit, 10);
+    const offset = shouldGetAll ? 0 : (safePage - 1) * limitValue;
 
     let query = 'SELECT * FROM su_kien WHERE da_xoa = 0';
     const params = [];
@@ -29,7 +30,9 @@ export const getAllSuKien = async (req, res, next) => {
     }
 
     query += ' ORDER BY ngay DESC';
-    query += buildLimitOffsetClause(limitValue, offset);
+    if (!shouldGetAll) {
+      query += buildLimitOffsetClause(limitValue, offset);
+    }
 
     const [suKiens] = await pool.execute(query, params);
 
