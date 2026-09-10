@@ -7,14 +7,19 @@ import ServiceDetail from '../components/ServiceDetail';
 import SeoHead from '../components/SeoHead';
 
 const Service = () => {
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
 
   const handleServiceClick = (service) => {
     setSelectedService(service);
   };
 
-  const handleBack = () => {
+  const handleBackFromDetail = () => {
     setSelectedService(null);
+  };
+
+  const handleCategoryBack = () => {
+    setSelectedCategory(null);
   };
 
   return (
@@ -23,20 +28,28 @@ const Service = () => {
         title={
           selectedService
             ? `${selectedService.ten_dich_vu || 'Dịch vụ'} – Dịch vụ`
-            : 'Dịch vụ'
+            : selectedCategory
+              ? `${selectedCategory.ten} – Dịch vụ`
+              : 'Dịch vụ'
         }
         description={
           selectedService?.mo_ta_ngan ||
           selectedService?.mo_ta ||
+          selectedCategory?.mo_ta ||
           'Các gói dịch vụ chăm sóc sức khỏe, vật lý trị liệu và hỗ trợ sinh hoạt tại Trung tâm trường thọ Xuân Hoa – thiết kế phù hợp nhu cầu từng cụ.'
         }
         canonicalPath="/dich-vu"
       />
       <ServiceSession1 />
       {selectedService ? (
-        <ServiceDetail service={selectedService} onBack={handleBack} />
+        <ServiceDetail service={selectedService} onBack={handleBackFromDetail} />
       ) : (
-        <ServiceSession2 onServiceClick={handleServiceClick} />
+        <ServiceSession2
+          selectedCategory={selectedCategory}
+          onCategorySelect={setSelectedCategory}
+          onCategoryBack={handleCategoryBack}
+          onServiceClick={handleServiceClick}
+        />
       )}
       <ServiceSession3 />
       <ServiceSession4 />

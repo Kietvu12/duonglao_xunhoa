@@ -2709,6 +2709,7 @@ export default function BenhNhanDetailPage() {
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Thời gian</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Người đo</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Tâm thu</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Tâm trương</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Đánh giá</th>
@@ -2724,6 +2725,7 @@ export default function BenhNhanDetailPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {item.thoi_gian_do ? formatDateTimeVN(item.thoi_gian_do) : '-'}
                             </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.ten_nguoi_do || '-'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{item.tam_thu || '-'} mmHg</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{item.tam_truong || '-'} mmHg</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.danh_gia_chi_tiet ? formatDanhGia(item.danh_gia_chi_tiet) : '-'}</td>
@@ -2857,6 +2859,7 @@ export default function BenhNhanDetailPage() {
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Thời gian</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Người đo</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Giá trị (bpm)</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Đánh giá</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Tình trạng bệnh nhân</th>
@@ -2870,6 +2873,7 @@ export default function BenhNhanDetailPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {item.thoi_gian_do ? formatDateTimeVN(item.thoi_gian_do) : '-'}
                             </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.ten_nguoi_do || '-'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{item.gia_tri_nhip_tim || '-'} bpm</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.danh_gia_chi_tiet ? formatDanhGia(item.danh_gia_chi_tiet) : '-'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.tinh_trang_benh_nhan_khi_do ? item.tinh_trang_benh_nhan_khi_do.replace('_', ' ') : '-'}</td>
@@ -3001,6 +3005,7 @@ export default function BenhNhanDetailPage() {
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Thời gian</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Người đo</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Giá trị (mmol/L)</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Đánh giá</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Vị trí lấy mẫu</th>
@@ -3014,6 +3019,7 @@ export default function BenhNhanDetailPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {item.thoi_gian_do ? formatDateTimeVN(item.thoi_gian_do) : '-'}
                             </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.ten_nguoi_do || '-'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{item.gia_tri_duong_huyet || '-'} mmol/L</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.danh_gia_chi_tiet ? formatDanhGia(item.danh_gia_chi_tiet) : '-'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.vi_tri_lay_mau ? item.vi_tri_lay_mau.replace('_', ' ') : '-'}</td>
@@ -3145,6 +3151,7 @@ export default function BenhNhanDetailPage() {
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Thời gian</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Người đo</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Giá trị (%)</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Vị trí đo</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Tình trạng hô hấp</th>
@@ -3158,6 +3165,7 @@ export default function BenhNhanDetailPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {item.thoi_gian_do ? formatDateTimeVN(item.thoi_gian_do) : '-'}
                             </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.ten_nguoi_do || '-'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{item.gia_tri_spo2 || '-'}%</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.vi_tri_do ? item.vi_tri_do.replace('_', ' ') : '-'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.tinh_trang_ho_hap ? item.tinh_trang_ho_hap.replace('_', ' ') : '-'}</td>
@@ -3289,6 +3297,7 @@ export default function BenhNhanDetailPage() {
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Thời gian</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Người đo</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Giá trị (°C)</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Đánh giá</th>
                           <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Vị trí đo</th>
@@ -3303,6 +3312,7 @@ export default function BenhNhanDetailPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {item.thoi_gian_do ? formatDateTimeVN(item.thoi_gian_do) : '-'}
                             </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.ten_nguoi_do || '-'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{item.gia_tri_nhiet_do || '-'}°C</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.danh_gia_chi_tiet ? formatDanhGia(item.danh_gia_chi_tiet) : '-'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.vi_tri_do ? item.vi_tri_do.replace('_', ' ') : '-'}</td>

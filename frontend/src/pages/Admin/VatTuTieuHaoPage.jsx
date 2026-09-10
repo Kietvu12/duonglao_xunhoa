@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { benhNhanAPI, tuThuocAPI, vatTuTieuHaoAPI } from '../../services/api';
+import { benhNhanAPI, nguoiThanAPI, nhanVienAPI, tuThuocAPI, vatTuTieuHaoAPI } from '../../services/api';
+
+const LOAI_BAN_GIAO_LABELS = {
+  nguoi_nha_to_dieu_duong: 'Người nhà → Điều dưỡng',
+  dieu_duong_to_benh_nhan: 'Điều dưỡng → Bệnh nhân',
+};
 
 const TRANG_THAI_LABELS = {
   cho_duyet: 'Chờ duyệt',
@@ -18,7 +23,10 @@ const TRANG_THAI_BADGE = {
 };
 
 const emptyForm = {
+  loai_ban_giao: 'dieu_duong_to_benh_nhan',
   id_benh_nhan: '',
+  id_nguoi_gui_nguoi_than: '',
+  id_nguoi_nhan: '',
   nguon: 'tu_thuoc',
   id_tu_thuoc: '',
   ten_vat_tu: '',
@@ -33,6 +41,8 @@ export default function VatTuTieuHaoPage() {
 
   const [records, setRecords] = useState([]);
   const [benhNhans, setBenhNhans] = useState([]);
+  const [nguoiThans, setNguoiThans] = useState([]);
+  const [nhanViens, setNhanViens] = useState([]);
   const [tuThuocItems, setTuThuocItems] = useState([]);
   const [danhMucNgoaiKho, setDanhMucNgoaiKho] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +50,7 @@ export default function VatTuTieuHaoPage() {
   const [viewMode, setViewMode] = useState('all');
   const [search, setSearch] = useState('');
   const [filterTrangThai, setFilterTrangThai] = useState('');
+  const [filterLoaiBanGiao, setFilterLoaiBanGiao] = useState('');
   const [filterBenhNhan, setFilterBenhNhan] = useState('');
   const [filterNgay, setFilterNgay] = useState('');
 
@@ -53,11 +64,20 @@ export default function VatTuTieuHaoPage() {
     loadBenhNhans();
     loadTuThuoc();
     loadDanhMucNgoaiKho();
+    loadNhanViens();
   }, []);
 
   useEffect(() => {
     loadRecords();
-  }, [viewMode, search, filterTrangThai, filterBenhNhan, filterNgay]);
+  }, [viewMode, search, filterTrangThai, filterLoaiBanGiao, filterBenhNhan, filterNgay]);
+
+  useEffect(() => {
+    if (formData.id_benh_nhan) {
+      loadNguoiThans(formData.id_benh_nhan);
+    } else {
+      setNguoiThans([]);
+    }
+  }, [formData.id_benh_nhan]);
 
   const loadBenhNhans = async () => {
     try {
@@ -86,6 +106,25 @@ export default function VatTuTieuHaoPage() {
     }
   };
 
+  const loadNhanViens = async () => {
+    try {
+      const response = await nhanVienAPI.getAll({ limit: -1 });
+      setNhanViens(response.data || []);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const loadNguoiThans = async (idBenhNhan) => {
+    try {
+      const response = await nguoiThanAPI.getAll({ id_benh_nhan: idBenhNhan });
+      setNguoiThans(response.data || []);
+    } catch (error) {
+      console.error(error);
+      setNguoiThans([]);
+    }
+  };
+
   const loadRecords = async () => {
     try {
       setLoading(true);
@@ -99,6 +138,7 @@ export default function VatTuTieuHaoPage() {
         const params = { limit: 100 };
         if (search.trim()) params.search = search.trim();
         if (filterTrangThai) params.trang_thai = filterTrangThai;
+        if (filterLoaiBanGiao) params.loai_ban_giao = filterLoaiBanGiao;
         if (filterBenhNhan) params.id_benh_nhan = filterBenhNhan;
         if (filterNgay) params.ngay = filterNgay;
         response = await vatTuTieuHaoAPI.getAll(params);
@@ -131,14 +171,33 @@ export default function VatTuTieuHaoPage() {
       return;
     }
 
+    if (formData.loai_ban_giao === 'nguoi_nha_to_dieu_duong') {
+      if (!formData.id_nguoi_gui_nguoi_than) {
+        alert('Vui lòng chọn người nhà bàn giao');
+        return;
+      }
+      if (!formData.id_nguoi_nhan) {
+        alert('Vui lòng chọn điều dưỡng nhận');
+        return;
+      }
+    }
+
     try {
       const payload = {
+        loai_ban_giao: formData.loai_ban_giao,
         id_benh_nhan: formData.id_benh_nhan,
         so_luong: soLuong,
         ly_do: formData.ly_do || null,
       };
 
-      if (formData.nguon === 'tu_thuoc') {
+      if (formData.loai_ban_giao === 'nguoi_nha_to_dieu_duong') {
+        payload.id_nguoi_gui_nguoi_than = formData.id_nguoi_gui_nguoi_than;
+        payload.id_nguoi_nhan = formData.id_nguoi_nhan;
+      }
+
+      const useTuThuoc = formData.loai_ban_giao === 'dieu_duong_to_benh_nhan' && formData.nguon === 'tu_thuoc';
+
+      if (useTuThuoc) {
         if (!formData.id_tu_thuoc) {
           alert('Vui lòng chọn vật tư từ tủ thuốc');
           return;
@@ -207,7 +266,7 @@ export default function VatTuTieuHaoPage() {
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Vật tư tiêu hao</h1>
-          <p className="text-sm text-gray-500 mt-1">Sổ nhật ký bàn giao vật tư cho người cao tuổi</p>
+          <p className="text-sm text-gray-500 mt-1">Sổ nhật ký bàn giao vật tư — truy xuất người gửi, người nhận và thời gian</p>
         </div>
         <button
           onClick={() => {
@@ -242,7 +301,7 @@ export default function VatTuTieuHaoPage() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <div className={`grid grid-cols-1 gap-4 ${viewMode === 'all' ? 'md:grid-cols-4' : 'md:grid-cols-2'}`}>
+        <div className={`grid grid-cols-1 gap-4 ${viewMode === 'all' ? 'md:grid-cols-5' : 'md:grid-cols-2'}`}>
           <input
             type="text"
             placeholder="Tìm theo tên vật tư hoặc NCT..."
@@ -260,6 +319,16 @@ export default function VatTuTieuHaoPage() {
                 <option value="">Tất cả NCT</option>
                 {benhNhans.map((bn) => (
                   <option key={bn.id} value={bn.id}>{bn.ho_ten}</option>
+                ))}
+              </select>
+              <select
+                value={filterLoaiBanGiao}
+                onChange={(e) => setFilterLoaiBanGiao(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A90E2] outline-none"
+              >
+                <option value="">Tất cả loại bàn giao</option>
+                {Object.entries(LOAI_BAN_GIAO_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
                 ))}
               </select>
               <select
@@ -292,9 +361,11 @@ export default function VatTuTieuHaoPage() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Thời gian</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Loại bàn giao</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Vật tư</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">NCT</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Người bàn giao</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Người gửi</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Người nhận</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Số lượng</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nguồn</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Trạng thái</th>
@@ -304,7 +375,7 @@ export default function VatTuTieuHaoPage() {
               <tbody className="divide-y divide-gray-200">
                 {records.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan="10" className="px-4 py-8 text-center text-gray-500">
                       Không có bản ghi
                     </td>
                   </tr>
@@ -312,6 +383,15 @@ export default function VatTuTieuHaoPage() {
                   records.map((record) => (
                     <tr key={record.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">{formatDateTime(record.ngay_tao)}</td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className={`px-2 py-1 text-xs rounded-full whitespace-nowrap ${
+                          record.loai_ban_giao === 'nguoi_nha_to_dieu_duong'
+                            ? 'bg-teal-100 text-teal-800'
+                            : 'bg-sky-100 text-sky-800'
+                        }`}>
+                          {LOAI_BAN_GIAO_LABELS[record.loai_ban_giao] || LOAI_BAN_GIAO_LABELS.dieu_duong_to_benh_nhan}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">{record.ten_vat_tu}</td>
                       <td className="px-4 py-3 text-sm text-gray-700">
                         {record.id_benh_nhan ? (
@@ -320,7 +400,8 @@ export default function VatTuTieuHaoPage() {
                           </Link>
                         ) : '—'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{record.ten_nguoi_ban_giao || '—'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{record.ten_nguoi_gui || record.ten_nguoi_ban_giao || '—'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{record.ten_nguoi_nhan || '—'}</td>
                       <td className="px-4 py-3 text-sm text-gray-900">{record.so_luong} {record.don_vi_tinh || ''}</td>
                       <td className="px-4 py-3 text-sm">
                         <span className={`px-2 py-1 text-xs rounded-full ${record.id_tu_thuoc ? 'bg-indigo-100 text-indigo-800' : 'bg-purple-100 text-purple-800'}`}>
@@ -373,10 +454,12 @@ export default function VatTuTieuHaoPage() {
                 </button>
               </div>
               <div className="space-y-3 text-sm">
+                <div><span className="text-gray-500">Loại bàn giao:</span> {LOAI_BAN_GIAO_LABELS[viewing.loai_ban_giao] || LOAI_BAN_GIAO_LABELS.dieu_duong_to_benh_nhan}</div>
                 <div><span className="text-gray-500">Vật tư:</span> <span className="font-medium">{viewing.ten_vat_tu}</span></div>
                 <div><span className="text-gray-500">Số lượng:</span> {viewing.so_luong} {viewing.don_vi_tinh}</div>
                 <div><span className="text-gray-500">NCT:</span> {viewing.ten_benh_nhan || '—'}</div>
-                <div><span className="text-gray-500">Người bàn giao:</span> {viewing.ten_nguoi_ban_giao || '—'}</div>
+                <div><span className="text-gray-500">Người gửi:</span> {viewing.ten_nguoi_gui || viewing.ten_nguoi_ban_giao || '—'}</div>
+                <div><span className="text-gray-500">Người nhận:</span> {viewing.ten_nguoi_nhan || '—'}</div>
                 <div><span className="text-gray-500">Thời gian:</span> {formatDateTime(viewing.ngay_tao)}</div>
                 <div><span className="text-gray-500">Nguồn:</span> {viewing.id_tu_thuoc ? 'Tủ thuốc' : 'Ngoài kho'}</div>
                 <div><span className="text-gray-500">Lý do:</span> {viewing.ly_do || '—'}</div>
@@ -412,11 +495,40 @@ export default function VatTuTieuHaoPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Loại bàn giao <span className="text-red-500">*</span></label>
+                  <div className="space-y-2">
+                    {Object.entries(LOAI_BAN_GIAO_LABELS).map(([value, label]) => (
+                      <label key={value} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="loai_ban_giao"
+                          checked={formData.loai_ban_giao === value}
+                          onChange={() => setFormData({
+                            ...formData,
+                            loai_ban_giao: value,
+                            id_nguoi_gui_nguoi_than: '',
+                            id_nguoi_nhan: '',
+                            ...(value === 'nguoi_nha_to_dieu_duong'
+                              ? { nguon: 'ngoai_kho', id_tu_thuoc: '' }
+                              : {}),
+                          })}
+                        />
+                        <span className="text-sm">{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Người cao tuổi <span className="text-red-500">*</span></label>
                   <select
                     required
                     value={formData.id_benh_nhan}
-                    onChange={(e) => setFormData({ ...formData, id_benh_nhan: e.target.value })}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      id_benh_nhan: e.target.value,
+                      id_nguoi_gui_nguoi_than: '',
+                    })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A90E2] outline-none"
                   >
                     <option value="">— Chọn NCT —</option>
@@ -424,55 +536,80 @@ export default function VatTuTieuHaoPage() {
                   </select>
                 </div>
 
+                {formData.loai_ban_giao === 'nguoi_nha_to_dieu_duong' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Người nhà bàn giao <span className="text-red-500">*</span></label>
+                      <select
+                        required
+                        value={formData.id_nguoi_gui_nguoi_than}
+                        onChange={(e) => setFormData({ ...formData, id_nguoi_gui_nguoi_than: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A90E2] outline-none"
+                        disabled={!formData.id_benh_nhan}
+                      >
+                        <option value="">— Chọn người nhà —</option>
+                        {nguoiThans.map((nt) => (
+                          <option key={nt.id} value={nt.id}>
+                            {nt.ho_ten}{nt.moi_quan_he ? ` (${nt.moi_quan_he})` : ''}
+                          </option>
+                        ))}
+                      </select>
+                      {formData.id_benh_nhan && nguoiThans.length === 0 && (
+                        <p className="text-xs text-amber-600 mt-1">Bệnh nhân chưa có người nhà trong hệ thống</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Điều dưỡng nhận <span className="text-red-500">*</span></label>
+                      <select
+                        required
+                        value={formData.id_nguoi_nhan}
+                        onChange={(e) => setFormData({ ...formData, id_nguoi_nhan: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A90E2] outline-none"
+                      >
+                        <option value="">— Chọn điều dưỡng —</option>
+                        {nhanViens.map((nv) => (
+                          <option key={nv.id} value={nv.id}>{nv.ho_ten}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                )}
+
+                {formData.loai_ban_giao === 'dieu_duong_to_benh_nhan' && (
+                  <div className="p-3 bg-sky-50 rounded-lg text-sm text-sky-800">
+                    Người gửi: <strong>{user?.ho_ten || 'Điều dưỡng đang đăng nhập'}</strong> → Người nhận: bệnh nhân đã chọn
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Nguồn vật tư</label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="nguon"
-                        checked={formData.nguon === 'tu_thuoc'}
-                        onChange={() => setFormData({ ...formData, nguon: 'tu_thuoc', ten_vat_tu: '', don_vi_tinh: '' })}
-                      />
-                      <span className="text-sm">Lấy từ tủ thuốc</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="nguon"
-                        checked={formData.nguon === 'ngoai_kho'}
-                        onChange={() => setFormData({ ...formData, nguon: 'ngoai_kho', id_tu_thuoc: '' })}
-                      />
-                      <span className="text-sm">Vật tư khác (ngoài kho)</span>
-                    </label>
-                  </div>
+                  {formData.loai_ban_giao === 'nguoi_nha_to_dieu_duong' ? (
+                    <p className="text-sm text-gray-600">Vật tư do người nhà mang đến (ngoài kho)</p>
+                  ) : (
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="nguon"
+                          checked={formData.nguon === 'tu_thuoc'}
+                          onChange={() => setFormData({ ...formData, nguon: 'tu_thuoc', ten_vat_tu: '', don_vi_tinh: '' })}
+                        />
+                        <span className="text-sm">Lấy từ tủ thuốc</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="nguon"
+                          checked={formData.nguon === 'ngoai_kho'}
+                          onChange={() => setFormData({ ...formData, nguon: 'ngoai_kho', id_tu_thuoc: '' })}
+                        />
+                        <span className="text-sm">Vật tư khác (ngoài kho)</span>
+                      </label>
+                    </div>
+                  )}
                 </div>
 
-                {formData.nguon === 'tu_thuoc' ? (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Vật tư trong tủ thuốc <span className="text-red-500">*</span></label>
-                    <select
-                      required
-                      value={formData.id_tu_thuoc}
-                      onChange={(e) => setFormData({ ...formData, id_tu_thuoc: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A90E2] outline-none"
-                    >
-                      <option value="">— Chọn vật tư —</option>
-                      {tuThuocItems.map((item) => (
-                        <option key={item.id} value={item.id} disabled={!item.co_the_chon}>
-                          {item.ten_thuoc} — còn {item.so_luong_ton} {item.don_vi_tinh || ''} {!item.co_the_chon ? '(không dùng được)' : ''}
-                        </option>
-                      ))}
-                    </select>
-                    {selectedTuThuoc && (
-                      <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm text-gray-600 space-y-1">
-                        <div>Tồn: <strong>{selectedTuThuoc.so_luong_ton} {selectedTuThuoc.don_vi_tinh}</strong></div>
-                        {selectedTuThuoc.han_su_dung && <div>Hạn dùng: {new Date(selectedTuThuoc.han_su_dung).toLocaleDateString('vi-VN')}</div>}
-                        {selectedTuThuoc.chi_dinh && <div>Chỉ định: {selectedTuThuoc.chi_dinh}</div>}
-                      </div>
-                    )}
-                  </div>
-                ) : (
+                {(formData.loai_ban_giao === 'nguoi_nha_to_dieu_duong' || formData.nguon === 'ngoai_kho') ? (
                   <>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Nhóm vật tư</label>
@@ -520,7 +657,31 @@ export default function VatTuTieuHaoPage() {
                       />
                     </div>
                   </>
-                )}
+                ) : formData.nguon === 'tu_thuoc' ? (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Vật tư trong tủ thuốc <span className="text-red-500">*</span></label>
+                    <select
+                      required
+                      value={formData.id_tu_thuoc}
+                      onChange={(e) => setFormData({ ...formData, id_tu_thuoc: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A90E2] outline-none"
+                    >
+                      <option value="">— Chọn vật tư —</option>
+                      {tuThuocItems.map((item) => (
+                        <option key={item.id} value={item.id} disabled={!item.co_the_chon}>
+                          {item.ten_thuoc} — còn {item.so_luong_ton} {item.don_vi_tinh || ''} {!item.co_the_chon ? '(không dùng được)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedTuThuoc && (
+                      <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm text-gray-600 space-y-1">
+                        <div>Tồn: <strong>{selectedTuThuoc.so_luong_ton} {selectedTuThuoc.don_vi_tinh}</strong></div>
+                        {selectedTuThuoc.han_su_dung && <div>Hạn dùng: {new Date(selectedTuThuoc.han_su_dung).toLocaleDateString('vi-VN')}</div>}
+                        {selectedTuThuoc.chi_dinh && <div>Chỉ định: {selectedTuThuoc.chi_dinh}</div>}
+                      </div>
+                    )}
+                  </div>
+                ) : null}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Số lượng <span className="text-red-500">*</span></label>

@@ -3,6 +3,7 @@ import { getNowForDB, getTodayVN } from '../utils/dateUtils.js';
 import { buildLimitOffsetClause, sanitizeLimit } from '../utils/queryHelpers.js';
 import {
   DANH_MUC_VAT_TU_NGOAI_KHO,
+  LOAI_BAN_GIAO,
   TRANG_THAI_TIEU_HAO,
   TRANG_THAI_TON,
   computeTrangThaiTon,
@@ -13,6 +14,16 @@ const BASE_SELECT = `
   SELECT vt.*,
          bn.ho_ten as ten_benh_nhan,
          tk.ho_ten as ten_nguoi_ban_giao,
+         nt.ho_ten as ten_nguoi_nha_gui,
+         tk_nv.ho_ten as ten_dieu_duong_nhan,
+         CASE
+           WHEN vt.loai_ban_giao = 'nguoi_nha_to_dieu_duong' THEN nt.ho_ten
+           ELSE tk.ho_ten
+         END as ten_nguoi_gui,
+         CASE
+           WHEN vt.loai_ban_giao = 'nguoi_nha_to_dieu_duong' THEN tk_nv.ho_ten
+           ELSE bn.ho_ten
+         END as ten_nguoi_nhan,
          tt.ten_thuoc as ten_tu_thuoc,
          tt.don_vi_tinh as don_vi_tu_thuoc,
          plt.ten_loai as ten_phan_loai_tu_thuoc
@@ -20,6 +31,9 @@ const BASE_SELECT = `
   LEFT JOIN benh_nhan bn ON vt.id_benh_nhan = bn.id
   LEFT JOIN ho_so_nhan_vien hsnv ON vt.id_nguoi_gui = hsnv.id
   LEFT JOIN tai_khoan tk ON hsnv.id_tai_khoan = tk.id
+  LEFT JOIN nguoi_than_benh_nhan nt ON vt.id_nguoi_gui_nguoi_than = nt.id
+  LEFT JOIN ho_so_nhan_vien hsnv_nhan ON vt.id_nguoi_nhan = hsnv_nhan.id
+  LEFT JOIN tai_khoan tk_nv ON hsnv_nhan.id_tai_khoan = tk_nv.id
   LEFT JOIN tu_thuoc tt ON vt.id_tu_thuoc = tt.id
   LEFT JOIN phan_loai_thuoc plt ON tt.id_phan_loai = plt.id
 `;
@@ -143,6 +157,7 @@ export const getAllVatTuTieuHao = async (req, res, next) => {
       id_benh_nhan,
       id_tu_thuoc,
       trang_thai,
+      loai_ban_giao,
       ngay,
       start_date,
       end_date,
@@ -171,6 +186,11 @@ export const getAllVatTuTieuHao = async (req, res, next) => {
       params.push(trang_thai);
     }
 
+    if (loai_ban_giao) {
+      query += ' AND vt.loai_ban_giao = ?';
+      params.push(loai_ban_giao);
+    }
+
     if (ngay) {
       query += ' AND DATE(vt.ngay_tao) = ?';
       params.push(ngay);
@@ -186,9 +206,9 @@ export const getAllVatTuTieuHao = async (req, res, next) => {
     }
 
     if (search?.trim()) {
-      query += ' AND (vt.ten_vat_tu LIKE ? OR bn.ho_ten LIKE ? OR tk.ho_ten LIKE ?)';
+      query += ' AND (vt.ten_vat_tu LIKE ? OR bn.ho_ten LIKE ? OR tk.ho_ten LIKE ? OR nt.ho_ten LIKE ? OR tk_nv.ho_ten LIKE ?)';
       const keyword = `%${search.trim()}%`;
-      params.push(keyword, keyword, keyword);
+      params.push(keyword, keyword, keyword, keyword, keyword);
     }
 
     query += ' ORDER BY vt.ngay_tao DESC';
@@ -240,12 +260,23 @@ export const createVatTuTieuHao = async (req, res, next) => {
   try {
     const {
       id_benh_nhan,
+      loai_ban_giao = LOAI_BAN_GIAO.DIEU_DUONG_TO_BENH_NHAN,
+      id_nguoi_gui_nguoi_than,
+      id_nguoi_nhan,
       id_tu_thuoc,
       ten_vat_tu,
       so_luong,
       don_vi_tinh,
       ly_do
     } = req.body;
+
+    const allowedLoai = Object.values(LOAI_BAN_GIAO);
+    if (!allowedLoai.includes(loai_ban_giao)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Loại bàn giao không hợp lệ'
+      });
+    }
 
     if (!id_benh_nhan) {
       return res.status(400).json({
@@ -281,12 +312,66 @@ export const createVatTuTieuHao = async (req, res, next) => {
       });
     }
 
-    const idNguoiGui = await getNhanVienIdFromUser(req.user.id, connection);
-    if (!idNguoiGui) {
-      return res.status(400).json({
-        success: false,
-        message: 'Tài khoản chưa liên kết hồ sơ nhân viên, không thể bàn giao vật tư'
-      });
+    let idNguoiGui = null;
+    let idNguoiGuiNguoiThan = null;
+    let idNguoiNhan = null;
+
+    if (loai_ban_giao === LOAI_BAN_GIAO.NGUOI_NHA_TO_DIEU_DUONG) {
+      if (!id_nguoi_gui_nguoi_than) {
+        return res.status(400).json({
+          success: false,
+          message: 'Vui lòng chọn người nhà bàn giao'
+        });
+      }
+      if (!id_nguoi_nhan) {
+        return res.status(400).json({
+          success: false,
+          message: 'Vui lòng chọn điều dưỡng nhận'
+        });
+      }
+      if (id_tu_thuoc) {
+        return res.status(400).json({
+          success: false,
+          message: 'Bàn giao từ người nhà chỉ áp dụng cho vật tư ngoài kho'
+        });
+      }
+
+      const [nguoiThanRows] = await connection.execute(
+        'SELECT id FROM nguoi_than_benh_nhan WHERE id = ? AND id_benh_nhan = ? AND is_delete = 0',
+        [id_nguoi_gui_nguoi_than, id_benh_nhan]
+      );
+      if (nguoiThanRows.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Người nhà không thuộc bệnh nhân đã chọn'
+        });
+      }
+
+      const [nhanVienNhanRows] = await connection.execute(
+        `SELECT hsnv.id
+         FROM ho_so_nhan_vien hsnv
+         INNER JOIN tai_khoan tk ON hsnv.id_tai_khoan = tk.id
+         WHERE hsnv.id = ? AND tk.da_xoa = 0
+           AND tk.vai_tro IN ('dieu_duong', 'dieu_duong_truong', 'quan_ly_y_te')`,
+        [id_nguoi_nhan]
+      );
+      if (nhanVienNhanRows.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Điều dưỡng nhận không hợp lệ'
+        });
+      }
+
+      idNguoiGuiNguoiThan = id_nguoi_gui_nguoi_than;
+      idNguoiNhan = id_nguoi_nhan;
+    } else {
+      idNguoiGui = await getNhanVienIdFromUser(req.user.id, connection);
+      if (!idNguoiGui) {
+        return res.status(400).json({
+          success: false,
+          message: 'Tài khoản chưa liên kết hồ sơ nhân viên, không thể bàn giao vật tư'
+        });
+      }
     }
 
     let finalTenVatTu = ten_vat_tu?.trim() || null;
@@ -333,12 +418,15 @@ export const createVatTuTieuHao = async (req, res, next) => {
     const ngayTao = getNowForDB();
     const [result] = await connection.execute(
       `INSERT INTO vat_tu_tieu_hao (
-        id_benh_nhan, id_nguoi_gui, id_tu_thuoc, ten_vat_tu,
-        so_luong, don_vi_tinh, ly_do, trang_thai, ngay_tao
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        id_benh_nhan, loai_ban_giao, id_nguoi_gui, id_nguoi_gui_nguoi_than, id_nguoi_nhan,
+        id_tu_thuoc, ten_vat_tu, so_luong, don_vi_tinh, ly_do, trang_thai, ngay_tao
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id_benh_nhan,
+        loai_ban_giao,
         idNguoiGui,
+        idNguoiGuiNguoiThan,
+        idNguoiNhan,
         finalIdTuThuoc,
         finalTenVatTu,
         soLuong,

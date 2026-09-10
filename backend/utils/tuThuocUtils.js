@@ -14,6 +14,16 @@ export const TRANG_THAI_TIEU_HAO = {
   DA_HUY: 'da_huy'
 };
 
+export const LOAI_BAN_GIAO = {
+  NGUOI_NHA_TO_DIEU_DUONG: 'nguoi_nha_to_dieu_duong',
+  DIEU_DUONG_TO_BENH_NHAN: 'dieu_duong_to_benh_nhan',
+};
+
+export const LOAI_BAN_GIAO_LABELS = {
+  nguoi_nha_to_dieu_duong: 'Người nhà → Điều dưỡng',
+  dieu_duong_to_benh_nhan: 'Điều dưỡng → Bệnh nhân',
+};
+
 /** Thứ tự ưu tiên hiển thị: hết hàng → hết hạn → sắp hết → còn hàng */
 export const TRANG_THAI_SORT_ORDER = {
   het_hang: 1,

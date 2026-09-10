@@ -6,6 +6,75 @@ import crypto from 'crypto';
 import path from 'path';
 import { createNotificationForAdmins, createNotificationForDieuDuong } from '../services/notificationService.js';
 
+const getNguoiDoIdFromUser = async (userId) => {
+  if (!userId) return null;
+  const [rows] = await pool.execute(
+    'SELECT id FROM ho_so_nhan_vien WHERE id_tai_khoan = ? LIMIT 1',
+    [userId]
+  );
+  return rows[0]?.id ?? null;
+};
+
+const fetchChiSoPaginated = async ({
+  table,
+  idBenhNhan,
+  start_date,
+  end_date,
+  limitValue,
+  offset,
+}) => {
+  let countQuery = `SELECT COUNT(*) as total FROM ${table} WHERE id_benh_nhan = ?`;
+  const countParams = [idBenhNhan];
+
+  if (start_date && end_date) {
+    countQuery += ' AND DATE(thoi_gian_do) BETWEEN ? AND ?';
+    countParams.push(start_date, end_date);
+  }
+
+  const [countResult] = await pool.execute(countQuery, countParams);
+  const total = countResult[0].total;
+
+  let query = `
+    SELECT t.*, tk.ho_ten AS ten_nguoi_do
+    FROM ${table} t
+    LEFT JOIN ho_so_nhan_vien hsnv ON t.id_nguoi_do = hsnv.id
+    LEFT JOIN tai_khoan tk ON hsnv.id_tai_khoan = tk.id
+    WHERE t.id_benh_nhan = ?
+  `;
+  const params = [idBenhNhan];
+
+  if (start_date && end_date) {
+    query += ' AND DATE(t.thoi_gian_do) BETWEEN ? AND ?';
+    params.push(start_date, end_date);
+  }
+
+  query += ` ORDER BY t.thoi_gian_do DESC LIMIT ${limitValue} OFFSET ${offset}`;
+
+  let data;
+  try {
+    [data] = await pool.execute(query, params);
+  } catch (error) {
+    if (!error.message.includes('Unknown column')) {
+      throw error;
+    }
+    let fallbackQuery = `SELECT * FROM ${table} WHERE id_benh_nhan = ?`;
+    const fallbackParams = [idBenhNhan];
+    if (start_date && end_date) {
+      fallbackQuery += ' AND DATE(thoi_gian_do) BETWEEN ? AND ?';
+      fallbackParams.push(start_date, end_date);
+    }
+    fallbackQuery += ` ORDER BY thoi_gian_do DESC LIMIT ${limitValue} OFFSET ${offset}`;
+    [data] = await pool.execute(fallbackQuery, fallbackParams);
+    data = data.map((row) => ({ ...row, ten_nguoi_do: null }));
+  }
+
+  return {
+    data,
+    total,
+    totalPages: Math.ceil(total / limitValue),
+  };
+};
+
 export const getAllBenhNhan = async (req, res, next) => {
   try {
     // Nhận index (vị trí bắt đầu) và limit (mặc định 1000, -1 để lấy tất cả)
@@ -698,33 +767,14 @@ export const getHuyetAp = async (req, res, next) => {
     // Tính offset
     const offset = (pageValue - 1) * limitValue;
 
-    // Query để đếm tổng số bản ghi
-    let countQuery = `SELECT COUNT(*) as total FROM huyet_ap WHERE id_benh_nhan = ?`;
-    const countParams = [id];
-
-    if (start_date && end_date) {
-      countQuery += ' AND DATE(thoi_gian_do) BETWEEN ? AND ?';
-      countParams.push(start_date, end_date);
-    }
-
-    const [countResult] = await pool.execute(countQuery, countParams);
-    const total = countResult[0].total;
-
-    // Query để lấy dữ liệu với pagination
-    let query = `SELECT * FROM huyet_ap WHERE id_benh_nhan = ?`;
-    const params = [id];
-
-    if (start_date && end_date) {
-      query += ' AND DATE(thoi_gian_do) BETWEEN ? AND ?';
-      params.push(start_date, end_date);
-    }
-
-    query += ` ORDER BY thoi_gian_do DESC LIMIT ${limitValue} OFFSET ${offset}`;
-
-    const [data] = await pool.execute(query, params);
-
-    // Tính toán pagination info
-    const totalPages = Math.ceil(total / limitValue);
+    const { data, total, totalPages } = await fetchChiSoPaginated({
+      table: 'huyet_ap',
+      idBenhNhan: id,
+      start_date,
+      end_date,
+      limitValue,
+      offset,
+    });
 
     res.json({
       success: true,
@@ -733,8 +783,8 @@ export const getHuyetAp = async (req, res, next) => {
         currentPage: pageValue,
         itemsPerPage: limitValue,
         totalItems: total,
-        totalPages: totalPages
-      }
+        totalPages,
+      },
     });
   } catch (error) {
     next(error);
@@ -744,6 +794,7 @@ export const getHuyetAp = async (req, res, next) => {
 export const createHuyetAp = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const idNguoiDo = await getNguoiDoIdFromUser(req.user?.id);
     const {
       tam_thu, tam_truong, thoi_gian_do, vi_tri_do, tu_the_khi_do,
       ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao
@@ -772,6 +823,7 @@ export const createHuyetAp = async (req, res, next) => {
     // Sanitize tất cả các giá trị trước khi insert
     const sanitizedValues = [
       id,
+      idNguoiDo,
       sanitizeValue(tam_thu),
       sanitizeValue(tam_truong),
       sanitizeValue(thoi_gian_do) || getNowForDB(),
@@ -788,8 +840,8 @@ export const createHuyetAp = async (req, res, next) => {
     try {
       await pool.execute(
         `INSERT INTO huyet_ap 
-         (id_benh_nhan, tam_thu, tam_truong, thoi_gian_do, vi_tri_do, tu_the_khi_do, ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao, danh_gia_chi_tiet)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (id_benh_nhan, id_nguoi_do, tam_thu, tam_truong, thoi_gian_do, vi_tri_do, tu_the_khi_do, ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao, danh_gia_chi_tiet)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         sanitizedValues
       );
     } catch (error) {
@@ -947,33 +999,14 @@ export const getNhipTim = async (req, res, next) => {
     // Tính offset
     const offset = (pageValue - 1) * limitValue;
 
-    // Query để đếm tổng số bản ghi
-    let countQuery = `SELECT COUNT(*) as total FROM nhip_tim WHERE id_benh_nhan = ?`;
-    const countParams = [id];
-
-    if (start_date && end_date) {
-      countQuery += ' AND DATE(thoi_gian_do) BETWEEN ? AND ?';
-      countParams.push(start_date, end_date);
-    }
-
-    const [countResult] = await pool.execute(countQuery, countParams);
-    const total = countResult[0].total;
-
-    // Query để lấy dữ liệu với pagination
-    let query = `SELECT * FROM nhip_tim WHERE id_benh_nhan = ?`;
-    const params = [id];
-
-    if (start_date && end_date) {
-      query += ' AND DATE(thoi_gian_do) BETWEEN ? AND ?';
-      params.push(start_date, end_date);
-    }
-
-    query += ` ORDER BY thoi_gian_do DESC LIMIT ${limitValue} OFFSET ${offset}`;
-
-    const [data] = await pool.execute(query, params);
-
-    // Tính toán pagination info
-    const totalPages = Math.ceil(total / limitValue);
+    const { data, total, totalPages } = await fetchChiSoPaginated({
+      table: 'nhip_tim',
+      idBenhNhan: id,
+      start_date,
+      end_date,
+      limitValue,
+      offset,
+    });
 
     res.json({
       success: true,
@@ -982,8 +1015,8 @@ export const getNhipTim = async (req, res, next) => {
         currentPage: pageValue,
         itemsPerPage: limitValue,
         totalItems: total,
-        totalPages: totalPages
-      }
+        totalPages,
+      },
     });
   } catch (error) {
     next(error);
@@ -993,6 +1026,7 @@ export const getNhipTim = async (req, res, next) => {
 export const createNhipTim = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const idNguoiDo = await getNguoiDoIdFromUser(req.user?.id);
     const {
       gia_tri_nhip_tim, thoi_gian_do, tinh_trang_benh_nhan_khi_do,
       ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao
@@ -1021,6 +1055,7 @@ export const createNhipTim = async (req, res, next) => {
     // Sanitize tất cả các giá trị trước khi insert
     const sanitizedValues = [
       id,
+      idNguoiDo,
       sanitizeValue(gia_tri_nhip_tim),
       sanitizeValue(thoi_gian_do) || getNowForDB(),
       sanitizeValue(tinh_trang_benh_nhan_khi_do),
@@ -1035,8 +1070,8 @@ export const createNhipTim = async (req, res, next) => {
     try {
       await pool.execute(
         `INSERT INTO nhip_tim 
-         (id_benh_nhan, gia_tri_nhip_tim, thoi_gian_do, tinh_trang_benh_nhan_khi_do, ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao, danh_gia_chi_tiet)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (id_benh_nhan, id_nguoi_do, gia_tri_nhip_tim, thoi_gian_do, tinh_trang_benh_nhan_khi_do, ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao, danh_gia_chi_tiet)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         sanitizedValues
       );
     } catch (error) {
@@ -1214,32 +1249,14 @@ export const getDuongHuyet = async (req, res, next) => {
     const offset = (pageValue - 1) * limitValue;
 
     // Query để đếm tổng số bản ghi
-    let countQuery = `SELECT COUNT(*) as total FROM duong_huyet WHERE id_benh_nhan = ?`;
-    const countParams = [id];
-
-    if (start_date && end_date) {
-      countQuery += ' AND DATE(thoi_gian_do) BETWEEN ? AND ?';
-      countParams.push(start_date, end_date);
-    }
-
-    const [countResult] = await pool.execute(countQuery, countParams);
-    const total = countResult[0].total;
-
-    // Query để lấy dữ liệu với pagination
-    let query = `SELECT * FROM duong_huyet WHERE id_benh_nhan = ?`;
-    const params = [id];
-
-    if (start_date && end_date) {
-      query += ' AND DATE(thoi_gian_do) BETWEEN ? AND ?';
-      params.push(start_date, end_date);
-    }
-
-    query += ` ORDER BY thoi_gian_do DESC LIMIT ${limitValue} OFFSET ${offset}`;
-
-    const [data] = await pool.execute(query, params);
-
-    // Tính toán pagination info
-    const totalPages = Math.ceil(total / limitValue);
+    const { data, total, totalPages } = await fetchChiSoPaginated({
+      table: 'duong_huyet',
+      idBenhNhan: id,
+      start_date,
+      end_date,
+      limitValue,
+      offset,
+    });
 
     res.json({
       success: true,
@@ -1248,8 +1265,8 @@ export const getDuongHuyet = async (req, res, next) => {
         currentPage: pageValue,
         itemsPerPage: limitValue,
         totalItems: total,
-        totalPages: totalPages
-      }
+        totalPages,
+      },
     });
   } catch (error) {
     next(error);
@@ -1259,6 +1276,7 @@ export const getDuongHuyet = async (req, res, next) => {
 export const createDuongHuyet = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const idNguoiDo = await getNguoiDoIdFromUser(req.user?.id);
     const {
       gia_tri_duong_huyet, thoi_gian_do, vi_tri_lay_mau, trieu_chung_kem_theo,
       ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao
@@ -1287,6 +1305,7 @@ export const createDuongHuyet = async (req, res, next) => {
     // Sanitize tất cả các giá trị trước khi insert
     const sanitizedValues = [
       id,
+      idNguoiDo,
       sanitizeValue(gia_tri_duong_huyet),
       sanitizeValue(thoi_gian_do) || getNowForDB(),
       sanitizeValue(vi_tri_lay_mau),
@@ -1301,9 +1320,9 @@ export const createDuongHuyet = async (req, res, next) => {
     // Kiểm tra xem cột id_cau_hinh_chi_so_canh_bao và danh_gia_chi_tiet có tồn tại không
     try {
       await pool.execute(
-        `INSERT INTO duong_huyet 
-         (id_benh_nhan, gia_tri_duong_huyet, thoi_gian_do, vi_tri_lay_mau, trieu_chung_kem_theo, ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao, danh_gia_chi_tiet)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO duong_huyet
+         (id_benh_nhan, id_nguoi_do, gia_tri_duong_huyet, thoi_gian_do, vi_tri_lay_mau, trieu_chung_kem_theo, ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao, danh_gia_chi_tiet)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         sanitizedValues
       );
     } catch (error) {
@@ -1429,32 +1448,14 @@ export const getSpO2 = async (req, res, next) => {
     const offset = (pageValue - 1) * limitValue;
 
     // Query để đếm tổng số bản ghi
-    let countQuery = `SELECT COUNT(*) as total FROM spo2 WHERE id_benh_nhan = ?`;
-    const countParams = [id];
-
-    if (start_date && end_date) {
-      countQuery += ' AND DATE(thoi_gian_do) BETWEEN ? AND ?';
-      countParams.push(start_date, end_date);
-    }
-
-    const [countResult] = await pool.execute(countQuery, countParams);
-    const total = countResult[0].total;
-
-    // Query để lấy dữ liệu với pagination
-    let query = `SELECT * FROM spo2 WHERE id_benh_nhan = ?`;
-    const params = [id];
-
-    if (start_date && end_date) {
-      query += ' AND DATE(thoi_gian_do) BETWEEN ? AND ?';
-      params.push(start_date, end_date);
-    }
-
-    query += ` ORDER BY thoi_gian_do DESC LIMIT ${limitValue} OFFSET ${offset}`;
-
-    const [data] = await pool.execute(query, params);
-
-    // Tính toán pagination info
-    const totalPages = Math.ceil(total / limitValue);
+    const { data, total, totalPages } = await fetchChiSoPaginated({
+      table: 'spo2',
+      idBenhNhan: id,
+      start_date,
+      end_date,
+      limitValue,
+      offset,
+    });
 
     res.json({
       success: true,
@@ -1463,8 +1464,8 @@ export const getSpO2 = async (req, res, next) => {
         currentPage: pageValue,
         itemsPerPage: limitValue,
         totalItems: total,
-        totalPages: totalPages
-      }
+        totalPages,
+      },
     });
   } catch (error) {
     next(error);
@@ -1474,6 +1475,7 @@ export const getSpO2 = async (req, res, next) => {
 export const createSpO2 = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const idNguoiDo = await getNguoiDoIdFromUser(req.user?.id);
     const {
       gia_tri_spo2, thoi_gian_do, vi_tri_do, tinh_trang_ho_hap,
       ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao, pi
@@ -1502,6 +1504,7 @@ export const createSpO2 = async (req, res, next) => {
     // Sanitize tất cả các giá trị trước khi insert
     const sanitizedValues = [
       id,
+      idNguoiDo,
       sanitizeValue(gia_tri_spo2),
       sanitizeValue(thoi_gian_do) || getNowForDB(),
       sanitizeValue(vi_tri_do),
@@ -1518,8 +1521,8 @@ export const createSpO2 = async (req, res, next) => {
     try {
       await pool.execute(
         `INSERT INTO spo2 
-         (id_benh_nhan, gia_tri_spo2, thoi_gian_do, vi_tri_do, tinh_trang_ho_hap, ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao, danh_gia_chi_tiet, pi)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (id_benh_nhan, id_nguoi_do, gia_tri_spo2, thoi_gian_do, vi_tri_do, tinh_trang_ho_hap, ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao, danh_gia_chi_tiet, pi)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         sanitizedValues
       );
     } catch (error) {
@@ -1646,32 +1649,14 @@ export const getNhietDo = async (req, res, next) => {
     const offset = (pageValue - 1) * limitValue;
 
     // Query để đếm tổng số bản ghi
-    let countQuery = `SELECT COUNT(*) as total FROM nhiet_do WHERE id_benh_nhan = ?`;
-    const countParams = [id];
-
-    if (start_date && end_date) {
-      countQuery += ' AND DATE(thoi_gian_do) BETWEEN ? AND ?';
-      countParams.push(start_date, end_date);
-    }
-
-    const [countResult] = await pool.execute(countQuery, countParams);
-    const total = countResult[0].total;
-
-    // Query để lấy dữ liệu với pagination
-    let query = `SELECT * FROM nhiet_do WHERE id_benh_nhan = ?`;
-    const params = [id];
-
-    if (start_date && end_date) {
-      query += ' AND DATE(thoi_gian_do) BETWEEN ? AND ?';
-      params.push(start_date, end_date);
-    }
-
-    query += ` ORDER BY thoi_gian_do DESC LIMIT ${limitValue} OFFSET ${offset}`;
-
-    const [data] = await pool.execute(query, params);
-
-    // Tính toán pagination info
-    const totalPages = Math.ceil(total / limitValue);
+    const { data, total, totalPages } = await fetchChiSoPaginated({
+      table: 'nhiet_do',
+      idBenhNhan: id,
+      start_date,
+      end_date,
+      limitValue,
+      offset,
+    });
 
     res.json({
       success: true,
@@ -1680,8 +1665,8 @@ export const getNhietDo = async (req, res, next) => {
         currentPage: pageValue,
         itemsPerPage: limitValue,
         totalItems: total,
-        totalPages: totalPages
-      }
+        totalPages,
+      },
     });
   } catch (error) {
     next(error);
@@ -1691,6 +1676,7 @@ export const getNhietDo = async (req, res, next) => {
 export const createNhietDo = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const idNguoiDo = await getNguoiDoIdFromUser(req.user?.id);
     const {
       gia_tri_nhiet_do, thoi_gian_do, vi_tri_do, tinh_trang_luc_do,
       ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao
@@ -1719,6 +1705,7 @@ export const createNhietDo = async (req, res, next) => {
     // Sanitize tất cả các giá trị trước khi insert
     const sanitizedValues = [
       id,
+      idNguoiDo,
       sanitizeValue(gia_tri_nhiet_do),
       sanitizeValue(thoi_gian_do) || getNowForDB(),
       sanitizeValue(vi_tri_do),
@@ -1734,8 +1721,8 @@ export const createNhietDo = async (req, res, next) => {
     try {
       await pool.execute(
         `INSERT INTO nhiet_do 
-         (id_benh_nhan, gia_tri_nhiet_do, thoi_gian_do, vi_tri_do, tinh_trang_luc_do, ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao, danh_gia_chi_tiet)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (id_benh_nhan, id_nguoi_do, gia_tri_nhiet_do, thoi_gian_do, vi_tri_do, tinh_trang_luc_do, ghi_chu, muc_do, noi_dung_canh_bao, id_cau_hinh_chi_so_canh_bao, danh_gia_chi_tiet)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         sanitizedValues
       );
     } catch (error) {
