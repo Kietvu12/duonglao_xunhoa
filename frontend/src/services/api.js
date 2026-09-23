@@ -1400,6 +1400,50 @@ export const tuThuocAPI = {
   delete: (id) => apiCall(`/tu-thuoc/${id}`, {
     method: 'DELETE',
   }),
+  downloadImportTemplate: async () => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/tu-thuoc/import/mau`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Không tải được file mẫu');
+    }
+    return response.blob();
+  },
+  downloadPhanLoaiDanhMuc: async () => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/tu-thuoc/import/danh-muc-phan-loai`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Không tải được danh mục phân loại');
+    }
+    return response.blob();
+  },
+  previewImport: async (formData) => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/tu-thuoc/import/xem-truoc`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Xem trước thất bại');
+    return data;
+  },
+  importFromExcel: async (formData) => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/tu-thuoc/import`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Import thất bại');
+    return data;
+  },
 };
 
 // Vật tư tiêu hao APIs

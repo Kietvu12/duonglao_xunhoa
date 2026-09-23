@@ -7,6 +7,15 @@ import {
   PHAN_CA_NV_EDIT_FIELDS,
   CONG_VIEC_NV_EDIT_FIELDS,
 } from '../../utils/importExcelBuilder';
+import {
+  CA_BAND_LABELS,
+  DEFAULT_CA_TIMES,
+  HINH_THUC_LABELS,
+  MA_CA_PRESETS,
+  formatHinhThuc,
+  inferCaBandFromMa,
+  resolveCaTimesForForm,
+} from '../../utils/phanCaConstants';
 
 export default function NhanVienPage() {
   const [nhanViens, setNhanViens] = useState([]);
@@ -123,10 +132,13 @@ export default function NhanVienPage() {
   const [phanCaForm, setPhanCaForm] = useState({
     id_tai_khoan: '',
     ca: 'sang',
+    ma_ca: '',
+    hinh_thuc_lam_viec: 'tai_co_so',
     ngay: '',
-    gio_bat_dau: '',
-    gio_ket_thuc: '',
-    trang_thai: 'du_kien'
+    gio_bat_dau: DEFAULT_CA_TIMES.sang.gio_bat_dau,
+    gio_ket_thuc: DEFAULT_CA_TIMES.sang.gio_ket_thuc,
+    trang_thai: 'du_kien',
+    ghi_chu: '',
   });
   const [showChuyenCaModal, setShowChuyenCaModal] = useState(false);
   const [caCanChuyen, setCaCanChuyen] = useState(null);
@@ -696,24 +708,31 @@ export default function NhanVienPage() {
     }
   };
 
-  // Hàm lấy thời gian cố định cho từng ca
-  const getCaTime = (ca) => {
-    const caTimes = {
-      'sang': { gio_bat_dau: '06:00', gio_ket_thuc: '14:00' },
-      'chieu': { gio_bat_dau: '14:00', gio_ket_thuc: '22:00' },
-      'dem': { gio_bat_dau: '22:00', gio_ket_thuc: '06:00' }
-    };
-    return caTimes[ca] || { gio_bat_dau: '', gio_ket_thuc: '' };
+  const getCaTime = (ca, maCa = '') => {
+    const resolved = resolveCaTimesForForm(ca, maCa);
+    return { gio_bat_dau: resolved.gio_bat_dau, gio_ket_thuc: resolved.gio_ket_thuc };
   };
 
-  // Hàm xử lý khi thay đổi ca
+  const handleMaCaChange = (maCa) => {
+    const ca = inferCaBandFromMa(maCa);
+    const resolved = resolveCaTimesForForm(ca, maCa);
+    setPhanCaForm({
+      ...phanCaForm,
+      ma_ca: maCa,
+      ca,
+      gio_bat_dau: resolved.gio_bat_dau,
+      gio_ket_thuc: resolved.gio_ket_thuc,
+      hinh_thuc_lam_viec: resolved.hinh_thuc || phanCaForm.hinh_thuc_lam_viec,
+    });
+  };
+
   const handleCaChange = (caValue) => {
-    const caTime = getCaTime(caValue);
+    const caTime = getCaTime(caValue, phanCaForm.ma_ca);
     setPhanCaForm({
       ...phanCaForm,
       ca: caValue,
       gio_bat_dau: caTime.gio_bat_dau,
-      gio_ket_thuc: caTime.gio_ket_thuc
+      gio_ket_thuc: caTime.gio_ket_thuc,
     });
   };
 
@@ -723,22 +742,28 @@ export default function NhanVienPage() {
       setPhanCaForm({
         id_tai_khoan: ca.id_tai_khoan || '',
         ca: ca.ca || 'sang',
+        ma_ca: ca.ma_ca || '',
+        hinh_thuc_lam_viec: ca.hinh_thuc_lam_viec || 'tai_co_so',
         ngay: ca.ngay || '',
         gio_bat_dau: ca.gio_bat_dau || '',
         gio_ket_thuc: ca.gio_ket_thuc || '',
-        trang_thai: ca.trang_thai || 'du_kien'
+        trang_thai: ca.trang_thai || 'du_kien',
+        ghi_chu: ca.ghi_chu || '',
       });
     } else {
       setEditingPhanCa(null);
       const defaultCa = 'sang';
-      const defaultTime = getCaTime(defaultCa);
+      const defaultTime = getCaTime(defaultCa, 'A');
       setPhanCaForm({
         id_tai_khoan: selectedNhanVien?.id_tai_khoan || '',
         ca: defaultCa,
+        ma_ca: 'A',
+        hinh_thuc_lam_viec: 'tai_co_so',
         ngay: '',
         gio_bat_dau: defaultTime.gio_bat_dau,
         gio_ket_thuc: defaultTime.gio_ket_thuc,
-        trang_thai: 'du_kien'
+        trang_thai: 'du_kien',
+        ghi_chu: '',
       });
     }
     setShowPhanCaForm(true);
@@ -858,13 +883,10 @@ export default function NhanVienPage() {
     }
   };
 
-  const getCaLabel = (ca) => {
-    const labels = {
-      'sang': 'Ca sáng',
-      'chieu': 'Ca chiều',
-      'dem': 'Ca đêm'
-    };
-    return labels[ca] || ca;
+  const getCaLabel = (ca, maCa) => {
+    const band = CA_BAND_LABELS[ca] || ca;
+    if (maCa) return `${maCa} (${band})`;
+    return band;
   };
 
   const getTrangThaiLabel = (trangThai) => {
@@ -2053,7 +2075,8 @@ export default function NhanVienPage() {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Ngày</th>
-                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Ca</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Ca / mã</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Hình thức</th>
                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Giờ bắt đầu</th>
                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Giờ kết thúc</th>
                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Trạng thái</th>
@@ -2063,7 +2086,7 @@ export default function NhanVienPage() {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {getFilteredLichPhanCa().length === 0 ? (
                         <tr>
-                          <td colSpan="6" className="px-6 py-12 text-center">
+                          <td colSpan="7" className="px-6 py-12 text-center">
                             <span className="material-symbols-outlined text-4xl text-gray-300 mb-2" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>search_off</span>
                             <p className="text-gray-500 text-sm">Không tìm thấy ca nào phù hợp với bộ lọc</p>
                           </td>
@@ -2074,7 +2097,8 @@ export default function NhanVienPage() {
                           <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-900 font-medium">
                             {new Date(ca.ngay).toLocaleDateString('vi-VN')}
                           </td>
-                          <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-900">{getCaLabel(ca.ca)}</td>
+                          <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-900">{getCaLabel(ca.ca, ca.ma_ca)}</td>
+                          <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{formatHinhThuc(ca.hinh_thuc_lam_viec)}</td>
                           <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-900">{ca.gio_bat_dau}</td>
                           <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-900">{ca.gio_ket_thuc}</td>
                           <td className="px-6 py-5 whitespace-nowrap">
@@ -2162,16 +2186,55 @@ export default function NhanVienPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Ca *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Mã ca (roster DLXH)</label>
+                <select
+                  value={MA_CA_PRESETS.some((p) => p.value === phanCaForm.ma_ca) ? phanCaForm.ma_ca : '__custom__'}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === '__custom__') {
+                      setPhanCaForm({ ...phanCaForm, ma_ca: '' });
+                    } else {
+                      handleMaCaChange(v);
+                    }
+                  }}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-white focus:outline-0 focus:ring-2 focus:ring-[#4A90E2]/50 text-gray-800 mb-2"
+                >
+                  {MA_CA_PRESETS.map((p) => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                  ))}
+                  <option value="__custom__">Khác (nhập mã tùy chỉnh)</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="VD: A, D, OH, Remote..."
+                  value={phanCaForm.ma_ca}
+                  onChange={(e) => handleMaCaChange(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-white focus:outline-0 focus:ring-2 focus:ring-[#4A90E2]/50 text-gray-800"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Nhóm ca *</label>
                 <select
                   required
                   value={phanCaForm.ca}
                   onChange={(e) => handleCaChange(e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-white focus:outline-0 focus:ring-2 focus:ring-[#4A90E2]/50 text-gray-800"
                 >
-                  <option value="sang">Ca sáng (06:00 - 14:00)</option>
-                  <option value="chieu">Ca chiều (14:00 - 22:00)</option>
-                  <option value="dem">Ca đêm (22:00 - 06:00)</option>
+                  <option value="sang">Ca ngày (07:30 – 17:30)</option>
+                  <option value="chieu">Ca chiều (13:30 – 17:30)</option>
+                  <option value="dem">Ca đêm (17:30 – 07:30)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Hình thức làm việc</label>
+                <select
+                  value={phanCaForm.hinh_thuc_lam_viec}
+                  onChange={(e) => setPhanCaForm({ ...phanCaForm, hinh_thuc_lam_viec: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-white focus:outline-0 focus:ring-2 focus:ring-[#4A90E2]/50 text-gray-800"
+                >
+                  {Object.entries(HINH_THUC_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -2208,6 +2271,16 @@ export default function NhanVienPage() {
                   <option value="hoan_thanh">Hoàn thành</option>
                   <option value="vang">Vắng</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Ghi chú</label>
+                <textarea
+                  rows={2}
+                  value={phanCaForm.ghi_chu}
+                  onChange={(e) => setPhanCaForm({ ...phanCaForm, ghi_chu: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-white focus:outline-0 focus:ring-2 focus:ring-[#4A90E2]/50 text-gray-800"
+                  placeholder="Ghi chú thêm (nếu có)"
+                />
               </div>
               <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                 <button
@@ -2340,14 +2413,18 @@ export default function NhanVienPage() {
                       <button
                         onClick={() => {
                           const defaultCa = 'sang';
-                          const defaultTime = getCaTime(defaultCa);
+                          const defaultTime = getCaTime(defaultCa, 'A');
                           const selectedDateStr = formatDateForComparison(selectedDate);
                           setPhanCaForm({
+                            id_tai_khoan: '',
                             ca: defaultCa,
+                            ma_ca: 'A',
+                            hinh_thuc_lam_viec: 'tai_co_so',
                             ngay: selectedDateStr,
                             gio_bat_dau: defaultTime.gio_bat_dau,
                             gio_ket_thuc: defaultTime.gio_ket_thuc,
-                            trang_thai: 'du_kien'
+                            trang_thai: 'du_kien',
+                            ghi_chu: '',
                           });
                           setEditingPhanCa(null);
                           setSelectedNhanVien(null); // Không cần chọn nhân viên cụ thể trong calendar view
@@ -2379,8 +2456,11 @@ export default function NhanVienPage() {
                               <div className="flex-1">
                                 <div className="font-semibold text-sm text-gray-900">{ca.ho_ten}</div>
                                 <div className="text-xs text-gray-600 mt-0.5">
-                                  {getCaLabel(ca.ca)}
+                                  {getCaLabel(ca.ca, ca.ma_ca)}
                                 </div>
+                                {ca.hinh_thuc_lam_viec && (
+                                  <div className="text-xs text-gray-500">{formatHinhThuc(ca.hinh_thuc_lam_viec)}</div>
+                                )}
                               </div>
                             </div>
                             <div className="text-xs text-gray-600 mb-2 flex items-center gap-1">
@@ -2803,8 +2883,9 @@ export default function NhanVienPage() {
         open={showImportPhanCaModal}
         onClose={() => setShowImportPhanCaModal(false)}
         title="Import phân ca theo tháng"
-        description="Tạo trước lịch phân ca cho nhân viên từ file Excel"
-        templateFilePrefix="mau-phan-ca"
+        description="Dùng file Excel roster DLXH (ma trận Họ và tên × ngày, sheet Tháng M.YYYY). Tải file mẫu giống hệt DLXH_ROSTER 2026, chỉnh lịch rồi upload lại — chọn đúng tháng/năm tương ứng sheet."
+        templateFilePrefix="DLXH_ROSTER"
+        templateDownloadFileName="DLXH_ROSTER  2026.xlsx"
         previewType="phan_ca"
         replaceConfirmText="Import sẽ XÓA toàn bộ phân ca trong tháng {thang}/{nam} rồi tạo lại. Tiếp tục?"
         supplementConfirmText="Import sẽ bổ sung phân ca tháng {thang}/{nam} (bỏ qua bản ghi trùng). Tiếp tục?"
@@ -2820,8 +2901,9 @@ export default function NhanVienPage() {
             open={showImportPhanCaNvModal}
             onClose={() => setShowImportPhanCaNvModal(false)}
             title={`Import phân ca — ${selectedNhanVien.ho_ten}`}
-            description="Import lịch phân ca riêng cho nhân viên này"
-            templateFilePrefix={`mau-phan-ca-nv-${selectedNhanVien.id}`}
+            description="Upload cùng file roster DLXH; hệ thống chỉ import các ca của nhân viên này (khớp họ tên trên sheet Tháng M.YYYY)."
+            templateFilePrefix="DLXH_ROSTER"
+            templateDownloadFileName="DLXH_ROSTER  2026.xlsx"
             previewType="phan_ca"
             editFields={PHAN_CA_NV_EDIT_FIELDS}
             buildFileFromRows={buildPhanCaNvFileFromRows}

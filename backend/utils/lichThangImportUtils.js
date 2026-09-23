@@ -1,4 +1,10 @@
 import XLSX from 'xlsx';
+import { mapRosterCellToShift, resolveCaTimes } from './rosterCaMapping.js';
+import {
+  findMonthSheetName,
+  isRosterNameAlignedWithDb,
+  parseDlxhRosterWorkbook,
+} from './dlxhRosterImportUtils.js';
 
 const CA_VALUES = ['sang', 'chieu', 'dem'];
 const MUC_UU_TIEN_VALUES = ['thap', 'trung_binh', 'cao'];
@@ -9,7 +15,9 @@ const PHAN_CA_COLUMNS = [
   { key: 'ngay', label: 'Ngày (YYYY-MM-DD)', width: 16 },
   { key: 'id_tai_khoan', label: 'ID tài khoản', width: 14 },
   { key: 'ho_ten_nhan_vien', label: 'Họ tên nhân viên', width: 28 },
+  { key: 'ma_ca', label: 'Mã ca (A/D/N/OH/Remote...)', width: 22 },
   { key: 'ca', label: 'Ca (sang/chieu/dem)', width: 20 },
+  { key: 'hinh_thuc_lam_viec', label: 'Hình thức (remote/onsite/hanh_chinh...)', width: 28 },
   { key: 'gio_bat_dau', label: 'Giờ bắt đầu (HH:mm)', width: 18 },
   { key: 'gio_ket_thuc', label: 'Giờ kết thúc (HH:mm)', width: 18 },
   { key: 'trang_thai', label: 'Trạng thái (du_kien/dang_truc/hoan_thanh/vang)', width: 36 },
@@ -68,8 +76,12 @@ const HEADER_ALIASES = {
   stt: ['stt'],
   ngay: ['ngay', 'ngày', 'ngay (yyyy-mm-dd)', 'ngày (yyyy-mm-dd)'],
   id_tai_khoan: ['id_tai_khoan', 'id tai khoan', 'id tài khoản'],
-  ho_ten_nhan_vien: ['ho_ten_nhan_vien', 'ho ten nhan vien', 'họ tên nhân viên', 'ho ten nhan vien'],
+  ho_ten_nhan_vien: ['ho_ten_nhan_vien', 'ho ten nhan vien', 'họ tên nhân viên', 'ho ten nhan vien', 'họ tên (db)'],
+  id_ho_so_nhan_vien: ['id_ho_so_nhan_vien', 'id ho so nhan vien', 'id hồ sơ nhân viên', 'id hồ sơ nv'],
+  ho_ten_tren_file: ['ho_ten_tren_file', 'ho ten tren file', 'họ tên trên file', 'họ tên (file)'],
   ca: ['ca', 'ca (sang/chieu/dem)', 'ca (sang/chieu/dem)'],
+  ma_ca: ['ma_ca', 'ma ca', 'mã ca', 'mã ca (a/d/n/oh/remote...)', 'ky hieu', 'ký hiệu'],
+  hinh_thuc_lam_viec: ['hinh_thuc_lam_viec', 'hinh thuc lam viec', 'hình thức', 'hình thức (remote/onsite/hanh_chinh...)'],
   gio_bat_dau: ['gio_bat_dau', 'gio bat dau', 'giờ bắt đầu (hh:mm)', 'gio bat dau (hh:mm)'],
   gio_ket_thuc: ['gio_ket_thuc', 'gio ket thuc', 'giờ kết thúc (hh:mm)', 'gio ket thuc (hh:mm)'],
   trang_thai: ['trang_thai', 'trang thai', 'trạng thái', 'trạng thái (du_kien/dang_truc/hoan_thanh/vang)'],
@@ -475,7 +487,17 @@ const isDateInMonth = (dateStr, thang, nam) => {
   return y === Number(nam) && m === Number(thang);
 };
 
-export const parseLichThangWorkbook = (workbook, { thang, nam, nhanViens = [], benhNhans = [], mode = 'all', scope = null }) => {
+export const listWorkbookSheetNames = (workbook) => workbook?.SheetNames || [];
+
+export const parseLichThangWorkbook = (workbook, {
+  thang,
+  nam,
+  nhanViens = [],
+  benhNhans = [],
+  mode = 'all',
+  scope = null,
+  sheetName: selectedSheetName = null,
+}) => {
   const maps = buildLookupMaps({ nhanViens, benhNhans });
   const phanCaRows = findSheetRows(workbook, ['Phan_ca', 'Phân ca', 'PHAN_CA']);
   const congViecRows = findSheetRows(workbook, ['Cong_viec', 'Công việc', 'CONG_VIEC']);
@@ -492,7 +514,7 @@ export const parseLichThangWorkbook = (workbook, { thang, nam, nhanViens = [], b
 
     const row = normalizeImportRow(rawRow);
     const hasEmployee = normalizeText(row.id_tai_khoan) || normalizeText(row.ho_ten_nhan_vien);
-    const hasCa = normalizeText(row.ca);
+    const hasCa = normalizeText(row.ca) || normalizeText(row.ma_ca);
 
     if (isScopedPhanCa) {
       if (!hasCa) return;
@@ -502,12 +524,41 @@ export const parseLichThangWorkbook = (workbook, { thang, nam, nhanViens = [], b
 
     const rowNum = index + 2;
     const ngay = parseExcelDate(row.ngay);
-    const gioBatDau = parseExcelTime(row.gio_bat_dau);
-    const gioKetThuc = parseExcelTime(row.gio_ket_thuc);
-    const ca = normalizeKey(row.ca);
-    const nhanVien = isScopedPhanCa
+    let gioBatDau = parseExcelTime(row.gio_bat_dau);
+    let gioKetThuc = parseExcelTime(row.gio_ket_thuc);
+    let ca = normalizeKey(row.ca);
+    let maCa = normalizeText(row.ma_ca) || null;
+    let hinhThuc = normalizeText(row.hinh_thuc_lam_viec) || null;
+    let ghiChu = normalizeText(row.ghi_chu) || null;
+
+    if (maCa) {
+      const mapped = mapRosterCellToShift(maCa);
+      if (mapped.type === 'off' || mapped.type === 'skip') {
+        return;
+      }
+      if (mapped.type === 'shift') {
+        if (!ca || !CA_VALUES.includes(ca)) ca = mapped.ca;
+        if (!gioBatDau) gioBatDau = mapped.gio_bat_dau;
+        if (!gioKetThuc) gioKetThuc = mapped.gio_ket_thuc;
+        if (!hinhThuc) hinhThuc = mapped.hinh_thuc_lam_viec;
+        if (mapped.ghi_chu && !ghiChu) ghiChu = mapped.ghi_chu;
+        maCa = mapped.ma_ca;
+      }
+    } else if (ca && CA_VALUES.includes(ca)) {
+      const times = resolveCaTimes(ca);
+      if (!gioBatDau) gioBatDau = times.gio_bat_dau;
+      if (!gioKetThuc) gioKetThuc = times.gio_ket_thuc;
+      if (!hinhThuc) hinhThuc = times.hinh_thuc_lam_viec;
+    }
+
+    let nhanVien = isScopedPhanCa
       ? { id: scope.id_ho_so, id_tai_khoan: scope.id_tai_khoan, ho_ten: scope.ho_ten }
       : resolveTaiKhoan(row, maps);
+    const idHoSoRow = normalizeText(row.id_ho_so_nhan_vien);
+    if (idHoSoRow && maps.hoSoById.has(idHoSoRow)) {
+      nhanVien = maps.hoSoById.get(idHoSoRow);
+    }
+    const hoTenTrenFile = normalizeText(row.ho_ten_nhan_vien || row.ho_ten);
     const trangThai = normalizeKey(row.trang_thai) || 'du_kien';
 
     const rowErrors = [];
@@ -524,17 +575,36 @@ export const parseLichThangWorkbook = (workbook, { thang, nam, nhanViens = [], b
     if (!gioKetThuc) rowErrors.push('Giờ kết thúc không hợp lệ');
     if (!TRANG_THAI_CA_VALUES.includes(trangThai)) rowErrors.push('Trạng thái ca không hợp lệ');
 
+    let nhanVienMapHop = false;
+    if (nhanVien) {
+      nhanVienMapHop = isRosterNameAlignedWithDb(hoTenTrenFile || nhanVien.ho_ten, nhanVien.ho_ten);
+      if (idHoSoRow && String(idHoSoRow) !== String(nhanVien.id)) {
+        nhanVienMapHop = false;
+        rowErrors.push('ID hồ sơ nhân viên không khớp dữ liệu trong DB');
+      }
+      if (hoTenTrenFile && !isRosterNameAlignedWithDb(hoTenTrenFile, nhanVien.ho_ten)) {
+        nhanVienMapHop = false;
+        rowErrors.push(`Tên "${hoTenTrenFile}" không khớp NV DB "${nhanVien.ho_ten}" (ID ${nhanVien.id})`);
+      }
+    }
+
     const item = {
       row: rowNum,
       sheet: 'Phan_ca',
       ngay,
+      id_ho_so_nhan_vien: nhanVien?.id || idHoSoRow || null,
       id_tai_khoan: nhanVien?.id_tai_khoan || null,
-      ho_ten_nhan_vien: nhanVien?.ho_ten || normalizeText(row.ho_ten_nhan_vien || row.ho_ten),
+      ho_ten_tren_file: hoTenTrenFile || nhanVien?.ho_ten || '',
+      ho_ten_nhan_vien: nhanVien?.ho_ten || hoTenTrenFile,
       ca,
+      ma_ca: maCa,
+      hinh_thuc_lam_viec: hinhThuc,
       gio_bat_dau: gioBatDau,
       gio_ket_thuc: gioKetThuc,
       trang_thai: trangThai,
-      valid: rowErrors.length === 0
+      ghi_chu: ghiChu,
+      nhan_vien_map_hop: nhanVienMapHop,
+      valid: rowErrors.length === 0,
     };
 
     if (rowErrors.length) {
@@ -616,13 +686,59 @@ export const parseLichThangWorkbook = (workbook, { thang, nam, nhanViens = [], b
     congViec.push(item);
   });
 
-  if (mode === 'phan_ca' || mode === 'all') {
+  let skippedRosterNames = [];
+  let rosterSheetName = null;
+  if ((mode === 'phan_ca' || mode === 'all') && phanCa.length === 0) {
+    rosterSheetName = selectedSheetName || findMonthSheetName(workbook, thang, nam);
+    const dlxh = parseDlxhRosterWorkbook(workbook, {
+      thang,
+      nam,
+      maps,
+      sheetName: selectedSheetName || null,
+    });
+    if (dlxh.found) {
+      rosterSheetName = dlxh.sheetName || rosterSheetName;
+      let rosterRows = dlxh.phanCa;
+      if (isScopedPhanCa) {
+        rosterRows = rosterRows.filter(
+          (p) => String(p.id_tai_khoan) === String(scope.id_tai_khoan)
+        );
+      }
+      if (rosterRows.length > 0) {
+        phanCa.push(...rosterRows);
+        errors.push(...dlxh.errors);
+      }
+      skippedRosterNames = dlxh.skippedNames || [];
+    }
+
     if (phanCa.length === 0) {
-      errors.push({
-        sheet: 'Phan_ca',
-        row: 0,
-        messages: ['Sheet "Phan_ca" không có dữ liệu']
-      });
+      if (!rosterSheetName && phanCaRows.length === 0) {
+        errors.push({
+          sheet: 'Roster',
+          row: 0,
+          messages: [
+            selectedSheetName
+              ? `Sheet "${selectedSheetName}" không đọc được dữ liệu roster (thiếu hàng "Họ và tên" hoặc không có ca hợp lệ).`
+              : `Không tìm thấy sheet roster "Tháng ${thang}.${nam}". Chọn sheet trên file hoặc tải mẫu DLXH_ROSTER.`,
+          ],
+        });
+      } else if (isScopedPhanCa) {
+        errors.push({
+          sheet: rosterSheetName || 'Roster',
+          row: 0,
+          messages: [
+            'Không có ca làm việc hợp lệ cho nhân viên này trên roster tháng đã chọn (OFF/NL/… được bỏ qua).',
+          ],
+        });
+      } else {
+        errors.push({
+          sheet: rosterSheetName || 'Roster',
+          row: 0,
+          messages: [
+            'Roster không có ca làm việc hợp lệ để import (kiểm tra mã ca và khớp họ tên nhân viên).',
+          ],
+        });
+      }
     }
   }
 
@@ -636,12 +752,18 @@ export const parseLichThangWorkbook = (workbook, { thang, nam, nhanViens = [], b
     }
   }
 
+  const phanCaMapLoi = phanCa.filter((r) => r.nhan_vien_map_hop === false).length;
+
   const summary = {
     tong_phan_ca: phanCa.length,
     phan_ca_hop_le: phanCa.filter((r) => r.valid).length,
+    phan_ca_map_loi: phanCaMapLoi,
     tong_cong_viec: congViec.length,
     cong_viec_hop_le: congViec.filter((r) => r.valid).length,
-    tong_loi: errors.length
+    tong_loi: errors.length,
+    skipped_roster_names: skippedRosterNames,
+    roster_sheet: rosterSheetName,
+    sheet_da_chon: selectedSheetName || rosterSheetName,
   };
 
   if (mode === 'phan_ca') {

@@ -1,10 +1,13 @@
 import pool from '../config/database.js';
 import { getNowForDB } from '../utils/dateUtils.js';
 import { createNotification } from '../services/notificationService.js';
+import { insertLichPhanCa } from '../utils/phanCaDbHelper.js';
 import {
-  buildPhanCaTemplate,
+  DLXH_ROSTER_TEMPLATE_FILENAME,
+  readDlxhRosterTemplateBuffer,
+} from '../utils/dlxhRosterTemplate.js';
+import {
   buildCongViecTemplate,
-  buildPhanCaTemplateForNhanVien,
   buildCongViecTemplateForNhanVien,
   buildCongViecTemplateForBenhNhan,
   buildNhanVienDanhMucWorkbook,
@@ -134,10 +137,20 @@ const parseImportFile = async (req, res, mode, scope = null) => {
     benhNhans = ref.benhNhans;
   }
 
-  const workbook = parseWorkbookFromBuffer(req.file.buffer);
-  const parsed = parseLichThangWorkbook(workbook, { thang, nam, nhanViens, benhNhans, mode, scope });
+  const sheetName = String(req.body.sheet_name || req.body.sheetName || '').trim() || null;
 
-  return { thang, nam, parsed, nhanViens, benhNhans, scope };
+  const workbook = parseWorkbookFromBuffer(req.file.buffer);
+  const parsed = parseLichThangWorkbook(workbook, {
+    thang,
+    nam,
+    nhanViens,
+    benhNhans,
+    mode,
+    scope,
+    sheetName,
+  });
+
+  return { thang, nam, parsed, nhanViens, benhNhans, scope, sheetName };
 };
 
 const downloadTemplate = (mode) => async (req, res, next) => {
@@ -145,17 +158,25 @@ const downloadTemplate = (mode) => async (req, res, next) => {
     const thang = Number(req.query.thang) || new Date().getMonth() + 1;
     const nam = Number(req.query.nam) || new Date().getFullYear();
 
+    if (mode === 'phan_ca') {
+      const buffer = readDlxhRosterTemplateBuffer();
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${DLXH_ROSTER_TEMPLATE_FILENAME}"`
+      );
+      res.send(buffer);
+      return;
+    }
+
     const { nhanViens, benhNhans } = await loadReferenceData();
-    const workbook = mode === 'phan_ca'
-      ? buildPhanCaTemplate({ thang, nam, nhanViens })
-      : buildCongViecTemplate({ thang, nam, nhanViens, benhNhans });
+    const workbook = buildCongViecTemplate({ thang, nam, nhanViens, benhNhans });
     const buffer = workbookToBuffer(workbook);
 
-    const prefix = mode === 'phan_ca' ? 'mau-phan-ca' : 'mau-cong-viec';
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="${prefix}-${nam}-${String(thang).padStart(2, '0')}.xlsx"`
+      `attachment; filename="mau-cong-viec-${nam}-${String(thang).padStart(2, '0')}.xlsx"`
     );
     res.send(buffer);
   } catch (error) {
@@ -168,15 +189,21 @@ const previewImport = (mode, scope = null) => async (req, res, next) => {
     const result = await parseImportFile(req, res, mode, scope);
     if (result.error) return result.error;
 
-    const { thang, nam, parsed } = result;
+    const { thang, nam, parsed, nhanViens, sheetName } = result;
 
     res.json({
       success: true,
       data: {
         thang,
         nam,
-        ...parsed
-      }
+        sheet_name: sheetName,
+        nhan_vien_danh_muc: nhanViens.map((nv) => ({
+          id: nv.id,
+          id_tai_khoan: nv.id_tai_khoan,
+          ho_ten: nv.ho_ten,
+        })),
+        ...parsed,
+      },
     });
   } catch (error) {
     next(error);
@@ -259,15 +286,17 @@ const importData = (mode, scope = null) => async (req, res, next) => {
     const { thang, nam, parsed } = result;
     const cheDo = req.body.che_do === 'thay_the_thang' ? 'thay_the_thang' : 'bo_sung';
 
-    if (parsed.summary.tong_loi > 0) {
+    if (parsed.summary.tong_loi > 0 || parsed.summary.phan_ca_map_loi > 0) {
       return res.status(400).json({
         success: false,
-        message: 'File có lỗi, vui lòng sửa trước khi import',
+        message: parsed.summary.phan_ca_map_loi > 0
+          ? 'Còn dòng map sai nhân viên (bôi đỏ), vui lòng kiểm tra ID / họ tên trước khi import'
+          : 'File có lỗi, vui lòng sửa trước khi import',
         data: parsed
       });
     }
 
-    const validPhanCa = parsed.phanCa.filter((r) => r.valid);
+    const validPhanCa = parsed.phanCa.filter((r) => r.valid && r.nhan_vien_map_hop !== false);
     const validCongViec = parsed.congViec.filter((r) => r.valid);
 
     if (mode === 'phan_ca' && validPhanCa.length === 0) {
@@ -313,11 +342,7 @@ const importData = (mode, scope = null) => async (req, res, next) => {
           }
         }
 
-        await connection.execute(
-          `INSERT INTO lich_phan_ca (id_tai_khoan, ca, ngay, gio_bat_dau, gio_ket_thuc, trang_thai, ngay_tao)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
-          [row.id_tai_khoan, row.ca, row.ngay, row.gio_bat_dau, row.gio_ket_thuc, row.trang_thai || 'du_kien', ngayTao]
-        );
+        await insertLichPhanCa(connection, row, ngayTao);
         insertedPhanCa += 1;
       }
     }
@@ -463,14 +488,12 @@ export const downloadPhanCaTemplateForNhanVien = async (req, res, next) => {
     const resolved = await resolveNhanVienScope(req, res);
     if (resolved.error) return resolved.error;
 
-    const thang = Number(req.query.thang) || new Date().getMonth() + 1;
-    const nam = Number(req.query.nam) || new Date().getFullYear();
-    const buffer = workbookToBuffer(buildPhanCaTemplateForNhanVien({ thang, nam, nhanVien: resolved.nhanVien }));
+    const buffer = readDlxhRosterTemplateBuffer();
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="mau-phan-ca-nv-${resolved.nhanVien.id}-${nam}-${String(thang).padStart(2, '0')}.xlsx"`
+      `attachment; filename="${DLXH_ROSTER_TEMPLATE_FILENAME}"`
     );
     res.send(buffer);
   } catch (error) {

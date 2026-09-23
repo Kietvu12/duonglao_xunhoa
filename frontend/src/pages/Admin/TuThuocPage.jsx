@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import TuThuocImportModal from '../../components/Admin/TuThuocImportModal';
 import { phanLoaiThuocAPI, tuThuocAPI } from '../../services/api';
 
 const TRANG_THAI_OPTIONS = [
@@ -59,6 +60,7 @@ export default function TuThuocPage() {
   const [formData, setFormData] = useState(emptyForm);
 
   const [showPhanLoaiModal, setShowPhanLoaiModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editingPhanLoai, setEditingPhanLoai] = useState(null);
   const [phanLoaiForm, setPhanLoaiForm] = useState(emptyPhanLoaiForm);
 
@@ -217,17 +219,26 @@ export default function TuThuocPage() {
           <p className="text-sm text-gray-500 mt-1">Theo dõi tồn kho thuốc và vật tư y tế dùng chung</p>
         </div>
         {canManage && activeTab === 'tu-thuoc' && (
-          <button
-            onClick={() => {
-              setEditing(null);
-              setFormData(emptyForm);
-              setShowModal(true);
-            }}
-            className="bg-[#4A90E2] hover:bg-[#357ABD] text-white font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
-          >
-            <span className="material-symbols-outlined text-xl">add</span>
-            Thêm mục
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-xl">upload_file</span>
+              Import Excel
+            </button>
+            <button
+              onClick={() => {
+                setEditing(null);
+                setFormData(emptyForm);
+                setShowModal(true);
+              }}
+              className="bg-[#4A90E2] hover:bg-[#357ABD] text-white font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-xl">add</span>
+              Thêm mục
+            </button>
+          </div>
         )}
         {canManage && activeTab === 'phan-loai' && (
           <button
@@ -507,6 +518,15 @@ export default function TuThuocPage() {
           </div>
         </div>
       )}
+
+      <TuThuocImportModal
+        open={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => {
+          loadTuThuoc();
+          loadThongKe();
+        }}
+      />
 
       {showPhanLoaiModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

@@ -3,6 +3,8 @@ import { passwordEncrypt } from '../utils/cryptoHelper.js';
 import { buildLimitOffsetClause, sanitizeOffset, sanitizeLimit } from '../utils/queryHelpers.js';
 import { createNotificationForAdmins } from '../services/notificationService.js';
 import { getNowForDB, getTodayVN } from '../utils/dateUtils.js';
+import { mapRosterCellToShift, resolveCaTimes } from '../utils/rosterCaMapping.js';
+import { insertLichPhanCa } from '../utils/phanCaDbHelper.js';
 
 // Encryption key - có thể lấy từ env hoặc dùng key cố định
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'encryptionkey';
@@ -464,9 +466,12 @@ export const getLichPhanCa = async (req, res, next) => {
 
 export const createLichPhanCa = async (req, res, next) => {
   try {
-    const { id_tai_khoan, ca, ngay, gio_bat_dau, gio_ket_thuc, trang_thai } = req.body;
+    const {
+      id_tai_khoan, ca, ngay, gio_bat_dau, gio_ket_thuc, trang_thai,
+      ma_ca, hinh_thuc_lam_viec, ghi_chu
+    } = req.body;
 
-    if (!id_tai_khoan || !ca || !ngay || !gio_bat_dau || !gio_ket_thuc) {
+    if (!id_tai_khoan || !ca || !ngay) {
       return res.status(400).json({
         success: false,
         message: 'Vui lòng điền đầy đủ thông tin'
@@ -498,10 +503,26 @@ export const createLichPhanCa = async (req, res, next) => {
       formattedNgay = ngay.split(' ')[0].split('T')[0];
     }
 
+    let finalMaCa = ma_ca || null;
+    let finalHinhThuc = hinh_thuc_lam_viec || null;
+    let finalGhiChu = ghi_chu || null;
+
+    if (ma_ca) {
+      const mapped = mapRosterCellToShift(ma_ca);
+      if (mapped.type === 'shift') {
+        finalMaCa = mapped.ma_ca;
+        if (!finalHinhThuc) finalHinhThuc = mapped.hinh_thuc_lam_viec;
+        if (mapped.ghi_chu && !finalGhiChu) finalGhiChu = mapped.ghi_chu;
+      }
+    }
+
+    const resolvedTimes = resolveCaTimes(ca, finalMaCa);
+
     // Format time to HH:mm:ss if needed
     // Input type="time" returns HH:mm (24h format), MySQL TIME needs HH:mm:ss
-    let formattedGioBatDau = gio_bat_dau;
-    let formattedGioKetThuc = gio_ket_thuc;
+    let formattedGioBatDau = gio_bat_dau || resolvedTimes.gio_bat_dau;
+    let formattedGioKetThuc = gio_ket_thuc || resolvedTimes.gio_ket_thuc;
+    if (!finalHinhThuc) finalHinhThuc = resolvedTimes.hinh_thuc_lam_viec;
     
     // Ensure time format is HH:mm:ss
     if (formattedGioBatDau) {
@@ -538,17 +559,36 @@ export const createLichPhanCa = async (req, res, next) => {
     // Default trang_thai is 'du_kien' if not provided
     const finalTrangThai = trang_thai || 'du_kien';
 
+    if (!formattedGioBatDau || !formattedGioKetThuc) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vui lòng điền giờ bắt đầu và giờ kết thúc ca',
+      });
+    }
+
     const ngayTaoVN = getNowForDB();
-    const [result] = await pool.execute(
-      `INSERT INTO lich_phan_ca (id_tai_khoan, ca, ngay, gio_bat_dau, gio_ket_thuc, trang_thai, ngay_tao)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id_tai_khoan, ca, formattedNgay, formattedGioBatDau, formattedGioKetThuc, finalTrangThai, ngayTaoVN]
-    );
+    const connection = await pool.getConnection();
+    let insertId;
+    try {
+      insertId = await insertLichPhanCa(connection, {
+        id_tai_khoan,
+        ca,
+        ngay: formattedNgay,
+        gio_bat_dau: formattedGioBatDau,
+        gio_ket_thuc: formattedGioKetThuc,
+        trang_thai: finalTrangThai,
+        ma_ca: finalMaCa,
+        hinh_thuc_lam_viec: finalHinhThuc,
+        ghi_chu: finalGhiChu,
+      }, ngayTaoVN);
+    } finally {
+      connection.release();
+    }
 
     res.status(201).json({
       success: true,
       message: 'Phân ca thành công',
-      data: { id: result.insertId }
+      data: { id: insertId }
     });
   } catch (error) {
     console.error('Error creating lich phan ca:', error);
@@ -559,7 +599,10 @@ export const createLichPhanCa = async (req, res, next) => {
 export const updateLichPhanCa = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { ca, ngay, gio_bat_dau, gio_ket_thuc, trang_thai } = req.body;
+    const {
+      ca, ngay, gio_bat_dau, gio_ket_thuc, trang_thai,
+      ma_ca, hinh_thuc_lam_viec, ghi_chu
+    } = req.body;
 
     const updateFields = [];
     const updateValues = [];
@@ -567,6 +610,18 @@ export const updateLichPhanCa = async (req, res, next) => {
     if (ca !== undefined) {
       updateFields.push('ca = ?');
       updateValues.push(ca);
+    }
+    if (ma_ca !== undefined) {
+      updateFields.push('ma_ca = ?');
+      updateValues.push(ma_ca || null);
+    }
+    if (hinh_thuc_lam_viec !== undefined) {
+      updateFields.push('hinh_thuc_lam_viec = ?');
+      updateValues.push(hinh_thuc_lam_viec || null);
+    }
+    if (ghi_chu !== undefined) {
+      updateFields.push('ghi_chu = ?');
+      updateValues.push(ghi_chu || null);
     }
     if (ngay !== undefined) {
       updateFields.push('ngay = ?');

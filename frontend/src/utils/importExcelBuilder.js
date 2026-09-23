@@ -5,7 +5,11 @@ const PHAN_CA_HEADERS = [
   'Ngày (YYYY-MM-DD)',
   'ID tài khoản',
   'Họ tên nhân viên',
+  'ID hồ sơ nhân viên',
+  'Họ tên trên file',
+  'Mã ca (A/D/N/OH/Remote...)',
   'Ca (sang/chieu/dem)',
+  'Hình thức (remote/onsite/hanh_chinh...)',
   'Giờ bắt đầu (HH:mm)',
   'Giờ kết thúc (HH:mm)',
   'Trạng thái (du_kien/dang_truc/hoan_thanh/vang)',
@@ -41,7 +45,11 @@ export const buildPhanCaFileFromRows = (rows, fileName = 'import-phan-ca.xlsx') 
     row.ngay || '',
     row.id_tai_khoan || '',
     row.ho_ten_nhan_vien || '',
+    row.id_ho_so_nhan_vien || '',
+    row.ho_ten_tren_file || row.ho_ten_nhan_vien || '',
+    row.ma_ca || '',
     row.ca || '',
+    row.hinh_thuc_lam_viec || '',
     row.gio_bat_dau?.slice?.(0, 5) || row.gio_bat_dau || '',
     row.gio_ket_thuc?.slice?.(0, 5) || row.gio_ket_thuc || '',
     row.trang_thai || 'du_kien',
@@ -80,9 +88,13 @@ export const buildCongViecFileFromRows = (rows, fileName = 'import-cong-viec.xls
 
 export const PHAN_CA_EDIT_FIELDS = [
   { key: 'ngay', label: 'Ngày', width: 'w-32' },
+  { key: 'ho_ten_tren_file', label: 'Họ tên (file)', width: 'w-36' },
+  { key: 'id_ho_so_nhan_vien', label: 'ID hồ sơ NV', width: 'w-24' },
   { key: 'id_tai_khoan', label: 'ID TK', width: 'w-20' },
-  { key: 'ho_ten_nhan_vien', label: 'Họ tên NV', width: 'w-36' },
+  { key: 'ho_ten_nhan_vien', label: 'Họ tên (DB)', width: 'w-36' },
+  { key: 'ma_ca', label: 'Mã ca', width: 'w-24' },
   { key: 'ca', label: 'Ca', width: 'w-24' },
+  { key: 'hinh_thuc_lam_viec', label: 'Hình thức', width: 'w-28' },
   { key: 'gio_bat_dau', label: 'Giờ BD', width: 'w-24' },
   { key: 'gio_ket_thuc', label: 'Giờ KT', width: 'w-24' },
   { key: 'trang_thai', label: 'Trạng thái', width: 'w-28' },
@@ -101,7 +113,8 @@ export const CONG_VIEC_EDIT_FIELDS = [
 ];
 
 const PHAN_CA_NV_HEADERS = [
-  'STT', 'Ngày (YYYY-MM-DD)', 'Ca (sang/chieu/dem)',
+  'STT', 'Ngày (YYYY-MM-DD)', 'Mã ca (A/D/N/OH/Remote...)', 'Ca (sang/chieu/dem)',
+  'Hình thức (remote/onsite/hanh_chinh...)',
   'Giờ bắt đầu (HH:mm)', 'Giờ kết thúc (HH:mm)',
   'Trạng thái (du_kien/dang_truc/hoan_thanh/vang)', 'Ghi chú',
 ];
@@ -118,7 +131,12 @@ const CONG_VIEC_BN_HEADERS = [
 
 export const PHAN_CA_NV_EDIT_FIELDS = [
   { key: 'ngay', label: 'Ngày', width: 'w-32' },
+  { key: 'ho_ten_tren_file', label: 'Họ tên (file)', width: 'w-32' },
+  { key: 'id_ho_so_nhan_vien', label: 'ID hồ sơ', width: 'w-24' },
+  { key: 'ho_ten_nhan_vien', label: 'Họ tên (DB)', width: 'w-32' },
+  { key: 'ma_ca', label: 'Mã ca', width: 'w-24' },
   { key: 'ca', label: 'Ca', width: 'w-24' },
+  { key: 'hinh_thuc_lam_viec', label: 'Hình thức', width: 'w-28' },
   { key: 'gio_bat_dau', label: 'Giờ BD', width: 'w-24' },
   { key: 'gio_ket_thuc', label: 'Giờ KT', width: 'w-24' },
   { key: 'trang_thai', label: 'Trạng thái', width: 'w-28' },
@@ -148,7 +166,9 @@ export const buildPhanCaNvFileFromRows = (rows, fileName = 'import-phan-ca.xlsx'
   const bodyRows = rows.map((row, index) => [
     index + 1,
     row.ngay || '',
+    row.ma_ca || '',
     row.ca || '',
+    row.hinh_thuc_lam_viec || '',
     row.gio_bat_dau?.slice?.(0, 5) || row.gio_bat_dau || '',
     row.gio_ket_thuc?.slice?.(0, 5) || row.gio_ket_thuc || '',
     row.trang_thai || 'du_kien',
@@ -176,6 +196,45 @@ export const buildCongViecNvFileFromRows = (rows, fileName = 'import-cong-viec.x
   });
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([CONG_VIEC_NV_HEADERS, ...bodyRows]), 'Cong_viec');
+  return workbookToFile(workbook, fileName);
+};
+
+const TU_THUOC_HEADERS = [
+  'STT',
+  'Tên thuốc/vật tư',
+  'Phân loại (tên)',
+  'Đơn vị tính',
+  'Số lượng tồn',
+  'Ngưỡng cảnh báo',
+  'Hạn sử dụng (YYYY-MM-DD)',
+  'Chỉ định',
+  'Ghi chú',
+];
+
+export const TU_THUOC_EDIT_FIELDS = [
+  { key: 'ten_thuoc', label: 'Tên thuốc/vật tư', width: 'w-40' },
+  { key: 'ten_phan_loai', label: 'Phân loại', width: 'w-28' },
+  { key: 'don_vi_tinh', label: 'ĐVT', width: 'w-20' },
+  { key: 'so_luong_ton', label: 'Tồn', width: 'w-16' },
+  { key: 'so_luong_toi_thieu', label: 'Ngưỡng', width: 'w-16' },
+  { key: 'han_su_dung', label: 'HSD', width: 'w-28' },
+  { key: 'chi_dinh', label: 'Chỉ định', width: 'w-32' },
+];
+
+export const buildTuThuocFileFromRows = (rows, fileName = 'import-tu-thuoc.xlsx') => {
+  const bodyRows = rows.map((row, index) => [
+    index + 1,
+    row.ten_thuoc || '',
+    row.ten_phan_loai || '',
+    row.don_vi_tinh || '',
+    row.so_luong_ton ?? '',
+    row.so_luong_toi_thieu ?? '',
+    row.han_su_dung || '',
+    row.chi_dinh || '',
+    row.ghi_chu || '',
+  ]);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([TU_THUOC_HEADERS, ...bodyRows]), 'Tu_thuoc');
   return workbookToFile(workbook, fileName);
 };
 
