@@ -1,5 +1,14 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import expertDoctorImage from "../assets/Gemini_Generated_Image_qzkd1uqzkd1uqzkd.png";
+import {
+  expertFeaturedImage,
+  expertImageById,
+} from "../assets/expertTeamImages";
+
+/** Khung ảnh chung 3:4 — ảnh phủ kín khung (object-cover) */
+const EXPERT_PHOTO_FRAME =
+  "relative w-full aspect-[3/4] overflow-hidden bg-[#F9F6F1]";
+const EXPERT_PHOTO_IMG =
+  "absolute inset-0 h-full w-full object-cover object-center";
 
 const ExpertTeamSection = () => {
   const scrollContainerRef = useRef(null);
@@ -10,14 +19,14 @@ const ExpertTeamSection = () => {
   const featuredExpert = {
     id: 1,
     title: "Giám đốc chuyên môn",
-    name: "Ths. BSCKII – BSNT · Giảng viên Đại học Y Hà Nội",
+    name: "BSCK2 – Ths. BSNT Hoàng Thị Phương Nam",
     description:
-      "Chúng tôi theo đuổi sự chuẩn mực trong chuyên môn, kiên định với trách nhiệm và đặt trọn tâm huyết bằng yêu thương.",
+      "Bác sĩ CK2 – Ths. BSNT Hoàng Thị Phương Nam là bác sĩ chuyên ngành Nội – Lão khoa với hơn 15 năm kinh nghiệm trong khám, điều trị và chăm sóc toàn diện cho người cao tuổi. Trong quá trình công tác, bác sĩ làm việc tại nhiều chuyên khoa trọng điểm như Hồi sức tích cực, Cấp cứu, Đột quỵ, Tim mạch và Hô hấp tại Bệnh viện Lão khoa Trung ương.",
     positions: [
       "Thạc sĩ – Bác sĩ chuyên khoa cấp II – Điều dưỡng trưởng",
       "Giảng viên Đại học Y Hà Nội",
     ],
-    image: expertDoctorImage,
+    image: expertFeaturedImage,
   };
 
   const experts = [
@@ -28,7 +37,7 @@ const ExpertTeamSection = () => {
       description:
         "Sự an tâm của gia đình không chỉ đến từ chăm sóc tốt, mà còn từ sự minh bạch và đúng chuẩn mực. Chúng tôi bảo vệ từng quyền lợi, từng quyết định, từng hành trình của người cao tuổi bằng cả trách nhiệm pháp lý và đạo đức nghề nghiệp. Chuẩn mực tạo nên an tâm — minh bạch trong từng điều nhỏ nhất.",
       positions: [],
-      image: expertDoctorImage,
+      image: expertImageById[5],
     },
     {
       id: 2,
@@ -37,7 +46,7 @@ const ExpertTeamSection = () => {
       description:
         "PGS. TS. BSCKII Trần Nguyễn Ngọc là chuyên gia đầu ngành về Sức khỏe Tâm thần tại Việt Nam, hiện giữ chức Trưởng khoa Điều trị Rối loạn Cảm xúc – Viện Sức khỏe Tâm thần, Bệnh viện Bạch Mai và là Giảng viên cao cấp Đại học Y Hà Nội.",
       positions: [],
-      image: expertDoctorImage,
+      image: expertImageById[2],
     },
     {
       id: 3,
@@ -46,7 +55,7 @@ const ExpertTeamSection = () => {
       description:
         "PGS, TS, Giảng viên cao cấp Trần Hữu Bình – Thầy thuốc Nhân dân, là bác sĩ đầu ngành chuyên khoa Tâm thần – Tâm bệnh học tại Việt Nam. Ông từng giữ nhiều vị trí lãnh đạo và học thuật quan trọng như Nguyên Viện trưởng Viện Sức khỏe Tâm thần Quốc gia (Bệnh viện Bạch Mai).",
       positions: [],
-      image: expertDoctorImage,
+      image: expertImageById[3],
     },
     {
       id: 4,
@@ -55,7 +64,7 @@ const ExpertTeamSection = () => {
       description:
         "PGS Phan Toàn Thắng là nhà khoa học tiên phong trong y học tái tạo và công nghệ tế bào gốc, là người Việt Nam đầu tiên sở hữu bằng sáng chế độc quyền công nghệ tách chiết tế bào gốc từ màng dây rốn được bảo hộ ở 80 quốc gia.",
       positions: [],
-      image: expertDoctorImage,
+      image: expertImageById[4],
     },
   ];
 
@@ -147,14 +156,15 @@ const ExpertTeamSection = () => {
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-12 border border-accent-gold/20 shadow-lg"
                style={{ borderColor: 'rgba(201, 168, 112, 0.2)' }}>
             {/* Image Section */}
-            <div className="relative order-2 lg:order-1">
-              <div className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-xl">
+            <div className="relative order-2 lg:order-1 w-full max-w-[280px] sm:max-w-[320px] md:max-w-[350px] lg:max-w-[400px] mx-auto lg:mx-0">
+              <div
+                className={`rounded-xl sm:rounded-2xl shadow-xl ${EXPERT_PHOTO_FRAME}`}
+              >
                 <img
                   src={featuredExpert.image}
                   alt={featuredExpert.name}
-                  className="w-full h-auto object-contain"
+                  className={EXPERT_PHOTO_IMG}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
               </div>
               <div className="absolute -inset-2 sm:-inset-4 border-2 rounded-xl sm:rounded-2xl -z-10"
                    style={{ borderColor: '#E8D7B7' }}></div>
@@ -224,12 +234,13 @@ const ExpertTeamSection = () => {
                 {/* Card Container */}
                 <div className="relative w-full bg-white rounded-2xl sm:rounded-3xl border border-accent-gold/20 transition-all duration-500 group-hover:shadow-2xl"
                      style={{ borderColor: 'rgba(201, 168, 112, 0.2)' }}>
-                  {/* Image */}
-                  <div className="relative overflow-hidden rounded-t-2xl sm:rounded-t-3xl">
+                  <div
+                    className={`rounded-t-2xl sm:rounded-t-3xl ${EXPERT_PHOTO_FRAME}`}
+                  >
                     <img
                       src={expert.image}
                       alt={expert.name}
-                      className="w-full h-auto object-contain rounded-t-2xl sm:rounded-t-3xl"
+                      className={EXPERT_PHOTO_IMG}
                     />
                   </div>
 
