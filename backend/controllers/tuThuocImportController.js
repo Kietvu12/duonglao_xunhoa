@@ -1,3 +1,4 @@
+import XLSX from 'xlsx';
 import pool from '../config/database.js';
 import { formatDateForDB, getNowForDB } from '../utils/dateUtils.js';
 import { computeTrangThaiTon } from '../utils/tuThuocUtils.js';
@@ -6,7 +7,7 @@ import {
   buildPhanLoaiDanhMucWorkbook,
   parseTuThuocWorkbook,
 } from '../utils/tuThuocImportUtils.js';
-import { parseWorkbookFromBuffer, workbookToBuffer } from '../utils/lichThangImportUtils.js';
+import { workbookToBuffer } from '../utils/lichThangImportUtils.js';
 
 const loadPhanLoais = async () => {
   const [rows] = await pool.execute(
@@ -30,7 +31,8 @@ const parseImportFile = async (req) => {
   }
 
   const phanLoais = await loadPhanLoais();
-  const workbook = parseWorkbookFromBuffer(req.file.buffer);
+  // Không dùng cellDates: ngày được đọc dạng serial Excel để tránh lệch múi giờ
+  const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
   const parsed = parseTuThuocWorkbook(workbook, { phanLoais });
 
   return { parsed, phanLoais };
@@ -44,6 +46,31 @@ const findExistingByName = async (connection, tenThuoc) => {
     [tenThuoc]
   );
   return rows[0]?.id || null;
+};
+
+const ensurePhanLoaiIds = async (connection, items, ngayTao) => {
+  const createdIds = new Map();
+  for (const item of items) {
+    if (!item.phan_loai_moi) continue;
+    const key = item.ten_phan_loai.toLowerCase();
+    if (!createdIds.has(key)) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM phan_loai_thuoc WHERE LOWER(TRIM(ten_loai)) = LOWER(TRIM(?)) LIMIT 1',
+        [item.ten_phan_loai]
+      );
+      if (existing[0]) {
+        createdIds.set(key, existing[0].id);
+      } else {
+        const [insertResult] = await connection.execute(
+          'INSERT INTO phan_loai_thuoc (ten_loai, ngay_tao, ngay_cap_nhat) VALUES (?, ?, ?)',
+          [item.ten_phan_loai, ngayTao, ngayTao]
+        );
+        createdIds.set(key, insertResult.insertId);
+      }
+    }
+    item.id_phan_loai = createdIds.get(key);
+  }
+  return createdIds.size;
 };
 
 export const downloadTuThuocTemplate = async (req, res, next) => {
@@ -118,6 +145,7 @@ export const importTuThuoc = async (req, res, next) => {
     let updated = 0;
     let skipped = 0;
     const ngayTao = getNowForDB();
+    const phanLoaiCreated = await ensurePhanLoaiIds(connection, validItems, ngayTao);
 
     for (const item of validItems) {
       const trangThai = computeTrangThaiTon(
@@ -181,12 +209,14 @@ export const importTuThuoc = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: `Import thành công: ${inserted} thêm mới, ${updated} cập nhật, ${skipped} bỏ qua (trùng tên)`,
+      message: `Import thành công: ${inserted} thêm mới, ${updated} cập nhật, ${skipped} bỏ qua (trùng tên)`
+        + (phanLoaiCreated > 0 ? `, ${phanLoaiCreated} phân loại mới` : ''),
       data: {
         che_do: cheDo,
         inserted,
         updated,
         skipped,
+        phan_loai_created: phanLoaiCreated,
         summary: result.parsed.summary,
       },
     });

@@ -217,13 +217,16 @@ export default function TuThuocImportModal({ open, onClose, onSuccess }) {
 
   if (!open) return null;
 
+  // File dựng lại khi "Kiểm tra lại" luôn có sheet Tu_thuoc, chỉ hiện tên sheet của file gốc
+  const sourceSheet = preview?.summary?.sheet && preview.summary.sheet !== 'Tu_thuoc' ? preview.summary.sheet : null;
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
           <div>
             <h2 className="text-xl font-bold text-gray-800">Import danh sách thuốc / vật tư</h2>
-            <p className="text-sm text-gray-500 mt-1">Tải file mẫu, điền dữ liệu và import vào tủ thuốc</p>
+            <p className="text-sm text-gray-500 mt-1">Dùng file mẫu hoặc sổ "Bảng theo dõi nhập - xuất thuốc" (đọc sheet đầu tiên, tồn lấy theo cột Tồn cuối kỳ)</p>
           </div>
           <button onClick={handleClose} className="text-gray-500 hover:text-gray-700">
             <span className="material-symbols-outlined text-2xl">close</span>
@@ -358,6 +361,20 @@ export default function TuThuocImportModal({ open, onClose, onSuccess }) {
                   <div className="text-xs text-red-600">Lỗi</div>
                 </div>
               </div>
+
+              {(sourceSheet || preview.summary?.phan_loai_moi?.length > 0) && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 space-y-1">
+                  {sourceSheet && (
+                    <p>Đang đọc sheet: <span className="font-semibold">{sourceSheet}</span></p>
+                  )}
+                  {preview.summary?.phan_loai_moi?.length > 0 && (
+                    <p>
+                      Phân loại sẽ được tạo mới khi import:{' '}
+                      <span className="font-semibold">{preview.summary.phan_loai_moi.join(', ')}</span>
+                    </p>
+                  )}
+                </div>
+              )}
 
               {preview.errors?.length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 max-h-32 overflow-y-auto">
