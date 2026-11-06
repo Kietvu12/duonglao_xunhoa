@@ -14,7 +14,7 @@ const ServiceSession4 = () => {
     {
       id: 2,
       image: act2,
-      title: "Board Games",
+      title: "Trò Chơi Trí Tuệ",
       description: "Kích thích trí não và gắn kết cộng đồng",
     },
     {

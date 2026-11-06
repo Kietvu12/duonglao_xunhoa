@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { lichHenTuVanAPI } from '../services/api';
+import { CONTACT } from '../config/siteInfo';
+import {
+  EMAIL_REGEX,
+  PHONE_REGEX,
+  getTomorrowLocalDate,
+  joinServiceInterest,
+} from '../utils/dichVuUtils';
 
 const BookingModal = ({ isOpen, onClose, serviceName }) => {
   const [formData, setFormData] = useState({
@@ -16,11 +24,7 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
   const [success, setSuccess] = useState(false);
 
   // Set default date to tomorrow
-  const getTomorrowDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
-  };
+  const getTomorrowDate = getTomorrowLocalDate;
 
   // Set default time to 9:00 AM
   const getDefaultTime = () => {
@@ -29,14 +33,16 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
 
   // Set default values when modal opens
   useEffect(() => {
-    if (isOpen && !formData.ngay_mong_muon) {
+    if (isOpen) {
       setFormData(prev => ({
         ...prev,
-        ngay_mong_muon: getTomorrowDate(),
-        gio_mong_muon: getDefaultTime(),
+        ngay_mong_muon: prev.ngay_mong_muon || getTomorrowDate(),
+        gio_mong_muon: prev.gio_mong_muon || getDefaultTime(),
+        // Luôn đồng bộ với gói đang xem (khách có thể đổi gói rồi mở lại form)
         loai_dich_vu_quan_tam: serviceName || prev.loai_dich_vu_quan_tam
       }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, serviceName]);
 
   const handleChange = (e) => {
@@ -56,24 +62,23 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
 
     try {
       // Validate required fields
-      if (!formData.ho_ten || !formData.so_dien_thoai || !formData.email || !formData.ngay_mong_muon || !formData.gio_mong_muon) {
+      if (!formData.ho_ten.trim() || !formData.so_dien_thoai.trim() || !formData.ngay_mong_muon || !formData.gio_mong_muon) {
         setError('Vui lòng điền đầy đủ thông tin bắt buộc');
         setLoading(false);
         return;
       }
 
-      // Validate email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
+      // Validate email (không bắt buộc)
+      const cleanEmail = formData.email.trim();
+      if (cleanEmail && !EMAIL_REGEX.test(cleanEmail)) {
         setError('Email không hợp lệ');
         setLoading(false);
         return;
       }
 
       // Validate phone (Vietnamese format)
-      const phoneRegex = /^(0|\+84)[0-9]{9,10}$/;
-      const cleanPhone = formData.so_dien_thoai.replace(/\s/g, '');
-      if (!phoneRegex.test(cleanPhone)) {
+      const cleanPhone = formData.so_dien_thoai.replace(/[\s.-]/g, '');
+      if (!PHONE_REGEX.test(cleanPhone)) {
         setError('Số điện thoại không hợp lệ (ví dụ: 0912345678 hoặc +84912345678)');
         setLoading(false);
         return;
@@ -90,7 +95,10 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
 
       const response = await lichHenTuVanAPI.create({
         ...formData,
-        so_dien_thoai: cleanPhone
+        ho_ten: formData.ho_ten.trim(),
+        email: cleanEmail,
+        so_dien_thoai: cleanPhone,
+        loai_dich_vu_quan_tam: joinServiceInterest([formData.loai_dich_vu_quan_tam])
       });
 
       if (response.success) {
@@ -110,10 +118,12 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
         setTimeout(() => {
           setSuccess(false);
           onClose();
-        }, 2000);
+        }, 3000);
+      } else {
+        setError(response.message || 'Không gửi được yêu cầu. Vui lòng thử lại hoặc gọi hotline.');
       }
     } catch (err) {
-      setError(err.message || 'Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại!');
+      setError(`${err.message || 'Có lỗi xảy ra khi đặt lịch.'} Vui lòng thử lại hoặc gọi hotline ${CONTACT.hotline.display}.`);
     } finally {
       setLoading(false);
     }
@@ -130,7 +140,7 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h2 className="text-2xl font-raleway-bold text-gray-800">
-            Đặt lịch hẹn tư vấn
+            Đặt lịch tham quan & tư vấn
           </h2>
           <button
             onClick={onClose}
@@ -155,8 +165,13 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
               <h3 className="text-xl font-raleway-bold text-gray-800 mb-2">
                 Đặt lịch thành công!
               </h3>
-              <p className="text-justify" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
-                Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.
+              <p style={{ color: '#2D2D2D' }}>
+                Chúng tôi đã nhận yêu cầu và sẽ gọi lại để xác nhận lịch sớm nhất có thể.
+                <br />
+                Cần hỗ trợ ngay? Gọi hotline{' '}
+                <a href={CONTACT.hotline.tel} className="font-bold" style={{ color: '#A90046' }}>
+                  {CONTACT.hotline.display}
+                </a>
               </p>
             </div>
           ) : (
@@ -165,7 +180,7 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
               {serviceName && (
                 <div>
                   <label className="block text-sm font-raleway-semibold text-gray-700 mb-2">
-                    Dịch vụ quan tâm
+                    Gói dịch vụ quan tâm
                   </label>
                   <input
                     type="text"
@@ -211,16 +226,16 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
               {/* Email */}
               <div>
                 <label className="block text-sm font-raleway-semibold text-gray-700 mb-2">
-                  Email <span className="text-red-500">*</span>
+                  Email (tùy chọn)
                 </label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  required
+                  autoComplete="email"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="example@email.com"
+                  placeholder="email@example.com"
                 />
               </div>
 
@@ -228,7 +243,7 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-raleway-semibold text-gray-700 mb-2">
-                    Ngày mong muốn <span className="text-red-500">*</span>
+                    Ngày tham quan <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
@@ -242,7 +257,7 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
                 </div>
                 <div>
                   <label className="block text-sm font-raleway-semibold text-gray-700 mb-2">
-                    Giờ mong muốn <span className="text-red-500">*</span>
+                    Giờ tham quan <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="time"
@@ -277,6 +292,14 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
                 </div>
               )}
 
+              <p className="text-xs text-gray-500">
+                Bằng việc gửi yêu cầu, bạn đồng ý để Trung tâm liên hệ tư vấn theo{' '}
+                <Link to="/chinh-sach-bao-mat" onClick={onClose} className="underline" style={{ color: '#A90046' }}>
+                  Chính sách bảo mật
+                </Link>
+                .
+              </p>
+
               {/* Buttons */}
               <div className="flex gap-4 pt-4">
                 <button
@@ -291,7 +314,7 @@ const BookingModal = ({ isOpen, onClose, serviceName }) => {
                   disabled={loading}
                   className="flex-1 px-6 py-3 bg-gray-900 text-white font-raleway-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Đang xử lý...' : 'Đặt lịch'}
+                  {loading ? 'Đang gửi...' : 'Gửi yêu cầu đặt lịch'}
                 </button>
               </div>
             </form>

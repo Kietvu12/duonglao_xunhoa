@@ -23,7 +23,7 @@ const Session1 = () => {
                       border: '1px solid #C9A870',
                       letterSpacing: '0.15em'
                     }}>
-                Chăm sóc trọn tình thương
+                Trung tâm dưỡng lão tại Hạ Long
               </span>
             </div>
             
@@ -35,7 +35,7 @@ const Session1 = () => {
                 fontFamily: "'Playfair Display', serif"
               }}>
                 <span className="block mb-1 sm:mb-1.5">Chăm Sóc</span>
-                <span className="block mb-1 sm:mb-1.5">Bằng Cả</span>
+                <span className="block mb-1 sm:mb-1.5">Người Cao Tuổi</span>
                 <span 
                   className="inline-block"
                   style={{
@@ -48,20 +48,22 @@ const Session1 = () => {
                     backgroundPosition: '200% center'
                   }}
                 >
-                  Trái Tim
+                  Tại Hạ Long
                 </span>
               </h1>
               <div className="w-16 sm:w-20 h-0.5 bg-gradient-to-r from-accent-gold to-transparent"></div>
             </div>
             
             <p className="text-base sm:text-lg leading-relaxed text-justify" style={{ color: '#2D2D2D', maxWidth: '500px', textAlign: 'justify' }}>
-              Tại Xuân Hoa, chúng tôi mang đến không chỉ dịch vụ chăm sóc chuyên nghiệp 
-              cao cấp mà còn là tình yêu thương và sự tận tâm trong từng khoảnh khắc quý giá.
+              Trung tâm trường thọ Xuân Hoa (Đồi Thủy Sản, Hạ Long, Quảng Ninh) chăm sóc người cao tuổi
+              với các gói chăm sóc hoàn toàn 24/7, bán tự lập và tự lập – ngắn hạn theo ngày hoặc dài hạn theo tháng.
+              Chăm sóc bằng cả trái tim, tận tâm trong từng khoảnh khắc.
             </p>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full max-w-xl">
-              <Link
-                to="/lien-he"
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent('openBookingModal'))}
                 className="w-full px-4 sm:px-6 py-3 sm:py-4 rounded-full font-serif font-semibold text-xs sm:text-sm text-white transition-all duration-400 relative overflow-hidden text-center flex items-center justify-center"
                 style={{ 
                   background: 'linear-gradient(135deg, #8B0A3D 0%, #A90046 100%)',
@@ -89,7 +91,7 @@ const Session1 = () => {
                   }
                 }}
               >
-                <span className="relative z-10">Liên lạc với chúng tôi</span>
+                <span className="relative z-10">Đặt lịch tham quan</span>
                 <span 
                   className="btn-shine absolute top-0 left-[-100%] w-full h-full transition-all duration-600"
                   style={{
@@ -97,7 +99,7 @@ const Session1 = () => {
                     transition: 'left 0.6s ease'
                   }}
                 ></span>
-              </Link>
+              </button>
               <Link
                 to="/dich-vu"
                 className="w-full px-4 sm:px-6 py-3 sm:py-4 rounded-full font-serif font-semibold text-xs sm:text-sm transition-all duration-400 text-center flex items-center justify-center"
@@ -123,7 +125,7 @@ const Session1 = () => {
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                Khám phá thêm
+                Xem gói dịch vụ
               </Link>
             </div>
             
@@ -185,8 +187,10 @@ const Session1 = () => {
                 
               ></div>
               <img 
-                src={session1Image} 
-                alt="Chăm sóc người cao tuổi" 
+                src={session1Image}
+                alt="Chăm sóc người cao tuổi tại Trung tâm trường thọ Xuân Hoa, Hạ Long"
+                fetchPriority="high"
+                decoding="async"
                 className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] xl:h-[700px] object-cover"
               />
             </div>

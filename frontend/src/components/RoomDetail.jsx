@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import VRView from './VRView';
+import { useState, useEffect, lazy, Suspense } from 'react';
+// three.js nặng → chỉ tải khi khách bấm xem 360°
+const VRView = lazy(() => import('./VRView'));
 import { phongNewAPI, baiVietPhongAPI } from '../services/api';
 import { normalizeImageUrl } from '../utils/imageUtils';
 
@@ -136,7 +137,11 @@ const RoomDetail = ({ room, onBack }) => {
 
   return (
     <>
-      {showVRView && <VRView onClose={() => setShowVRView(false)} />}
+      {showVRView && (
+        <Suspense fallback={<div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 text-white">Đang tải chế độ xem 360°...</div>}>
+          <VRView onClose={() => setShowVRView(false)} />
+        </Suspense>
+      )}
       <section className="w-full bg-white py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}

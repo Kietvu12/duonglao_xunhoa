@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
-import { dichVuAPI, loaiDichVuAPI } from '../services/api';
+import { Link } from 'react-router-dom';
 import { serviceImages } from '../assets/serviceImages';
 import { normalizeImageUrl } from '../utils/imageUtils';
+import { buildCategoryPath, buildServicePath } from '../utils/dichVuUtils';
 
 const formatPrice = (price) => {
   if (!price) return null;
@@ -16,112 +16,33 @@ const getStartingPrice = (dv) => {
   return null;
 };
 
-const ServiceSession2 = ({ selectedCategory, onCategorySelect, onCategoryBack, onServiceClick }) => {
-  const [loaiDichVus, setLoaiDichVus] = useState([]);
-  const [dichVus, setDichVus] = useState([]);
-  const [loading, setLoading] = useState(true);
+const ServiceSession2 = ({ loading, loadError, categories = [], selectedCategory }) => {
+  const servicesInCategory = selectedCategory?.dichVus || [];
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [loaiRes, dichVuRes] = await Promise.all([
-        loaiDichVuAPI.getAll(),
-        dichVuAPI.getAll({ limit: -1 }),
-      ]);
-      setLoaiDichVus(loaiRes.data || []);
-      setDichVus(dichVuRes.data || []);
-    } catch (error) {
-      console.error('Error loading services:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const groupedByCategory = useMemo(() => {
-    const map = new Map();
-    dichVus.forEach((dv) => {
-      const key = dv.id_loai_dich_vu ?? 'uncategorized';
-      if (!map.has(key)) map.set(key, []);
-      map.get(key).push(dv);
-    });
-    return map;
-  }, [dichVus]);
-
-  const categoriesWithServices = useMemo(() => {
-    const fromLoai = loaiDichVus
-      .map((loai) => ({
-        ...loai,
-        dichVus: groupedByCategory.get(loai.id) || [],
-      }))
-      .filter((loai) => loai.dichVus.length > 0);
-
-    const uncategorized = groupedByCategory.get('uncategorized') || [];
-    if (uncategorized.length > 0) {
-      fromLoai.push({
-        id: 'uncategorized',
-        ten: 'Dịch vụ khác',
-        mo_ta: 'Các dịch vụ chăm sóc và hỗ trợ khác tại viện.',
-        dichVus: uncategorized,
-      });
-    }
-
-    return fromLoai;
-  }, [loaiDichVus, groupedByCategory]);
-
-  const servicesInCategory = useMemo(() => {
-    if (!selectedCategory) return [];
-    if (selectedCategory.id === 'uncategorized') {
-      return groupedByCategory.get('uncategorized') || [];
-    }
-    return groupedByCategory.get(selectedCategory.id) || [];
-  }, [selectedCategory, groupedByCategory]);
-
-  const handleServiceSelect = (dichVu) => {
-    onServiceClick?.({
-      ...dichVu,
-      loai_dich_vu: selectedCategory
-        ? { id: selectedCategory.id, ten: selectedCategory.ten }
-        : dichVu.ten_loai_dich_vu
-          ? { ten: dichVu.ten_loai_dich_vu }
-          : null,
-      dichVusOfType: servicesInCategory,
-    });
-  };
-
-  if (loading) {
+  if (loading || loadError || categories.length === 0) {
     return (
       <section className="py-16 sm:py-20 lg:py-24" style={{ background: '#F9F6F1' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16">
           <div className="text-center text-sm sm:text-base" style={{ color: '#2D2D2D' }}>
-            Đang tải dịch vụ...
+            {loading
+              ? 'Đang tải dịch vụ...'
+              : loadError
+                ? 'Chưa tải được danh sách dịch vụ. Vui lòng tải lại trang hoặc gọi hotline để được tư vấn.'
+                : 'Chưa có dịch vụ nào.'}
           </div>
         </div>
       </section>
     );
   }
 
-  if (categoriesWithServices.length === 0) {
+  const renderHeader = (title, subtitle, headingTag = 'h2') => {
+    const HeadingTag = headingTag;
     return (
-      <section className="py-16 sm:py-20 lg:py-24" style={{ background: '#F9F6F1' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16">
-          <div className="text-center text-sm sm:text-base" style={{ color: '#2D2D2D' }}>
-            Chưa có dịch vụ nào.
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  const renderHeader = (title, subtitle) => (
     <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-14 lg:mb-16">
       <span className="inline-block px-4 sm:px-6 py-2 rounded-full text-xs tracking-wide uppercase mb-4 sm:mb-6 bg-accent-gold-light text-primary-burgundy font-semibold border border-accent-gold">
         Dịch vụ
       </span>
-      <h2
+      <HeadingTag
         className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 leading-relaxed"
         style={{ color: '#2D2D2D', fontFamily: "'Playfair Display', serif", lineHeight: '1.35' }}
       >
@@ -131,28 +52,28 @@ const ServiceSession2 = ({ selectedCategory, onCategorySelect, onCategoryBack, o
             {subtitle}
           </span>
         )}
-      </h2>
+      </HeadingTag>
       <div className="w-16 sm:w-20 h-0.5 bg-gradient-to-r from-accent-gold via-accent-gold to-transparent mx-auto mb-5" />
     </div>
-  );
+    );
+  };
 
   if (selectedCategory) {
     return (
       <section className="py-16 sm:py-20 lg:py-24 xl:py-28" style={{ background: '#F9F6F1' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16">
-          <button
-            type="button"
-            onClick={onCategoryBack}
+          <Link
+            to="/dich-vu"
             className="inline-flex items-center gap-2 mb-8 text-sm font-semibold tracking-wide transition-colors hover:opacity-80"
             style={{ color: '#C9A870' }}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
             </svg>
-            Quay lại danh mục
-          </button>
+            Tất cả loại dịch vụ
+          </Link>
 
-          {renderHeader(selectedCategory.ten, `${servicesInCategory.length} dịch vụ`)}
+          {renderHeader(selectedCategory.ten, `${servicesInCategory.length} gói dịch vụ`, 'h1')}
 
           {selectedCategory.mo_ta && (
             <p
@@ -169,10 +90,9 @@ const ServiceSession2 = ({ selectedCategory, onCategorySelect, onCategoryBack, o
               const image = serviceImages[index % serviceImages.length];
 
               return (
-                <button
+                <Link
                   key={dichVu.id}
-                  type="button"
-                  onClick={() => handleServiceSelect(dichVu)}
+                  to={buildServicePath(selectedCategory, dichVu)}
                   className="group w-full text-left flex gap-4 sm:gap-6 bg-white rounded-2xl border overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
                   style={{ borderColor: 'rgba(201, 168, 112, 0.25)' }}
                 >
@@ -224,7 +144,7 @@ const ServiceSession2 = ({ selectedCategory, onCategorySelect, onCategoryBack, o
                       </span>
                     </div>
                   </div>
-                </button>
+                </Link>
               );
             })}
           </div>
@@ -245,15 +165,14 @@ const ServiceSession2 = ({ selectedCategory, onCategorySelect, onCategoryBack, o
         </p>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {categoriesWithServices.map((loai, index) => {
+          {categories.map((loai, index) => {
             const image = serviceImages[index % serviceImages.length];
 
             return (
-              <button
+              <Link
                 key={loai.id}
-                type="button"
-                onClick={() => onCategorySelect?.(loai)}
-                className="group text-left bg-white rounded-2xl sm:rounded-3xl border overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
+                to={buildCategoryPath(loai)}
+                className="group block text-left bg-white rounded-2xl sm:rounded-3xl border overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
                 style={{ borderColor: 'rgba(201, 168, 112, 0.2)' }}
               >
                 <div className="relative h-44 sm:h-48 overflow-hidden">
@@ -265,7 +184,7 @@ const ServiceSession2 = ({ selectedCategory, onCategorySelect, onCategoryBack, o
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <span className="inline-block px-3 py-1 rounded-full text-[10px] sm:text-xs tracking-wide uppercase bg-accent-gold-light text-primary-burgundy font-semibold border border-accent-gold">
-                      {loai.dichVus.length} dịch vụ
+                      {loai.dichVus.length} gói
                     </span>
                   </div>
                 </div>
@@ -292,7 +211,7 @@ const ServiceSession2 = ({ selectedCategory, onCategorySelect, onCategoryBack, o
                     </svg>
                   </span>
                 </div>
-              </button>
+              </Link>
             );
           })}
         </div>

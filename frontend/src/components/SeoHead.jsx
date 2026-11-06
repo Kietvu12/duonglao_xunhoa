@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 export const SITE_ORIGIN = 'https://duonglaoxuanhoa.net';
 export const SITE_NAME = 'Trung tâm trường thọ Xuân Hoa';
 export const DEFAULT_DESCRIPTION =
-  'Trung tâm trường thọ Xuân Hoa – chăm sóc người cao tuổi toàn diện, môi trường sống an lành và đội ngũ y bác sĩ, điều dưỡng chuyên nghiệp.';
+  'Trung tâm trường thọ Xuân Hoa tại Hạ Long – dưỡng lão và chăm sóc người cao tuổi toàn diện 24/7, môi trường sống an lành, đội ngũ điều dưỡng tận tâm.';
 
 function upsertMetaByName(name, content) {
   if (content == null || content === '') return;

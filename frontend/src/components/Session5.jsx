@@ -136,9 +136,11 @@ const Session5 = () => {
                   <h3 className="font-serif text-2xl sm:text-3xl font-semibold mb-3 sm:mb-4 leading-tight" style={{ color: '#2D2D2D', fontFamily: "'Playfair Display', serif" }}>
                     {events[0].tieu_de}
                   </h3>
-                  <p className="mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed text-justify" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
-                    {events[0].mo_ta || 'Không có mô tả'}
-                  </p>
+                  {events[0].mo_ta?.trim() && (
+                    <p className="mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed text-justify line-clamp-4" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
+                      {events[0].mo_ta}
+                    </p>
+                  )}
                   <button
                     type="button"
                     onClick={(e) => {
@@ -182,9 +184,11 @@ const Session5 = () => {
                     <h3 className="font-serif text-lg sm:text-xl font-semibold mb-1 sm:mb-2 leading-tight" style={{ color: '#2D2D2D', fontFamily: "'Playfair Display', serif" }}>
                       {event.tieu_de}
                     </h3>
-                    <p className="text-xs sm:text-sm line-clamp-2 text-justify" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
-                      {event.mo_ta || 'Không có mô tả'}
-                    </p>
+                    {event.mo_ta?.trim() && (
+                      <p className="text-xs sm:text-sm line-clamp-2 text-justify" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
+                        {event.mo_ta}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}

@@ -1,6 +1,6 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { NotificationProvider } from './contexts/NotificationContext'
 import PublicLayout from './components/PublicLayout'
 import HomePage from './pages/HomePage'
 import AboutUs from './pages/AboutUs'
@@ -11,35 +11,39 @@ import Contact from './pages/Contact'
 import HuongDanSuDung from './pages/HuongDanSuDung'
 import EventDetail from './pages/EventDetail'
 import SuKienListPage from './pages/SuKienListPage'
-import AdminLayout from './components/Admin/Layout'
-import AdminHomePage from './pages/Admin/HomePage'
-import Login from './pages/Admin/Login'
-import BenhNhanPage from './pages/Admin/BenhNhanPage'
-import BenhNhanDetailPage from './pages/Admin/BenhNhanDetailPage'
-import NhanVienPage from './pages/Admin/NhanVienPage'
-import LichKhamPage from './pages/Admin/LichKhamPage'
-import QuanLyDichVuPage from './pages/Admin/QuanLyDichVuPage'
-import QuanLySuKienPage from './pages/Admin/QuanLySuKienPage'
-import BaiVietPage from './pages/Admin/BaiVietPage'
-import TuyenDungPage from './pages/Admin/TuyenDungPage'
-import ThuocPage from './pages/Admin/ThuocPage'
-import CongViecPage from './pages/Admin/CongViecPage'
-import KPIPage from './pages/Admin/KPIPage'
-import PhongPage from './pages/Admin/PhongPage'
-import QuanLyPhongPage from './pages/Admin/QuanLyPhongPage'
-import QuanLyPhongPageNew from './pages/Admin/QuanLyPhongPageNew'
-import LichHenTuVanPage from './pages/Admin/LichHenTuVanPage'
-import KhaoSatChatLuongPage from './pages/Admin/KhaoSatChatLuongPage'
-import TaiKhoanPage from './pages/Admin/TaiKhoanPage'
-import CauHinhPage from './pages/Admin/CauHinhPage'
-import MediaCaNhanPage from './pages/Admin/MediaCaNhanPage'
-import DanhSachTrieuChungPage from './pages/Admin/DanhSachTrieuChungPage'
-import TrieuChungBenhNhanPage from './pages/Admin/TrieuChungBenhNhanPage'
-import TuThuocPage from './pages/Admin/TuThuocPage'
-import VatTuTieuHaoPage from './pages/Admin/VatTuTieuHaoPage'
+import ChinhSachBaoMat from './pages/ChinhSachBaoMat'
+import DieuKhoanSuDung from './pages/DieuKhoanSuDung'
 import duTruHoatDong30Cu from './assets/dự trù hoạt động 12 tháng cho 30 cụ.html?url'
 import soSanh30Cu50Cu from './assets/so sánh 30 cụ và 50 cụ.html?url'
 import './App.css'
+
+// Trang quản trị tải theo nhu cầu: khách xem site công khai không phải tải mã admin
+const AdminShell = lazy(() => import('./components/Admin/AdminShell'))
+const AdminHomePage = lazy(() => import('./pages/Admin/HomePage'))
+const Login = lazy(() => import('./pages/Admin/Login'))
+const BenhNhanPage = lazy(() => import('./pages/Admin/BenhNhanPage'))
+const BenhNhanDetailPage = lazy(() => import('./pages/Admin/BenhNhanDetailPage'))
+const NhanVienPage = lazy(() => import('./pages/Admin/NhanVienPage'))
+const LichKhamPage = lazy(() => import('./pages/Admin/LichKhamPage'))
+const QuanLyDichVuPage = lazy(() => import('./pages/Admin/QuanLyDichVuPage'))
+const QuanLySuKienPage = lazy(() => import('./pages/Admin/QuanLySuKienPage'))
+const BaiVietPage = lazy(() => import('./pages/Admin/BaiVietPage'))
+const TuyenDungPage = lazy(() => import('./pages/Admin/TuyenDungPage'))
+const ThuocPage = lazy(() => import('./pages/Admin/ThuocPage'))
+const CongViecPage = lazy(() => import('./pages/Admin/CongViecPage'))
+const KPIPage = lazy(() => import('./pages/Admin/KPIPage'))
+const PhongPage = lazy(() => import('./pages/Admin/PhongPage'))
+const QuanLyPhongPage = lazy(() => import('./pages/Admin/QuanLyPhongPage'))
+const QuanLyPhongPageNew = lazy(() => import('./pages/Admin/QuanLyPhongPageNew'))
+const LichHenTuVanPage = lazy(() => import('./pages/Admin/LichHenTuVanPage'))
+const KhaoSatChatLuongPage = lazy(() => import('./pages/Admin/KhaoSatChatLuongPage'))
+const TaiKhoanPage = lazy(() => import('./pages/Admin/TaiKhoanPage'))
+const CauHinhPage = lazy(() => import('./pages/Admin/CauHinhPage'))
+const MediaCaNhanPage = lazy(() => import('./pages/Admin/MediaCaNhanPage'))
+const DanhSachTrieuChungPage = lazy(() => import('./pages/Admin/DanhSachTrieuChungPage'))
+const TrieuChungBenhNhanPage = lazy(() => import('./pages/Admin/TrieuChungBenhNhanPage'))
+const TuThuocPage = lazy(() => import('./pages/Admin/TuThuocPage'))
+const VatTuTieuHaoPage = lazy(() => import('./pages/Admin/VatTuTieuHaoPage'))
 
 const HtmlAssetPage = ({ title, src }) => (
   <div className="h-screen w-screen bg-white">
@@ -65,11 +69,14 @@ function App() {
   return (
     <AuthProvider>
       <Router basename={routerBasename}>
+        <Suspense fallback={<div className="flex items-center justify-center h-screen">Đang tải...</div>}>
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
           <Route path="/ve-chung-toi" element={<PublicLayout><AboutUs /></PublicLayout>} />
           <Route path="/dich-vu" element={<PublicLayout><Service /></PublicLayout>} />
+          <Route path="/dich-vu/:loaiParam" element={<PublicLayout><Service /></PublicLayout>} />
+          <Route path="/dich-vu/:loaiParam/:dichVuParam" element={<PublicLayout><Service /></PublicLayout>} />
           <Route path="/tien-ich" element={<PublicLayout><Amenity /></PublicLayout>} />
           <Route path="/blog/bai-viet/:slug" element={<PublicLayout><Blog /></PublicLayout>} />
           <Route path="/blog/tuyen-dung/:jobSlug" element={<PublicLayout><Blog /></PublicLayout>} />
@@ -78,6 +85,8 @@ function App() {
           <Route path="/huong-dan-su-dung" element={<PublicLayout><HuongDanSuDung /></PublicLayout>} />
           <Route path="/su-kien" element={<PublicLayout><SuKienListPage /></PublicLayout>} />
           <Route path="/su-kien/:id" element={<PublicLayout><EventDetail /></PublicLayout>} />
+          <Route path="/chinh-sach-bao-mat" element={<PublicLayout><ChinhSachBaoMat /></PublicLayout>} />
+          <Route path="/dieu-khoan-su-dung" element={<PublicLayout><DieuKhoanSuDung /></PublicLayout>} />
           <Route
             path="/du-tru-hoat-dong-12-thang-cho-30-cu"
             element={<HtmlAssetPage title="Dự trù hoạt động 12 tháng cho 30 cụ" src={duTruHoatDong30Cu} />}
@@ -93,9 +102,7 @@ function App() {
             path="/admin"
             element={
               <ProtectedRoute>
-                <NotificationProvider>
-                  <AdminLayout />
-                </NotificationProvider>
+                <AdminShell />
               </ProtectedRoute>
             }
           >
@@ -123,6 +130,7 @@ function App() {
             <Route path="trieu-chung-benh-nhan" element={<TrieuChungBenhNhanPage />} />
           </Route>
         </Routes>
+        </Suspense>
       </Router>
     </AuthProvider>
   )

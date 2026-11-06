@@ -1,60 +1,58 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { baiVietDichVuAPI } from '../services/api';
 import { normalizeImageUrl } from '../utils/imageUtils';
+import { buildCategoryPath, buildServicePath, getServiceLabel } from '../utils/dichVuUtils';
 import BookingModal from './BookingModal';
 
-const ServiceDetail = ({ service, onBack }) => {
-  const [selectedService, setSelectedService] = useState(service);
+const pickDefaultPaymentType = (dv) => {
+  // Ưu tiên chọn mức giá có sẵn: ngày → tháng → quý → năm
+  if (dv?.gia_ngay) return 'ngay';
+  if (dv?.gia_thang) return 'thang';
+  if (dv?.gia_quy) return 'quy';
+  if (dv?.gia_nam) return 'nam';
+  return 'thang';
+};
+
+const ServiceDetail = ({ service, category }) => {
+  const selectedService = service;
   const [baiViet, setBaiViet] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedPaymentType, setSelectedPaymentType] = useState('thang');
+  const [selectedPaymentType, setSelectedPaymentType] = useState(() => pickDefaultPaymentType(service));
   const [showBookingModal, setShowBookingModal] = useState(false);
 
   useEffect(() => {
-    setSelectedService(service);
-    loadBaiViet(service.id);
-    // Ưu tiên chọn mức giá có sẵn: ngày → tháng → quý → năm
-    if (service.gia_ngay) setSelectedPaymentType('ngay');
-    else if (service.gia_thang) setSelectedPaymentType('thang');
-    else if (service.gia_quy) setSelectedPaymentType('quy');
-    else if (service.gia_nam) setSelectedPaymentType('nam');
-  }, [service]);
+    let cancelled = false;
+    setSelectedPaymentType(pickDefaultPaymentType(service));
+    setBaiViet(null);
 
-  const loadBaiViet = async (idDichVu) => {
-    try {
-      setLoading(true);
-      // Load bài viết dịch vụ có trạng thái xuất bản
-      const response = await baiVietDichVuAPI.getAll({
-        id_dich_vu: idDichVu,
-        trang_thai: 'xuat_ban',
-        limit: 1
-      });
-      
-      if (response && response.success && response.data && response.data.length > 0) {
-        const baiVietId = response.data[0].id;
-        const baiVietDetail = await baiVietDichVuAPI.getById(baiVietId);
-        if (baiVietDetail && baiVietDetail.success) {
-          setBaiViet(baiVietDetail.data);
+    const loadBaiViet = async () => {
+      try {
+        setLoading(true);
+        // Load bài viết dịch vụ có trạng thái xuất bản
+        const response = await baiVietDichVuAPI.getAll({
+          id_dich_vu: service.id,
+          trang_thai: 'xuat_ban',
+          limit: 1
+        });
+
+        if (response && response.success && response.data && response.data.length > 0) {
+          const baiVietDetail = await baiVietDichVuAPI.getById(response.data[0].id);
+          if (!cancelled && baiVietDetail && baiVietDetail.success) {
+            setBaiViet(baiVietDetail.data);
+          }
         }
-      } else {
-        setBaiViet(null);
+      } catch (error) {
+        console.error('Error loading bai viet:', error);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-    } catch (error) {
-      console.error('Error loading bai viet:', error);
-      setBaiViet(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleServiceClick = (dichVu) => {
-    setSelectedService(dichVu);
-    loadBaiViet(dichVu.id);
-    if (dichVu.gia_ngay) setSelectedPaymentType('ngay');
-    else if (dichVu.gia_thang) setSelectedPaymentType('thang');
-    else if (dichVu.gia_quy) setSelectedPaymentType('quy');
-    else if (dichVu.gia_nam) setSelectedPaymentType('nam');
-  };
+    };
+    loadBaiViet();
+    return () => {
+      cancelled = true;
+    };
+  }, [service]);
 
   const formatPrice = (price) => {
     if (!price) return 'Liên hệ';
@@ -96,14 +94,16 @@ const ServiceDetail = ({ service, onBack }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <div className="mb-6">
-          <nav className="text-sm text-gray-600">
-            <span className="hover:text-primary cursor-pointer" onClick={onBack}>
+          <nav className="text-sm text-gray-600" aria-label="Breadcrumb">
+            <Link to="/dich-vu" className="text-gray-600 hover:text-primary" style={{ textDecoration: 'none' }}>
               Dịch vụ
-            </span>
-            {selectedService.loai_dich_vu?.ten && (
+            </Link>
+            {category?.ten && (
               <>
                 <span className="mx-2">/</span>
-                <span className="text-gray-800">{selectedService.loai_dich_vu.ten}</span>
+                <Link to={buildCategoryPath(category)} className="text-gray-800 hover:text-primary" style={{ textDecoration: 'none' }}>
+                  {category.ten}
+                </Link>
               </>
             )}
             {selectedService.ten_dich_vu && (
@@ -118,34 +118,38 @@ const ServiceDetail = ({ service, onBack }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Left Column */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Service Offerings - Danh sách dịch vụ cùng loại */}
-            <div>
-              <h3 className="text-xl md:text-2xl font-raleway-bold text-gray-800 mb-4">
-                Service Offerings
-              </h3>
-              <ul className="space-y-2">
-                {service.dichVusOfType && service.dichVusOfType.map((dichVu) => (
-                  <li
-                    key={dichVu.id}
-                    className={`text-sm md:text-base font-raleway-regular p-2 rounded cursor-pointer transition-colors ${
-                      selectedService.id === dichVu.id
-                        ? 'bg-[#FFF9FB] text-gray-800 font-semibold'
-                        : 'text-gray-500 hover:bg-gray-50'
-                    }`}
-                    onClick={() => handleServiceClick(dichVu)}
-                  >
-                    {dichVu.ten_dich_vu}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Các gói cùng loại */}
+            {category?.dichVus?.length > 0 && (
+              <div>
+                <h2 className="text-xl md:text-2xl font-raleway-bold text-gray-800 mb-4">
+                  Các gói trong “{category.ten}”
+                </h2>
+                <ul className="space-y-2">
+                  {category.dichVus.map((dichVu) => (
+                    <li key={dichVu.id}>
+                      <Link
+                        to={buildServicePath(category, dichVu)}
+                        aria-current={selectedService.id === dichVu.id ? 'page' : undefined}
+                        className={`block text-sm md:text-base font-raleway-regular p-2 rounded transition-colors ${
+                          selectedService.id === dichVu.id
+                            ? 'bg-[#FFF9FB] text-gray-800 font-semibold'
+                            : 'text-gray-500 hover:bg-gray-50'
+                        }`}
+                      >
+                        {dichVu.ten_dich_vu}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Pricing Box */}
             <div className="border-2 border-primary rounded-lg p-6 space-y-4">
-              {/* BẢNG GIÁ Button */}
-              <button className="w-full py-2 bg-gray-200 text-gray-800 font-raleway-bold text-sm rounded hover:bg-gray-300 transition-colors">
+              {/* Tiêu đề bảng giá */}
+              <h2 className="w-full py-2 bg-gray-100 text-gray-800 font-raleway-bold text-sm rounded text-center tracking-wider">
                 BẢNG GIÁ
-              </button>
+              </h2>
 
               {/* Price */}
               <div className="text-center">
@@ -249,12 +253,11 @@ const ServiceDetail = ({ service, onBack }) => {
                 onClick={() => setShowBookingModal(true)}
                 className="w-full py-3 bg-gray-900 text-white font-raleway-bold text-sm md:text-base rounded hover:bg-gray-800 transition-colors"
               >
-                ĐẶT LỊCH NGAY VỚI DỊCH VỤ NÀY
+                ĐẶT LỊCH THAM QUAN – TƯ VẤN GÓI NÀY
               </button>
 
-              {/* No credit card required */}
               <p className="text-xs text-gray-500 text-center">
-                No credit card required
+                Đặt lịch tham quan miễn phí – không cần thanh toán trước.
               </p>
             </div>
           </div>
@@ -324,7 +327,7 @@ const ServiceDetail = ({ service, onBack }) => {
       <BookingModal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}
-        serviceName={selectedService?.ten_dich_vu || ''}
+        serviceName={getServiceLabel(selectedService, category?.ten)}
       />
     </section>
   );

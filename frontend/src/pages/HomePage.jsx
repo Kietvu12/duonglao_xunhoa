@@ -85,8 +85,8 @@ const HomePage = () => {
   return (
     <div className="min-h-screen font-raleway">
       <SeoHead
-        title="Trang chủ"
-        description="Trung tâm trường thọ Xuân Hoa – chăm sóc người cao tuổi chuyên nghiệp, môi trường sống an lành, đội ngũ y tế tận tâm và tiện ích hiện đại trong khuôn viên xanh."
+        title="Dưỡng lão & chăm sóc người cao tuổi tại Hạ Long"
+        description="Trung tâm trường thọ Xuân Hoa tại Đồi Thủy Sản, Hạ Long: chăm sóc người cao tuổi 24/7, gói chăm sóc hoàn toàn, bán tự lập, tự lập ngắn hạn và dài hạn. Đặt lịch tham quan miễn phí."
         canonicalPath="/"
       />
       {/* Session1 không cần animation vì đã có typing effect */}

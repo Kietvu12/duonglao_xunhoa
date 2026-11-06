@@ -1,5 +1,4 @@
 import { cloneElement } from "react";
-import { Link } from "react-router-dom";
 
 const AboutUsSession3 = () => {
   const coreValues = [
@@ -113,13 +112,14 @@ const AboutUsSession3 = () => {
               <p className="text-white/90 mb-8 leading-relaxed text-justify" style={{ textAlign: "justify" }}>
                 Đến thăm Xuân Hoa để cảm nhận trực tiếp những giá trị chúng tôi mang lại.
               </p>
-              <Link
-                to="/dich-vu"
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("openBookingModal"))}
                 className="inline-flex px-8 py-3 bg-white rounded-full font-semibold text-sm tracking-wide hover:shadow-2xl transition-all"
-                style={{ color: "#8B0A3D", textDecoration: "none" }}
+                style={{ color: "#8B0A3D" }}
               >
                 ĐẶT LỊCH THĂM
-              </Link>
+              </button>
             </div>
           </div>
         </div>

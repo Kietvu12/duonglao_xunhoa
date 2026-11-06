@@ -1,4 +1,5 @@
 import { homeImages } from '../assets/homeImages';
+import { CONTACT } from '../config/siteInfo';
 
 const Session6 = () => {
   return (
@@ -45,7 +46,12 @@ const Session6 = () => {
               <span className="font-serif font-light text-3xl sm:text-4xl text-white" style={{ fontFamily: "'Playfair Display', serif" }}>1</span>
             </div>
             <h3 className="font-serif text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>Liên hệ</h3>
-            <p className="text-sm sm:text-base text-white/80">Hotline VIP 24/7</p>
+            <p className="text-sm sm:text-base text-white/80">
+              Hotline 24/7:{' '}
+              <a href={CONTACT.hotline.tel} className="font-semibold text-white underline">
+                {CONTACT.hotline.display}
+              </a>
+            </p>
           </div>
           <div className="hidden sm:flex items-center justify-center self-start mt-6" aria-hidden="true">
             <svg className="w-12 h-12 text-white/85" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -81,7 +87,7 @@ const Session6 = () => {
           className="px-8 sm:px-12 lg:px-16 py-3 sm:py-4 lg:py-5 bg-white font-semibold text-xs sm:text-sm tracking-wider rounded-full hover:shadow-2xl transition-all"
           style={{ color: '#8B0A3D' }}
         >
-          ĐẶT LỊCH NGAY
+          ĐẶT LỊCH THAM QUAN
         </button>
       </div>
     </section>

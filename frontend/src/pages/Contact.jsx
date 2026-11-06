@@ -1,18 +1,16 @@
-import { Link } from 'react-router-dom';
 import bgContact from '../assets/bg_contact.jpg';
 import SeoHead from '../components/SeoHead';
+import { CONTACT, MAPS } from '../config/siteInfo';
 
 const Contact = () => {
-  const googleMapsDirection = 'https://www.google.com/maps/dir/?api=1&destination=123+ABC,+Quan+XYZ,+Ho+Chi+Minh';
-  const googleMapsEmbed =
-    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.133056458657!2d106.699!3d10.801!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317529292f000001%3A0x0000000000000000!2s123%20ABC%2C%20Qu%E1%BA%ADn%20XYZ%2C%20TP.HCM!5e0!3m2!1svi!2s!4v0000000000000!5m2!1svi!2s';
-
   const contacts = [
     {
-      title: 'Hotline',
-      value: '0123 456 789',
-      description: 'Gọi ngay để được tư vấn trực tiếp.',
-      href: 'tel:0123456789',
+      title: 'Hotline / Zalo',
+      value: CONTACT.hotline.display,
+      description: 'Gọi hoặc nhắn Zalo để được tư vấn trực tiếp.',
+      href: CONTACT.hotline.tel,
+      linkLabel: 'Gọi ngay',
+      highlight: true,
       icon: (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -26,9 +24,10 @@ const Contact = () => {
     },
     {
       title: 'Email',
-      value: 'info@xuanhoa.com',
+      value: CONTACT.email.display,
       description: 'Gửi cho chúng tôi yêu cầu hoặc câu hỏi của bạn.',
-      href: 'mailto:info@xuanhoa.com',
+      href: CONTACT.email.href,
+      linkLabel: 'Gửi email',
       icon: (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -42,9 +41,11 @@ const Contact = () => {
     },
     {
       title: 'Địa chỉ',
-      value: '123 Đường ABC, Quận XYZ, TP.HCM',
-      description: 'Đến trực tiếp hoặc đặt lịch tham quan.',
-      href: googleMapsDirection,
+      value: CONTACT.address.display,
+      description: 'Đến trực tiếp hoặc đặt lịch tham quan trước.',
+      href: MAPS.directionsUrl,
+      linkLabel: 'Chỉ đường',
+      external: true,
       icon: (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -64,8 +65,8 @@ const Contact = () => {
     },
     {
       title: 'Giờ làm việc',
-      value: '08:00 - 18:00 (T2 - T7)',
-      description: 'Hãy đặt lịch trước để được phục vụ tốt nhất.',
+      value: CONTACT.workingHours,
+      description: 'Tham quan trung tâm theo lịch hẹn – vui lòng đặt lịch trước.',
       href: null,
       icon: (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -89,7 +90,7 @@ const Contact = () => {
     >
       <SeoHead
         title="Liên hệ"
-        description="Liên hệ Trung tâm trường thọ Xuân Hoa: hotline, địa chỉ, giờ làm việc và đặt lịch tư vấn / tham quan. Đội ngũ luôn sẵn sàng hỗ trợ gia đình bạn."
+        description={`Liên hệ Trung tâm trường thọ Xuân Hoa tại Hạ Long: hotline/Zalo ${CONTACT.hotline.display}, email ${CONTACT.email.display}, địa chỉ ${CONTACT.address.display}. Tư vấn 24/7, đặt lịch tham quan.`}
         canonicalPath="/lien-he"
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
@@ -114,7 +115,7 @@ const Contact = () => {
               <div className="flex items-start gap-3">
                 <span
                   className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                    item.title === 'Hotline' ? 'bg-primary text-white shadow-md' : 'bg-primary/10 text-primary shadow-inner'
+                    item.highlight ? 'bg-primary text-white shadow-md' : 'bg-primary/10 text-primary shadow-inner'
                   }`}
                 >
                   {item.icon}
@@ -123,17 +124,16 @@ const Contact = () => {
                   <p className="text-xs uppercase tracking-[0.06em] text-gray-500 font-raleway-semibold">
                     {item.title}
                   </p>
-                  <p className="text-lg font-raleway-bold text-gray-900">{item.value}</p>
+                  <p className="text-base xl:text-lg font-raleway-bold text-gray-900 break-words [overflow-wrap:anywhere]">{item.value}</p>
                   <p className="text-sm text-gray-600 font-raleway-regular">{item.description}</p>
                   {item.href && (
                     <div className="mt-auto pt-2">
                       <a
                         href={item.href}
-                        target="_blank"
-                        rel="noreferrer"
+                        {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                         className="inline-flex items-center gap-1 text-primary font-raleway-semibold text-sm hover:underline"
                       >
-                        Mở {item.title.toLowerCase()}
+                        {item.linkLabel}
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5h10M19 5v10M19 5l-9 9" />
                         </svg>
@@ -156,32 +156,33 @@ const Contact = () => {
             </p>
             <div className="space-y-2 text-gray-700 font-raleway-regular">
               <p className="font-raleway-semibold">Địa chỉ</p>
-              <p>123 Đường ABC, Quận XYZ, TP.HCM</p>
+              <p>{CONTACT.address.display}</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 mt-auto">
               <a
-                href={googleMapsDirection}
+                href={MAPS.directionsUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="flex-1 text-center px-5 py-3 bg-primary text-white rounded-tr-lg rounded-bl-lg rounded-tl-none rounded-br-none font-raleway-bold text-sm shadow-md hover:bg-primary-light transition-colors duration-200"
               >
                 Mở Google Maps
               </a>
-              <Link
-                to="/"
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent('openBookingModal'))}
                 className="px-5 py-3 border border-gray-200 rounded-xl font-raleway-semibold text-gray-700 hover:border-primary/50 hover:text-primary transition-colors duration-200 text-center"
               >
-                Về trang chủ
-              </Link>
+                Đặt lịch tham quan
+              </button>
             </div>
           </div>
 
           <div className="relative w-full h-[320px] md:h-[420px] bg-white rounded-2xl border border-primary/10 shadow-sm overflow-hidden">
             <iframe
-              title="Bản đồ XUÂN HOA"
-              src={googleMapsEmbed}
+              title={`Bản đồ Trung tâm trường thọ Xuân Hoa – ${CONTACT.address.display}`}
+              src={MAPS.embedUrl}
               className="absolute inset-0 w-full h-full"
-              allowFullScreen=""
+              allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             ></iframe>

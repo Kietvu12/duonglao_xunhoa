@@ -10,6 +10,7 @@ import {
   formatDateVN, formatDateTimeVN, formatDateForInput, formatDateTimeForInput,
   getTodayVN, getVNNow, toISOStringVN, toVNDate
 } from '../../utils/dateUtils';
+import { formatThoiDiemUong, createEmptyThuoc, thuocToFormItem } from '../../utils/donThuocUtils';
 import ImportExcelModal from '../../components/Admin/ImportExcelModal';
 import {
   buildCongViecBnFileFromRows,
@@ -215,7 +216,7 @@ export default function BenhNhanDetailPage() {
   const [thuocForm, setThuocForm] = useState({
     mo_ta: '',
     ngay_ke: getTodayVN(),
-    thuoc: [{ ten_thuoc: '', lieu_luong: '', thoi_diem_uong: '', ghi_chu: '' }],
+    thuoc: [createEmptyThuoc()],
   });
   const [congViecForm, setCongViecForm] = useState({
     ten_cong_viec: '',
@@ -1415,14 +1416,23 @@ export default function BenhNhanDetailPage() {
   // Thuoc handlers
   const handleThuocSubmit = async (e) => {
     e.preventDefault();
-    if (benhNhan?.tinh_trang_hien_tai === 'Đã xuất viện') {
+    if (!editingThuoc && benhNhan?.tinh_trang_hien_tai === 'Đã xuất viện') {
       alert('Bệnh nhân đã xuất viện, không thể thêm dữ liệu mới');
       return;
     }
     try {
-      const data = { ...thuocForm, id_benh_nhan: id };
-      await thuocAPI.create(data);
-      alert('Tạo đơn thuốc thành công');
+      if (editingThuoc) {
+        await thuocAPI.update(editingThuoc.id, {
+          mo_ta: thuocForm.mo_ta,
+          ngay_ke: thuocForm.ngay_ke,
+          thuoc: thuocForm.thuoc,
+        });
+        alert('Cập nhật đơn thuốc thành công');
+      } else {
+        const data = { ...thuocForm, id_benh_nhan: id };
+        await thuocAPI.create(data);
+        alert('Tạo đơn thuốc thành công');
+      }
       setShowThuocModal(false);
       resetThuocForm();
       loadDonThuocs();
@@ -1434,7 +1444,7 @@ export default function BenhNhanDetailPage() {
   const handleAddThuoc = () => {
     setThuocForm({
       ...thuocForm,
-      thuoc: [...thuocForm.thuoc, { ten_thuoc: '', lieu_luong: '', thoi_diem_uong: '', ghi_chu: '' }],
+      thuoc: [...thuocForm.thuoc, createEmptyThuoc()],
     });
   };
 
@@ -1444,16 +1454,26 @@ export default function BenhNhanDetailPage() {
   };
 
   const handleThuocChange = (index, field, value) => {
-    const newThuoc = [...thuocForm.thuoc];
-    newThuoc[index][field] = value;
+    const newThuoc = thuocForm.thuoc.map((t, i) => (i === index ? { ...t, [field]: value } : t));
     setThuocForm({ ...thuocForm, thuoc: newThuoc });
+  };
+
+  const handleEditDonThuoc = (don) => {
+    setThuocForm({
+      mo_ta: don.mo_ta || '',
+      // API trả ngay_ke dạng YYYY-MM-DD
+      ngay_ke: don.ngay_ke ? String(don.ngay_ke).slice(0, 10) : getTodayVN(),
+      thuoc: don.thuoc && don.thuoc.length > 0 ? don.thuoc.map(thuocToFormItem) : [createEmptyThuoc()],
+    });
+    setEditingThuoc(don);
+    setShowThuocModal(true);
   };
 
   const resetThuocForm = () => {
     setThuocForm({
       mo_ta: '',
       ngay_ke: getTodayVN(),
-      thuoc: [{ ten_thuoc: '', lieu_luong: '', thoi_diem_uong: '', ghi_chu: '' }],
+      thuoc: [createEmptyThuoc()],
     });
     setEditingThuoc(null);
   };
@@ -3514,19 +3534,31 @@ export default function BenhNhanDetailPage() {
                           <p className="font-bold text-gray-900">Ngày kê: {formatDateVN(don.ngay_ke)}</p>
                           {don.mo_ta && <p className="text-sm text-gray-600 mt-1">{don.mo_ta}</p>}
                         </div>
-                        <button
-                          onClick={() => handleDeleteDonThuoc(don.id)}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-semibold"
-                        >
-                          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>delete</span>
-                          <span>Xóa</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEditDonThuoc(don)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-sm font-semibold"
+                          >
+                            <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>edit</span>
+                            <span>Sửa</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteDonThuoc(don.id)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-semibold"
+                          >
+                            <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>delete</span>
+                            <span>Xóa đơn</span>
+                          </button>
+                        </div>
                       </div>
                       {don.thuoc && don.thuoc.length > 0 && (
                         <div className="mt-4 space-y-2">
                           {don.thuoc.map((thuoc, idx) => (
                             <div key={idx} className="bg-gray-50 p-3 rounded-lg text-sm border border-gray-200">
-                              <span className="font-semibold text-gray-900">{thuoc.ten_thuoc}</span> - <span className="text-gray-700">{thuoc.lieu_luong}</span> - <span className="text-gray-700">{thuoc.thoi_diem_uong}</span>
+                              <span className="font-semibold text-gray-900">{thuoc.ten_thuoc}</span>
+                              {thuoc.lieu_luong && <> - <span className="text-gray-700">{thuoc.lieu_luong}</span></>}
+                              {thuoc.thoi_diem_uong && <> - <span className="text-gray-700">{formatThoiDiemUong(thuoc.thoi_diem_uong)}</span></>}
+                              {thuoc.thoi_gian_uong && <> - <span className="text-gray-700">{formatDateTimeVN(thuoc.thoi_gian_uong)}</span></>}
                               {thuoc.ghi_chu && <span className="text-gray-600 ml-2">({thuoc.ghi_chu})</span>}
                             </div>
                           ))}
@@ -5104,7 +5136,7 @@ export default function BenhNhanDetailPage() {
       {showThuocModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">Tạo đơn thuốc mới</h2>
+            <h2 className="text-2xl font-bold mb-4">{editingThuoc ? 'Sửa đơn thuốc' : 'Tạo đơn thuốc mới'}</h2>
             <form onSubmit={handleThuocSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -5185,6 +5217,15 @@ export default function BenhNhanDetailPage() {
                           />
                         </div>
                         <div>
+                          <label className="block text-xs text-gray-600 mb-1">Giờ uống</label>
+                          <input
+                            type="datetime-local"
+                            value={thuoc.thoi_gian_uong || ''}
+                            onChange={(e) => handleThuocChange(index, 'thoi_gian_uong', e.target.value)}
+                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          />
+                        </div>
+                        <div className="col-span-2">
                           <label className="block text-xs text-gray-600 mb-1">Ghi chú</label>
                           <input
                             type="text"
@@ -5213,7 +5254,7 @@ export default function BenhNhanDetailPage() {
                   type="submit"
                   className="flex items-center gap-2 px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#4A90E2]/90 transition-colors text-sm font-semibold"
                 >
-                  Tạo
+                  {editingThuoc ? 'Cập nhật' : 'Tạo'}
                 </button>
               </div>
             </form>

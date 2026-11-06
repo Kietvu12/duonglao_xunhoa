@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import zaloIcon from '../assets/zalo.svg';
 import messengerIcon from '../assets/messenger.svg';
+import { CONTACT, SOCIAL } from '../config/siteInfo';
 
-const HOTLINES = ['0961799188', '0961799588'];
-const MESSENGER_LINK = 'https://m.me/trungtamtruongthoxuanhoahalong';
-const ZALO_LINK = 'https://zalo.me/84961799588';
+const MESSENGER_LINK = SOCIAL.messenger;
+const ZALO_LINK = SOCIAL.zalo;
 
 const ContactFloatingButtons = () => {
   const [hovered, setHovered] = useState(null);
-  const [phonePopupOpen, setPhonePopupOpen] = useState(false);
 
   const buttonBase =
     'group relative w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center p-0 border-0 overflow-hidden';
@@ -17,10 +16,9 @@ const ContactFloatingButtons = () => {
 
   return (
     <div className="fixed bottom-6 right-4 md:bottom-8 md:right-6 z-50 flex flex-col gap-3">
-      {/* Điện thoại - Mở popup 2 số hotline */}
-      <button
-        type="button"
-        onClick={() => setPhonePopupOpen(true)}
+      {/* Điện thoại - gọi thẳng hotline chính thức */}
+      <a
+        href={CONTACT.hotline.tel}
         className={`${buttonBase} text-white`}
         style={{
           background:
@@ -35,8 +33,8 @@ const ContactFloatingButtons = () => {
         }}
         onMouseEnter={() => setHovered('phone')}
         onMouseLeave={() => setHovered(null)}
-        aria-label="Hotline"
-        title="Hotline"
+        aria-label={`Gọi hotline ${CONTACT.hotline.display}`}
+        title={`Hotline ${CONTACT.hotline.display}`}
       >
         <svg
           className="w-6 h-6 md:w-7 md:h-7"
@@ -51,66 +49,7 @@ const ContactFloatingButtons = () => {
             d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
           />
         </svg>
-      </button>
-
-      {/* Popup 2 số hotline */}
-      {phonePopupOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-[60] bg-black/40"
-            onClick={() => setPhonePopupOpen(false)}
-            aria-hidden="true"
-          />
-          <div
-            className="fixed right-4 bottom-24 md:right-6 md:bottom-32 z-[61] w-64 rounded-2xl bg-white shadow-xl border border-gray-100 overflow-hidden"
-            style={{ fontFamily: "'Cormorant Garamond', 'Times New Roman', serif" }}
-          >
-            <div
-              className="px-4 py-3 border-b border-gray-100"
-              style={{
-                background: 'linear-gradient(135deg, #8B0A3D 0%, #A90046 100%)',
-                color: 'white',
-                fontWeight: '700',
-                fontSize: '1rem',
-              }}
-            >
-              Chọn số hotline
-            </div>
-            <div className="p-3 space-y-2">
-              {HOTLINES.map((number) => (
-                <a
-                  key={number}
-                  href={`tel:${number}`}
-                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left transition-colors hover:bg-rose-50"
-                  style={{ color: '#2D2D2D', fontWeight: '600' }}
-                >
-                  <span
-                    className="flex items-center justify-center w-9 h-9 rounded-full flex-shrink-0 text-white"
-                    style={{
-                      background: 'linear-gradient(135deg, #8B0A3D 0%, #A90046 100%)',
-                    }}
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                  </span>
-                  <span>{number}</span>
-                </a>
-              ))}
-            </div>
-            <div className="p-2 border-t border-gray-100">
-              <button
-                type="button"
-                onClick={() => setPhonePopupOpen(false)}
-                className="w-full py-2 text-sm font-semibold rounded-lg transition-colors hover:bg-gray-100"
-                style={{ color: '#6b7280' }}
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+      </a>
 
       {/* Zalo */}
       <a
@@ -131,10 +70,10 @@ const ContactFloatingButtons = () => {
         }}
         onMouseEnter={() => setHovered('zalo')}
         onMouseLeave={() => setHovered(null)}
-        aria-label="Nhắn tin qua Zalo"
-        title="Zalo"
+        aria-label={`Nhắn tin Zalo ${CONTACT.hotline.display}`}
+        title={`Zalo ${CONTACT.hotline.display}`}
       >
-        <img src={zaloIcon} alt="Zalo" className={iconSize} />
+        <img src={zaloIcon} alt="" aria-hidden="true" className={iconSize} />
       </a>
 
       {/* Messenger */}
@@ -159,7 +98,7 @@ const ContactFloatingButtons = () => {
         aria-label="Nhắn tin qua Messenger"
         title="Messenger"
       >
-        <img src={messengerIcon} alt="Messenger" className={iconSize} />
+        <img src={messengerIcon} alt="" aria-hidden="true" className={iconSize} />
       </a>
     </div>
   );

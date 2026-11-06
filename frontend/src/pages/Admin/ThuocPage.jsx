@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { thuocAPI, benhNhanAPI } from '../../services/api';
+import { formatDateVN, formatDateTimeVN, getTodayVN } from '../../utils/dateUtils';
+import { formatThoiDiemUong, createEmptyThuoc, thuocToFormItem } from '../../utils/donThuocUtils';
 
 export default function ThuocPage() {
   const [donThuocs, setDonThuocs] = useState([]);
@@ -12,8 +14,8 @@ export default function ThuocPage() {
   const [formData, setFormData] = useState({
     id_benh_nhan: '',
     mo_ta: '',
-    ngay_ke: new Date().toISOString().split('T')[0],
-    thuoc: [{ ten_thuoc: '', lieu_luong: '', thoi_diem_uong: '', ghi_chu: '' }],
+    ngay_ke: getTodayVN(),
+    thuoc: [createEmptyThuoc()],
   });
   const [benhNhanSearch, setBenhNhanSearch] = useState('');
   const [showBenhNhanDropdown, setShowBenhNhanDropdown] = useState(false);
@@ -74,7 +76,7 @@ export default function ThuocPage() {
   const handleAddThuoc = () => {
     setFormData({
       ...formData,
-      thuoc: [...formData.thuoc, { ten_thuoc: '', lieu_luong: '', thoi_diem_uong: '', ghi_chu: '' }],
+      thuoc: [...formData.thuoc, createEmptyThuoc()],
     });
   };
 
@@ -84,8 +86,7 @@ export default function ThuocPage() {
   };
 
   const handleThuocChange = (index, field, value) => {
-    const newThuoc = [...formData.thuoc];
-    newThuoc[index][field] = value;
+    const newThuoc = formData.thuoc.map((t, i) => (i === index ? { ...t, [field]: value } : t));
     setFormData({ ...formData, thuoc: newThuoc });
   };
 
@@ -94,6 +95,10 @@ export default function ThuocPage() {
     try {
       await thuocAPI.delete(id);
       alert('Xóa đơn thuốc thành công');
+      if (viewingDon?.id === id) {
+        setShowViewModal(false);
+        setViewingDon(null);
+      }
       loadDonThuocs();
     } catch (error) {
       alert('Lỗi: ' + error.message);
@@ -106,10 +111,8 @@ export default function ThuocPage() {
   };
 
   const handleEdit = (don) => {
-    // Format ngày kê
-    const ngayKe = don.ngay_ke 
-      ? new Date(don.ngay_ke).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0];
+    // API trả ngay_ke dạng YYYY-MM-DD; không dùng toISOString() vì sẽ lệch 1 ngày theo múi giờ
+    const ngayKe = don.ngay_ke ? String(don.ngay_ke).slice(0, 10) : getTodayVN();
     
     // Tìm tên bệnh nhân từ id
     const benhNhan = benhNhans.find(bn => bn.id === don.id_benh_nhan);
@@ -119,16 +122,12 @@ export default function ThuocPage() {
       mo_ta: don.mo_ta || '',
       ngay_ke: ngayKe,
       thuoc: don.thuoc && don.thuoc.length > 0 
-        ? don.thuoc.map(t => ({
-            ten_thuoc: t.ten_thuoc || '',
-            lieu_luong: t.lieu_luong || '',
-            thoi_diem_uong: t.thoi_diem_uong || '',
-            ghi_chu: t.ghi_chu || ''
-          }))
-        : [{ ten_thuoc: '', lieu_luong: '', thoi_diem_uong: '', ghi_chu: '' }]
+        ? don.thuoc.map(thuocToFormItem)
+        : [createEmptyThuoc()]
     });
-    setBenhNhanSearch(benhNhan?.ho_ten || '');
+    setBenhNhanSearch(benhNhan?.ho_ten || don.ten_benh_nhan || '');
     setEditing(don);
+    setShowViewModal(false);
     setShowModal(true);
   };
 
@@ -136,8 +135,8 @@ export default function ThuocPage() {
     setFormData({
       id_benh_nhan: '',
       mo_ta: '',
-      ngay_ke: new Date().toISOString().split('T')[0],
-      thuoc: [{ ten_thuoc: '', lieu_luong: '', thoi_diem_uong: '', ghi_chu: '' }],
+      ngay_ke: getTodayVN(),
+      thuoc: [createEmptyThuoc()],
     });
     setBenhNhanSearch('');
     setShowBenhNhanDropdown(false);
@@ -190,7 +189,7 @@ export default function ThuocPage() {
                   <tr key={don.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-5 font-semibold text-gray-900">{don.ten_benh_nhan || '-'}</td>
                     <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-900">
-                      {don.ngay_ke ? new Date(don.ngay_ke).toLocaleDateString('vi-VN') : '-'}
+                      {don.ngay_ke ? formatDateVN(don.ngay_ke) : '-'}
                     </td>
                     <td className="px-6 py-5 text-sm text-gray-900">
                       <span className="inline-flex items-center gap-1 px-3 py-1 bg-[#4A90E2]/10 text-[#4A90E2] rounded-full text-xs font-semibold">
@@ -407,6 +406,15 @@ export default function ThuocPage() {
                           />
                         </div>
                         <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-2">Giờ uống</label>
+                          <input
+                            type="datetime-local"
+                            value={thuoc.thoi_gian_uong || ''}
+                            onChange={(e) => handleThuocChange(index, 'thoi_gian_uong', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-0 focus:ring-2 focus:ring-[#4A90E2]/50 text-sm text-gray-800"
+                          />
+                        </div>
+                        <div className="col-span-2">
                           <label className="block text-xs font-semibold text-gray-700 mb-2">Ghi chú</label>
                           <input
                             type="text"
@@ -463,6 +471,13 @@ export default function ThuocPage() {
                   <span>Sửa</span>
                 </button>
                 <button
+                  onClick={() => handleDelete(viewingDon.id)}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold"
+                >
+                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>delete</span>
+                  <span>Xóa</span>
+                </button>
+                <button
                   onClick={() => {
                     setShowViewModal(false);
                     setViewingDon(null);
@@ -491,13 +506,7 @@ export default function ThuocPage() {
                     Ngày kê
                   </label>
                   <p className="text-base text-gray-900">
-                    {viewingDon.ngay_ke 
-                      ? new Date(viewingDon.ngay_ke).toLocaleDateString('vi-VN', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })
-                      : '-'}
+                    {viewingDon.ngay_ke ? formatDateVN(viewingDon.ngay_ke) : '-'}
                   </p>
                 </div>
               </div>
@@ -540,7 +549,11 @@ export default function ThuocPage() {
                           </div>
                           <div>
                             <label className="block text-xs font-semibold text-gray-500 mb-1">Thời điểm uống</label>
-                            <p className="text-sm text-gray-900">{thuoc.thoi_diem_uong || '-'}</p>
+                            <p className="text-sm text-gray-900">{formatThoiDiemUong(thuoc.thoi_diem_uong) || '-'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-500 mb-1">Giờ uống</label>
+                            <p className="text-sm text-gray-900">{thuoc.thoi_gian_uong ? formatDateTimeVN(thuoc.thoi_gian_uong) : '-'}</p>
                           </div>
                           <div>
                             <label className="block text-xs font-semibold text-gray-500 mb-1">Ghi chú</label>

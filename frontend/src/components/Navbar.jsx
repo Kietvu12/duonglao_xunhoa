@@ -2,6 +2,24 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logoImage from '../assets/logo.png';
 import { dichVuAPI, lichHenTuVanAPI } from '../services/api';
+import { CONTACT } from '../config/siteInfo';
+import {
+  UNSURE_SERVICE_LABEL,
+  EMAIL_REGEX,
+  PHONE_REGEX,
+  getServiceLabel,
+  getTomorrowLocalDate,
+  joinServiceInterest,
+} from '../utils/dichVuUtils';
+
+const EMPTY_BOOKING_FORM = {
+  ho_ten: '',
+  so_dien_thoai: '',
+  email: '',
+  ngay_mong_muon: '',
+  gio_mong_muon: '',
+  ghi_chu: ''
+};
 
 const Navbar = () => {
   const location = useLocation();
@@ -9,16 +27,11 @@ const Navbar = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [dichVus, setDichVus] = useState([]);
+  const [dichVuLoading, setDichVuLoading] = useState(false);
+  const [dichVuLoadError, setDichVuLoadError] = useState(false);
+  // Danh sách nhãn gói đã chọn (nhãn đã kèm tên loại nên không trùng nhau)
   const [selectedServices, setSelectedServices] = useState([]);
-  const [formData, setFormData] = useState({
-    ho_ten: '',
-    so_dien_thoai: '',
-    email: '',
-    loai_dich_vu_quan_tam: '',
-    ngay_mong_muon: '',
-    gio_mong_muon: '',
-    ghi_chu: ''
-  });
+  const [formData, setFormData] = useState(EMPTY_BOOKING_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -32,30 +45,30 @@ const Navbar = () => {
   // Load services when booking modal opens
   useEffect(() => {
     const loadServices = async () => {
-      if (isBookingModalOpen) {
+      if (isBookingModalOpen && dichVus.length === 0) {
+        setDichVuLoading(true);
+        setDichVuLoadError(false);
         try {
           const response = await dichVuAPI.getAll({ limit: -1 });
-          const services = response.data || [];
-          console.log('Loaded services:', services.length, services);
-          setDichVus(services);
+          setDichVus(response.data || []);
         } catch (error) {
           console.error('Error loading services:', error);
+          setDichVuLoadError(true);
+        } finally {
+          setDichVuLoading(false);
         }
       }
     };
     loadServices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isBookingModalOpen]);
 
   // Set default date and time when modal opens
   useEffect(() => {
     if (isBookingModalOpen) {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowDate = tomorrow.toISOString().split('T')[0];
-      
       setFormData(prev => ({
         ...prev,
-        ngay_mong_muon: prev.ngay_mong_muon || tomorrowDate,
+        ngay_mong_muon: prev.ngay_mong_muon || getTomorrowLocalDate(),
         gio_mong_muon: prev.gio_mong_muon || '09:00'
       }));
     }
@@ -84,11 +97,6 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   };
 
-  const openContactModal = () => {
-    setIsMobileMenuOpen(false);
-    setIsContactModalOpen(true);
-  };
-
   const closeContactModal = () => {
     setIsContactModalOpen(false);
   };
@@ -97,15 +105,7 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
     setIsBookingModalOpen(true);
     setSelectedServices([]);
-    setFormData({
-      ho_ten: '',
-      so_dien_thoai: '',
-      email: '',
-      loai_dich_vu_quan_tam: '',
-      ngay_mong_muon: '',
-      gio_mong_muon: '',
-      ghi_chu: ''
-    });
+    setFormData(EMPTY_BOOKING_FORM);
     setError('');
     setSuccess(false);
   };
@@ -115,15 +115,7 @@ const Navbar = () => {
       setIsMobileMenuOpen(false);
       setIsBookingModalOpen(true);
       setSelectedServices([]);
-      setFormData({
-        ho_ten: '',
-        so_dien_thoai: '',
-        email: '',
-        loai_dich_vu_quan_tam: '',
-        ngay_mong_muon: '',
-        gio_mong_muon: '',
-        ghi_chu: ''
-      });
+      setFormData(EMPTY_BOOKING_FORM);
       setError('');
       setSuccess(false);
     };
@@ -137,34 +129,37 @@ const Navbar = () => {
   const closeBookingModal = () => {
     setIsBookingModalOpen(false);
     setSelectedServices([]);
-    setFormData({
-      ho_ten: '',
-      so_dien_thoai: '',
-      email: '',
-      loai_dich_vu_quan_tam: '',
-      ngay_mong_muon: '',
-      gio_mong_muon: '',
-      ghi_chu: ''
-    });
+    setFormData(EMPTY_BOOKING_FORM);
     setError('');
     setSuccess(false);
   };
 
-  const handleServiceToggle = (service) => {
-    setSelectedServices((prevSelected) => {
-      const exists = prevSelected.find((item) => item.id === service.id);
-      let updated;
-      if (exists) {
-        updated = prevSelected.filter((item) => item.id !== service.id);
-      } else {
-        updated = [...prevSelected, service];
+  // Nhóm gói theo loại để khách phân biệt các gói trùng tên ở nhiều loại
+  const serviceGroups = (() => {
+    const groups = new Map();
+    dichVus.forEach((service) => {
+      const groupName = (service.ten_loai_dich_vu || 'Dịch vụ khác').trim();
+      if (!groups.has(groupName)) groups.set(groupName, []);
+      const label = getServiceLabel(service, groupName);
+      // Bỏ trùng lặp tuyệt đối (cùng loại, cùng tên)
+      if (!groups.get(groupName).some((item) => item.label === label)) {
+        groups.get(groupName).push({ id: service.id, label, ten: (service.ten_dich_vu || '').trim(), mo_ta: service.mo_ta_ngan || service.mo_ta || '' });
       }
-      const serviceNames = updated.map((item) => item.ten_dich_vu).join(', ');
-      setFormData((prev) => ({
-        ...prev,
-        loai_dich_vu_quan_tam: serviceNames
-      }));
-      return updated;
+    });
+    return Array.from(groups, ([name, items]) => ({ name, items }));
+  })();
+
+  const handleServiceToggle = (label) => {
+    if (error) setError('');
+    setSelectedServices((prev) => {
+      if (label === UNSURE_SERVICE_LABEL) {
+        // "Chưa biết gói nào" loại trừ các lựa chọn khác
+        return prev.includes(label) ? [] : [label];
+      }
+      const withoutUnsure = prev.filter((item) => item !== UNSURE_SERVICE_LABEL);
+      return withoutUnsure.includes(label)
+        ? withoutUnsure.filter((item) => item !== label)
+        : [...withoutUnsure, label];
     });
   };
 
@@ -177,11 +172,7 @@ const Navbar = () => {
     if (error) setError('');
   };
 
-  const getTomorrowDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
-  };
+  const getTomorrowDate = getTomorrowLocalDate;
 
   const formatDateWithWeekday = (dateString) => {
     if (!dateString) return '';
@@ -221,17 +212,23 @@ const Navbar = () => {
 
     try {
       // Validate required fields (email không bắt buộc)
-      if (!formData.ho_ten || !formData.so_dien_thoai || !formData.ngay_mong_muon || !formData.gio_mong_muon) {
+      if (!formData.ho_ten.trim() || !formData.so_dien_thoai.trim() || !formData.ngay_mong_muon || !formData.gio_mong_muon) {
         setError('Vui lòng điền đầy đủ thông tin bắt buộc');
         setLoading(false);
         return;
       }
 
       // Validate phone (Vietnamese format)
-      const phoneRegex = /^(0|\+84)[0-9]{9,10}$/;
-      const cleanPhone = formData.so_dien_thoai.replace(/\s/g, '');
-      if (!phoneRegex.test(cleanPhone)) {
+      const cleanPhone = formData.so_dien_thoai.replace(/[\s.-]/g, '');
+      if (!PHONE_REGEX.test(cleanPhone)) {
         setError('Số điện thoại không hợp lệ (ví dụ: 0912345678 hoặc +84912345678)');
+        setLoading(false);
+        return;
+      }
+
+      const cleanEmail = formData.email.trim();
+      if (cleanEmail && !EMAIL_REGEX.test(cleanEmail)) {
+        setError('Email không hợp lệ');
         setLoading(false);
         return;
       }
@@ -247,17 +244,22 @@ const Navbar = () => {
 
       const response = await lichHenTuVanAPI.create({
         ...formData,
-        so_dien_thoai: cleanPhone
+        ho_ten: formData.ho_ten.trim(),
+        email: cleanEmail,
+        so_dien_thoai: cleanPhone,
+        loai_dich_vu_quan_tam: joinServiceInterest(selectedServices)
       });
 
       if (response.success) {
         setSuccess(true);
         setTimeout(() => {
           closeBookingModal();
-        }, 2000);
+        }, 3000);
+      } else {
+        setError(response.message || 'Không gửi được yêu cầu. Vui lòng thử lại hoặc gọi hotline.');
       }
     } catch (err) {
-      setError(err.message || 'Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại!');
+      setError(`${err.message || 'Có lỗi xảy ra khi đặt lịch.'} Vui lòng thử lại hoặc gọi hotline ${CONTACT.hotline.display}.`);
     } finally {
       setLoading(false);
     }
@@ -328,9 +330,9 @@ const Navbar = () => {
             </div>
 
             {/* CTA Button */}
-            <Link
-              to="/huong-dan-su-dung"
-              onClick={scrollToTop}
+            <button
+              type="button"
+              onClick={openBookingModal}
               className="hidden lg:inline-flex px-4 py-2 xl:px-6 xl:py-2.5 2xl:px-8 2xl:py-3 rounded-full text-xs xl:text-sm font-serif font-bold text-white transition-all duration-400 relative overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, #8B0A3D 0%, #A90046 100%)',
@@ -357,7 +359,7 @@ const Navbar = () => {
                 }
               }}
             >
-              <span className="relative z-10">Hướng dẫn sử dụng</span>
+              <span className="relative z-10">Đặt lịch tham quan</span>
               <span 
                 className="btn-shine absolute top-0 left-[-100%] w-full h-full transition-all duration-600"
                 style={{
@@ -365,7 +367,7 @@ const Navbar = () => {
                   transition: 'left 0.6s ease'
                 }}
               ></span>
-            </Link>
+            </button>
 
             {/* Mobile Menu Button */}
             <div className="lg:hidden ml-2 sm:ml-4">
@@ -430,9 +432,9 @@ const Navbar = () => {
                     {link.label}
                   </Link>
                 ))}
-                <Link
-                  to="/huong-dan-su-dung"
-                  onClick={scrollToTop}
+                <button
+                  type="button"
+                  onClick={openBookingModal}
                   className="mx-4 px-8 py-3 rounded-full text-sm font-serif font-bold text-white transition-all duration-400 relative overflow-hidden inline-flex justify-center"
                   style={{
                     background: 'linear-gradient(135deg, #8B0A3D 0%, #A90046 100%)',
@@ -455,7 +457,7 @@ const Navbar = () => {
                     }
                   }}
                 >
-                  <span className="relative z-10">Hướng dẫn sử dụng</span>
+                  <span className="relative z-10">Đặt lịch tham quan</span>
                   <span 
                     className="btn-shine absolute top-0 left-[-100%] w-full h-full transition-all duration-600"
                     style={{
@@ -463,7 +465,7 @@ const Navbar = () => {
                       transition: 'left 0.6s ease'
                     }}
                   ></span>
-                </Link>
+                </button>
               </div>
             </div>
           )}
@@ -515,7 +517,7 @@ const Navbar = () => {
 
               <div className="space-y-3">
                 <a
-                  href="tel:0123456789"
+                  href={CONTACT.hotline.tel}
                   className="flex items-start gap-3 p-4 rounded-xl border hover:shadow-md transition-all duration-200"
                   style={{ borderColor: 'rgba(169, 0, 70, 0.1)', backgroundColor: 'rgba(169, 0, 70, 0.05)' }}
                 >
@@ -540,7 +542,7 @@ const Navbar = () => {
                       Hotline
                     </p>
                     <p className="text-xl font-bold" style={{ color: '#2D2D2D', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
-                      0123 456 789
+                      {CONTACT.hotline.display}
                     </p>
                     <p className="text-base font-medium" style={{ color: '#8A8A8A', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif" }}>
                       Gọi ngay để được tư vấn trực tiếp
@@ -549,7 +551,7 @@ const Navbar = () => {
                 </a>
 
                 <a
-                  href="mailto:info@xuanhoa.com"
+                  href={CONTACT.email.href}
                   className="flex items-start gap-3 p-4 rounded-xl border hover:shadow-md transition-all duration-200"
                   style={{ borderColor: 'rgba(169, 0, 70, 0.1)' }}
                 >
@@ -573,8 +575,8 @@ const Navbar = () => {
                     <p className="text-sm font-bold uppercase tracking-wider" style={{ color: '#8A8A8A', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
                       Email
                     </p>
-                    <p className="text-xl font-bold" style={{ color: '#2D2D2D', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
-                      info@xuanhoa.com
+                    <p className="text-xl font-bold break-all" style={{ color: '#2D2D2D', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
+                      {CONTACT.email.display}
                     </p>
                     <p className="text-base font-medium" style={{ color: '#8A8A8A', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif" }}>
                       Gửi cho chúng tôi yêu cầu hoặc câu hỏi của bạn
@@ -611,7 +613,7 @@ const Navbar = () => {
                       Địa chỉ
                     </p>
                     <p className="text-xl font-bold" style={{ color: '#2D2D2D', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
-                      123 Đường ABC, Quận XYZ, TP.HCM
+                      {CONTACT.address.display}
                     </p>
                     <p className="text-base font-medium" style={{ color: '#8A8A8A', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif" }}>
                       Đến trực tiếp hoặc đặt lịch tham quan
@@ -685,10 +687,10 @@ const Navbar = () => {
             <div className="p-6 md:p-8 border-b border-gray-200 flex items-start justify-between">
               <div className="space-y-1">
                 <p className="text-sm font-bold text-primary-rose uppercase tracking-wider" style={{ fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
-                  Đặt lịch tư vấn
+                  Đặt lịch tham quan & tư vấn
                 </p>
-                <h3 className="text-3xl font-bold leading-tight" style={{ color: '#2D2D2D', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
-                  Chọn dịch vụ và điền thông tin
+                <h3 className="text-2xl md:text-3xl font-bold leading-tight" style={{ color: '#2D2D2D', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
+                  Chọn gói quan tâm và để lại thông tin
                 </h3>
               </div>
               <button
@@ -725,55 +727,99 @@ const Navbar = () => {
                   <h3 className="text-2xl font-bold mb-2" style={{ color: '#2D2D2D', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
                     Đặt lịch thành công!
                   </h3>
-                  <p className="text-justify" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
-                    Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.
+                  <p style={{ color: '#2D2D2D' }}>
+                    Chúng tôi đã nhận yêu cầu và sẽ gọi lại để xác nhận lịch sớm nhất có thể.
+                    <br />
+                    Cần hỗ trợ ngay? Gọi hotline{' '}
+                    <a href={CONTACT.hotline.tel} className="font-bold" style={{ color: '#A90046' }}>
+                      {CONTACT.hotline.display}
+                    </a>
                   </p>
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 gap-0">
                   {/* Left: Service List */}
                   <div className="p-6 md:p-8 border-r border-gray-200 bg-gray-50">
-                    <h4 className="text-xl font-bold mb-4" style={{ color: '#2D2D2D', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
-                      Chọn dịch vụ quan tâm
+                    <h4 className="text-xl font-bold mb-1" style={{ color: '#2D2D2D', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
+                      Gói dịch vụ quan tâm
                     </h4>
-                    <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-                      {dichVus.length === 0 ? (
-                        <div className="text-center py-8">
-                          <p style={{ color: '#8A8A8A' }}>Đang tải danh sách dịch vụ...</p>
-                        </div>
-                      ) : (
-                        dichVus.map((service) => {
-                          const isSelected = selectedServices.some((item) => item.id === service.id);
-                          return (
-                            <button
-                              key={service.id}
-                              type="button"
-                              onClick={() => handleServiceToggle(service)}
-                              className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
-                                isSelected
-                                  ? 'border-primary-rose bg-white shadow-md'
-                                  : 'border-gray-200 bg-white hover:border-primary-rose/50 hover:shadow-sm'
-                              }`}
-                            >
-                              <div
-                                className="font-bold text-lg mb-1"
-                                style={{
-                                  color: isSelected ? '#A90046' : '#2D2D2D',
-                                  fontFamily: "'Cormorant Garamond', 'Times New Roman', serif",
-                                  fontWeight: '700'
-                                }}
-                              >
-                                {service.ten_dich_vu}
-                              </div>
-                              {service.mo_ta && (
-                                <p className="text-sm text-justify" style={{ color: '#8A8A8A', textAlign: 'justify' }}>
-                                  {service.mo_ta.length > 100 ? `${service.mo_ta.substring(0, 100)}...` : service.mo_ta}
-                                </p>
-                              )}
-                            </button>
-                          );
-                        })
+                    <p className="text-sm mb-4" style={{ color: '#6B6B6B' }}>
+                      Có thể chọn nhiều gói. Chưa rõ? Chọn “{UNSURE_SERVICE_LABEL}”, chúng tôi sẽ tư vấn.
+                    </p>
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                      {(() => {
+                        const unsureSelected = selectedServices.includes(UNSURE_SERVICE_LABEL);
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => handleServiceToggle(UNSURE_SERVICE_LABEL)}
+                            aria-pressed={unsureSelected}
+                            className={`w-full text-left p-4 rounded-xl border-2 border-dashed transition-all duration-200 ${
+                              unsureSelected
+                                ? 'border-primary-rose bg-white shadow-md'
+                                : 'border-gray-300 bg-white hover:border-primary-rose/50 hover:shadow-sm'
+                            }`}
+                          >
+                            <div className="font-bold text-lg" style={{ color: unsureSelected ? '#A90046' : '#2D2D2D', fontFamily: "'Cormorant Garamond', 'Times New Roman', serif", fontWeight: '700' }}>
+                              {UNSURE_SERVICE_LABEL}
+                            </div>
+                            <p className="text-sm" style={{ color: '#8A8A8A' }}>
+                              Chuyên viên sẽ tư vấn gói phù hợp với tình trạng sức khỏe của người thân.
+                            </p>
+                          </button>
+                        );
+                      })()}
+
+                      {dichVuLoading && (
+                        <p className="text-center py-4 text-sm" style={{ color: '#8A8A8A' }}>Đang tải danh sách gói dịch vụ...</p>
                       )}
+                      {dichVuLoadError && (
+                        <p className="text-center py-4 text-sm" style={{ color: '#8A8A8A' }}>
+                          Chưa tải được danh sách gói. Bạn vẫn có thể gửi yêu cầu, chúng tôi sẽ tư vấn qua điện thoại.
+                        </p>
+                      )}
+
+                      {serviceGroups.map((group) => (
+                        <div key={group.name}>
+                          <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#8B0A3D' }}>
+                            {group.name}
+                          </p>
+                          <div className="space-y-2">
+                            {group.items.map((item) => {
+                              const isSelected = selectedServices.includes(item.label);
+                              return (
+                                <button
+                                  key={item.id}
+                                  type="button"
+                                  onClick={() => handleServiceToggle(item.label)}
+                                  aria-pressed={isSelected}
+                                  className={`w-full text-left p-3 rounded-xl border-2 transition-all duration-200 ${
+                                    isSelected
+                                      ? 'border-primary-rose bg-white shadow-md'
+                                      : 'border-gray-200 bg-white hover:border-primary-rose/50 hover:shadow-sm'
+                                  }`}
+                                >
+                                  <div
+                                    className="font-bold text-base"
+                                    style={{
+                                      color: isSelected ? '#A90046' : '#2D2D2D',
+                                      fontFamily: "'Cormorant Garamond', 'Times New Roman', serif",
+                                      fontWeight: '700'
+                                    }}
+                                  >
+                                    {item.ten}
+                                  </div>
+                                  {item.mo_ta && (
+                                    <p className="text-sm line-clamp-2" style={{ color: '#8A8A8A' }}>
+                                      {item.mo_ta}
+                                    </p>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -787,12 +833,12 @@ const Navbar = () => {
                       {selectedServices.length > 0 && (
                         <div className="p-4 rounded-xl border-2 border-primary-rose/30 bg-primary-rose/5">
                           <p className="text-sm font-semibold mb-1" style={{ color: '#8A8A8A' }}>
-                            Dịch vụ đã chọn:
+                            Gói đã chọn:
                           </p>
                           <div className="flex flex-wrap gap-2">
-                            {selectedServices.map((service) => (
+                            {selectedServices.map((label) => (
                               <span
-                                key={service.id}
+                                key={label}
                                 className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold"
                                 style={{
                                   backgroundColor: 'rgba(169, 0, 70, 0.08)',
@@ -801,7 +847,7 @@ const Navbar = () => {
                                   fontWeight: '700'
                                 }}
                               >
-                                {service.ten_dich_vu}
+                                {label}
                               </span>
                             ))}
                           </div>
@@ -840,11 +886,27 @@ const Navbar = () => {
                         />
                       </div>
 
+                      {/* Email (không bắt buộc) */}
+                      <div>
+                        <label className="block text-sm font-semibold mb-2" style={{ color: '#2D2D2D' }}>
+                          Email (tùy chọn)
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleFormChange}
+                          autoComplete="email"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-rose focus:border-transparent"
+                          placeholder="email@example.com"
+                        />
+                      </div>
+
                       {/* Ngày và giờ */}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-semibold mb-2" style={{ color: '#2D2D2D' }}>
-                            Ngày mong muốn <span className="text-red-500">*</span>
+                            Ngày tham quan <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="date"
@@ -863,7 +925,7 @@ const Navbar = () => {
                         </div>
                         <div>
                           <label className="block text-sm font-semibold mb-2" style={{ color: '#2D2D2D' }}>
-                            Giờ mong muốn <span className="text-red-500">*</span>
+                            Giờ tham quan <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="time"
@@ -902,6 +964,14 @@ const Navbar = () => {
                           {error}
                         </div>
                       )}
+
+                      <p className="text-xs" style={{ color: '#6B6B6B' }}>
+                        Bằng việc gửi yêu cầu, bạn đồng ý để Trung tâm liên hệ tư vấn theo{' '}
+                        <Link to="/chinh-sach-bao-mat" onClick={closeBookingModal} className="underline" style={{ color: '#A90046' }}>
+                          Chính sách bảo mật
+                        </Link>
+                        .
+                      </p>
 
                       {/* Submit Button */}
                       <div className="flex gap-3 pt-2">
@@ -946,7 +1016,7 @@ const Navbar = () => {
                             e.currentTarget.style.boxShadow = 'none';
                           }}
                         >
-                          {loading ? 'Đang xử lý...' : 'Đặt lịch'}
+                          {loading ? 'Đang gửi...' : 'Gửi yêu cầu đặt lịch'}
                         </button>
                       </div>
                     </form>
