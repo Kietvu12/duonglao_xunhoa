@@ -11,7 +11,7 @@ const Session2 = () => {
             Giá trị cốt lõi
           </span>
           <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-relaxed" style={{ color: '#2D2D2D', fontFamily: "'Playfair Display', serif", lineHeight: '1.4' }}>
-            Cái Chạm Nhỏ,<br/>
+            Cái Chạm Lớn,<br/>
             <span style={{ color: '#A90046', display: 'block', marginTop: '0.25rem' }}>Hạnh Phúc Lớn</span>
           </h2>
           <div className="w-16 sm:w-20 h-0.5 bg-gradient-to-r from-accent-gold via-accent-gold to-transparent mx-auto mb-6 sm:mb-8"></div>
