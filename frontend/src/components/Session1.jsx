@@ -39,7 +39,7 @@ const Session1 = () => {
                 <span 
                   className="inline-block"
                   style={{
-                    background: 'linear-gradient(90deg, #C9A870 0%, #F5E6C8 30%,rgb(177, 152, 11) 50%, #F5E6C8 70%, #C9A870 100%)',
+                    background: 'linear-gradient(90deg, #0F6E56 0%, #A7F3D0 30%, #047857 50%, #A7F3D0 70%, #0F6E56 100%)',
                     backgroundSize: '300% auto',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
