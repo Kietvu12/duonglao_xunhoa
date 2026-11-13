@@ -20,7 +20,7 @@ const AmenitySession1 = () => {
             <span 
               className="inline-block"
               style={{
-                background: 'linear-gradient(90deg, #C9A870 0%, #F5E6C8 50%, #C9A870 100%)',
+                background: 'linear-gradient(90deg, #047857 0%, #10B981 50%, #047857 100%)',
                 backgroundSize: '200% auto',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
