@@ -1,159 +1,144 @@
 import { Link } from 'react-router-dom';
-import logoWhite from '../assets/logowhite.png';
-import zaloIcon from '../assets/zalo.svg';
-import { CONTACT, MAPS, SOCIAL } from '../config/siteInfo';
+import logoImage from '../assets/logo.png';
+import { CONTACT, SITE_NAME } from '../config/siteInfo';
+import SocialIconLinks from './SocialIconLinks';
+import BookingCtaButton from './BookingCtaButton';
 
-const socialLinks = [
-  {
-    label: 'Facebook',
-    href: SOCIAL.facebook,
-    icon: (
-      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-      </svg>
-    ),
-  },
-  {
-    label: 'TikTok',
-    href: SOCIAL.tiktok,
-    icon: (
-      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-      </svg>
-    ),
-  },
-  {
-    label: 'Zalo',
-    href: SOCIAL.zalo,
-    icon: <img src={zaloIcon} alt="" className="w-6 h-6" aria-hidden="true" />,
-  },
+const quickLinks = [
+  { path: '/', label: 'Trang chủ' },
+  { path: '/ve-chung-toi', label: 'Về chúng tôi' },
+  { path: '/dich-vu', label: 'Dịch vụ' },
+  { path: '/tien-ich', label: 'Tiện ích' },
+  { path: '/blog', label: 'Blog' },
+];
+
+const serviceLinks = [
+  { path: '/dich-vu', label: 'Gói chăm sóc' },
+  { path: '/tien-ich', label: 'Tiện ích & không gian sống' },
+  { path: '/huong-dan-su-dung', label: 'Hướng dẫn sử dụng' },
+];
+
+// Hai trang nội dung chính sách đã có thật trong hệ thống — dùng Link, không dùng href="#".
+const legalLinks = [
+  { path: '/dieu-khoan-su-dung', label: 'Điều khoản sử dụng' },
+  { path: '/chinh-sach-bao-mat', label: 'Chính sách bảo mật' },
 ];
 
 const Footer = () => {
-  const navLinks = [
-    { path: '/', label: 'Trang chủ' },
-    { path: '/ve-chung-toi', label: 'Về chúng tôi' },
-    { path: '/dich-vu', label: 'Dịch vụ' },
-    { path: '/tien-ich', label: 'Tiện ích' },
-    { path: '/blog', label: 'Blog' },
-    { path: '/lien-he', label: 'Liên hệ' },
-    { path: '/huong-dan-su-dung', label: 'Hướng dẫn sử dụng' },
-  ];
+  const currentYear = new Date().getFullYear();
 
   return (
-    <footer id="contact" className="py-20" style={{ background: '#2D2D2D' }}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-          {/* Company */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center space-x-4 mb-6">
-              <Link to="/" className="flex items-center space-x-4">
-                <img
-                  src={logoWhite}
-                  alt="Xuân Hoa Logo"
-                  className="h-16 w-auto object-contain"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div>
-                  <div className="font-serif font-semibold text-2xl text-white" style={{ fontFamily: "'Playfair Display', serif" }}>Xuân Hoa</div>
-                  <div className="text-xs tracking-wider text-white">
-                    LUXURY SENIOR LIVING
-                  </div>
-                </div>
-              </Link>
-            </div>
-            <p className="text-white mb-8 max-w-md leading-relaxed" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Chăm sóc người cao tuổi với tiêu chuẩn đẳng cấp quốc tế. 
-              Mang đến cuộc sống sang trọng và hạnh phúc cho người thân quý giá của bạn.
-            </p>
-            <div className="flex gap-4">
-              {socialLinks.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={item.label}
-                  title={item.label}
-                  className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
-                  style={{ textDecoration: 'none' }}
-                >
-                  {item.icon}
-                </a>
-              ))}
-            </div>
-          </div>
-          
-          {/* Links */}
+    <footer className="font-raleway text-white" style={{ background: '#2D2D2D' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16 py-12 lg:py-16">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+          {/* Thương hiệu */}
           <div>
-            <h3 className="font-serif text-lg font-semibold text-white mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>Liên kết</h3>
-            <ul className="space-y-3 text-white text-sm" style={{ fontFamily: "'Playfair Display', serif" }}>
-              {navLinks.map((link) => (
+            <Link to="/" className="flex items-center gap-3 mb-4">
+              <img
+                src={logoImage}
+                alt={`${SITE_NAME} logo`}
+                className="h-12 w-auto object-contain"
+                loading="lazy"
+                decoding="async"
+              />
+              <div>
+                <div
+                  className="font-serif font-bold text-xl"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                >
+                  Xuân Hoa
+                </div>
+                <div className="text-xs font-semibold tracking-wider text-white/70">
+                  LUXURY SENIOR LIVING
+                </div>
+              </div>
+            </Link>
+            <p className="text-sm leading-relaxed text-white/75 mb-5">
+              {SITE_NAME} – môi trường sống an toàn, chăm sóc tận tâm và kết nối gia đình
+              cho người cao tuổi tại Hạ Long.
+            </p>
+            <SocialIconLinks />
+          </div>
+
+          {/* Liên kết nhanh */}
+          <div>
+            <h3 className="font-serif text-lg font-bold mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Liên kết nhanh
+            </h3>
+            <ul className="space-y-2.5 text-sm text-white/75">
+              {quickLinks.map((link) => (
                 <li key={link.path}>
-                  <Link
-                    to={link.path}
-                    className="hover:text-white transition-colors"
-                    style={{ textDecoration: 'none', color: 'inherit' }}
-                  >
+                  <Link to={link.path} className="transition-colors duration-200 hover:text-white">
                     {link.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
-          
-          {/* Contact */}
+
+          {/* Dịch vụ */}
           <div>
-            <h3 className="font-serif text-lg font-semibold text-white mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>Liên hệ</h3>
-            <ul className="space-y-4 text-sm text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
-              <li>
-                <a
-                  href={MAPS.placeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white hover:underline"
-                  style={{ textDecoration: 'none' }}
-                >
-                  Trung tâm trường thọ Xuân Hoa
-                  <br />
-                  {CONTACT.address.display}
-                </a>
-              </li>
+            <h3 className="font-serif text-lg font-bold mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Dịch vụ & tiện ích
+            </h3>
+            <ul className="space-y-2.5 text-sm text-white/75">
+              {serviceLinks.map((link) => (
+                <li key={link.path}>
+                  <Link to={link.path} className="transition-colors duration-200 hover:text-white">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Liên hệ + CTA */}
+          <div>
+            <h3 className="font-serif text-lg font-bold mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Liên hệ
+            </h3>
+            <ul className="space-y-2.5 text-sm text-white/75 mb-5">
               <li>
                 Hotline / Zalo:{' '}
-                <a
-                  href={CONTACT.hotline.tel}
-                  className="text-white font-semibold hover:underline"
-                  style={{ textDecoration: 'none' }}
-                >
+                <a href={CONTACT.hotline.tel} className="font-semibold text-white hover:underline">
                   {CONTACT.hotline.display}
                 </a>
               </li>
               <li>
                 Email:{' '}
-                <a
-                  href={CONTACT.email.href}
-                  className="text-white hover:underline break-all"
-                  style={{ textDecoration: 'none' }}
-                >
+                <a href={CONTACT.email.href} className="font-semibold text-white hover:underline break-all">
                   {CONTACT.email.display}
                 </a>
               </li>
-              <li>{CONTACT.workingHours}</li>
+              <li>Địa chỉ: {CONTACT.address.display}</li>
             </ul>
+            <BookingCtaButton
+              className="inline-flex items-center justify-center rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.1em] text-white transition-all duration-300 hover:-translate-y-0.5"
+              style={{
+                background: 'linear-gradient(135deg, #8B0A3D 0%, #A90046 100%)',
+                fontFamily: "'Playfair Display', serif",
+                boxShadow: '0 10px 30px rgba(139, 10, 61, 0.35)',
+              }}
+            >
+              Đặt lịch thăm
+            </BookingCtaButton>
           </div>
         </div>
-        
-        {/* Bottom */}
-        <div className="pt-8 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
-            <p>© {new Date().getFullYear()} Trung tâm trường thọ Xuân Hoa. Bảo lưu mọi quyền.</p>
-            <div className="flex gap-8">
-              <Link to="/dieu-khoan-su-dung" className="hover:underline" style={{ textDecoration: 'none', color: 'inherit' }}>Điều khoản sử dụng</Link>
-              <Link to="/chinh-sach-bao-mat" className="hover:underline" style={{ textDecoration: 'none', color: 'inherit' }}>Chính sách bảo mật</Link>
-            </div>
-          </div>
+
+        {/* Dòng bản quyền + chính sách */}
+        <div className="mt-10 pt-6 border-t border-white/15 flex flex-col-reverse gap-4 md:flex-row md:items-center md:justify-between">
+          <p className="text-xs text-white/60">
+            © {currentYear} {SITE_NAME}. Bảo lưu mọi quyền.
+          </p>
+          <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-white/75">
+            {legalLinks.map((link) => (
+              <li key={link.path}>
+                <Link to={link.path} className="transition-colors duration-200 hover:text-white hover:underline">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </footer>
