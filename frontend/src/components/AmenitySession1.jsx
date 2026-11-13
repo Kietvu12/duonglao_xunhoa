@@ -32,7 +32,7 @@ const AmenitySession1 = () => {
             </span>
           </h1>
           <div className="w-20 h-0.5 bg-gradient-to-r from-accent-gold via-accent-gold to-transparent mx-auto mb-8"></div>
-          <p className="text-xl max-w-3xl mx-auto text-justify" style={{ color: '#2D2D2D', textAlign: 'justify' }}>
+          <p className="text-xl max-w-3xl mx-auto text-center" style={{ color: '#2D2D2D', textAlign: 'center' }}>
             Mọi tiện ích được thiết kế với tiêu chuẩn sang trọng nhất, 
             mang đến trải nghiệm sống đẳng cấp và thoải mái cho cư dân.
           </p>
