@@ -36,8 +36,12 @@ const Footer = () => {
     { path: '/dich-vu', label: 'Dịch vụ' },
     { path: '/tien-ich', label: 'Tiện ích' },
     { path: '/blog', label: 'Blog' },
-    { path: '/lien-he', label: 'Liên hệ' },
+    { path: '/lien-he', label: 'Đặt lịch tham quan' },
+  ];
+
+  const supportLinks = [
     { path: '/huong-dan-su-dung', label: 'Hướng dẫn sử dụng' },
+    { path: '/lien-he', label: 'Liên hệ' },
   ];
 
   return (
@@ -91,6 +95,21 @@ const Footer = () => {
             <ul className="space-y-3 text-white text-sm" style={{ fontFamily: "'Playfair Display', serif" }}>
               {navLinks.map((link) => (
                 <li key={link.path}>
+                  <Link
+                    to={link.path}
+                    className="hover:text-white transition-colors"
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <h3 className="font-serif text-lg font-semibold text-white mb-6 mt-8" style={{ fontFamily: "'Playfair Display', serif" }}>Hỗ trợ</h3>
+            <ul className="space-y-3 text-white text-sm" style={{ fontFamily: "'Playfair Display', serif" }}>
+              {supportLinks.map((link) => (
+                <li key={`${link.path}-${link.label}`}>
                   <Link
                     to={link.path}
                     className="hover:text-white transition-colors"
